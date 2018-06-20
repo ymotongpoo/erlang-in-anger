@@ -12,15 +12,15 @@
 %The interactive session approach is usually okay for software that runs in a strict Read-Eval-Print-Loop (REPL).
 インタラクティブセッションを利用する方法は通常、ソフトウェアが厳密なREPL(Read-Eval-Print-Loop, 対話型評価環境)で動作している限りは問題のない方法です。
 %The programmed management and configuration approach requires careful planning in whatever tasks you think you'll need to do, and hopefully getting it right.
-プログラムによる管理・設定を行う方法は、あなたが必要と思うタスクすべてに対応が必要ですし、なおかつその対応が正しい必要があります。 %TODO: whatever tasks
+プログラムによる管理・設定を行う方法は、あなたが必要と思うタスクすべてに対応が必要ですし、なおかつその対応が正しい必要があります。 %TODO: whatever tasks...の訳これでいいのかな
 %Pretty much all systems can try that approach, so I'll skip it given I'm somewhat more interested in the cases where stuff is already bad and no function exists for it.
-ほとんどすべてのシステムはこのアプローチを試していますので、説明は飛ばすことにします。 %TODO: skip it given I'm somewhat ... が謎
+ほとんどすべてのシステムで後者の方法は試されていますので、説明は飛ばすことにします。
 私がもっと興味があるのは、事態が既に悪化していて、その事態に対処する関数が存在しない場合です。
 
 %Erlang uses something closer to an "interactor" than a REPL.
 ErlangはREPLというより"インタラクタ"に近いものを使っています。
 %Basically, a regular Erlang virtual machine does not need a REPL, and will happily run byte code and stick with that, no shell needed.
-基本的には、Erlang仮想マシンはREPLを必要とせず、平和にバイトコードを動作させて、それで終わりです。シェルの必要はありませんね。 %TODO: stick with thatのthatって何を指してるんだこれ。
+基本的には、Erlang仮想マシンはREPLを必要とせず、バイトコードがうまい具合に動作するよう専念すれば良いのです。シェルの必要はありませんね。
 %However, because of how it works with concurrency and multiprocessing, and good support for distribution, it is possible to have in-software REPLs that run as arbitrary Erlang processes.
 しかしながら、同時実行とマルチプロセッシングを可能にする仕組みや素晴らしい分散サポートのおかげで、Erlangでは任意のErlangプロセスで動作するソフトウェア内包のREPLを利用できます。
 
