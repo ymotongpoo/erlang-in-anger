@@ -1,4 +1,5 @@
 # README
+![PDF Build on Travis CI](https://travis-ci.org/ymotongpoo/erlang-in-anger.svg?branch=japanese)
 Erlang in Angarの翻訳用レポジトリです。オリジナルのREADMEは[こちら](./README.en.md)を参照してください。
 
 # 最新版
@@ -52,12 +53,16 @@ $ docker-compose up
 - [x] 000: Copyright
 - [x] 001: Introduction
 - [x] 101: How to Dive into a Code Base
-- [ ] 102: Building Open Source Erlang Software
+- [x] 102: Building Open Source Erlang Software
 - [ ] 103: Planning for Overload
 - [ ] 104: Connecting to Remote Nodes
 - [ ] 105: Runtime Metrics
 - [ ] 106: Reading Crash Dumps
 - [ ] 107: Memory Leaks
 - [ ] 108: CPU and Scheduler Hogs
-- [ ] 109: Tracing
+- [x] 109: Tracing
 - [x] 201: Conclusion
+
+
+# Tips
+* ダッシュ(―)は `---` (ハイフン3つ)とすると表示が崩れない

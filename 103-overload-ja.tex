@@ -39,48 +39,83 @@
 %We'll explore them in this chapter, along with common events that end up causing Erlang systems to blow up.
 この章では、Erlangシステムの爆発を引き起こす一般的なイベントとともに、それらを追求します。
 
-\section{Common Overload Sources}
+%\section{Common Overload Sources}
+\section{よくある過負荷の原因}
 
-There are a few common causes of queues blowing up and overload in Erlang systems that most people will encounter sooner or later, no matter how they approach their system. They're usually symptomatic of having your system grow up and require some help scaling up, or of an unexpected type of failure that ends up cascading much harder than it should have.
+%There are a few common causes of queues blowing up and overload in Erlang systems that most people will encounter sooner or later, no matter how they approach their system. They're usually symptomatic of having your system grow up and require some help scaling up, or of an unexpected type of failure that ends up cascading much harder than it should have.
+どんなにうまくう取り組んでもたいていの人が遅かれ早かれ遭遇する、キューを爆発させErlangシステムを過負荷にさせるよくある原因がいくつかあります。
+そうした原因は通常システムを大きくさせスケールアップさせる何かしらの助けが必要な兆候を表していたり、はたまた想定よりもずっと厳しく連鎖してしまう予期せぬ障害だったりします。
 
-\subsection{error\_logger Explodes}
+%\subsection{error\_logger Explodes}
+\subsection{error\_loggerの爆発}
 
-Ironically, the process in charge of error logging is one of the most fragile ones. In a default Erlang install, the \module{error\_logger}\footnote{Defined at \href{http://www.erlang.org/doc/man/error\_logger.html}{http://www.erlang.org/doc/man/error\_logger.html}} process will take its sweet time to log things to disk or over the network, and will do so much more slowly than errors can be generated.
+%Ironically, the process in charge of error logging is one of the most fragile ones. In a default Erlang install, the \module{error\_logger}\footnote{Defined at \href{http://www.erlang.org/doc/man/error\_logger.html}{http://www.erlang.org/doc/man/error\_logger.html}} process will take its sweet time to log things to disk or over the network, and will do so much more slowly than errors can be generated.
+皮肉なことにエラーログの責任を担うプロセスがもっとも壊れやすい部分の一つです。
+デフォルトのErlangのインストールでは、\module{error\_logger}\footnote{\href{http://www.erlang.org/doc/man/error\_logger.html}{http://www.erlang.org/doc/man/error\_logger.html}で定義されています。}プロセスは優雅にディスクやネットワーク越しにログを書き込み、それはエラーが生成されるよりもずっと遅い速度での書き込みなってしまいます。
 
-This is especially true of user-generated log messages (not for errors), and for crashes in large processes. For the former, this is because \module{error\_logger} doesn't really expect arbitrary levels of messages coming in continually. It's for exceptional cases only and doesn't expect lots of traffic. For the latter, it's because the entire state of processes (including their mailboxes) gets copied over to be logged. It only takes a few messages to cause memory to bubble up a lot, and if that's not enough to cause the node to run Out Of Memory (OOM), it may slow the logger enough that additional messages will.
+%This is especially true of user-generated log messages (not for errors), and for crashes in large processes. For the former, this is because \module{error\_logger} doesn't really expect arbitrary levels of messages coming in continually. It's for exceptional cases only and doesn't expect lots of traffic. For the latter, it's because the entire state of processes (including their mailboxes) gets copied over to be logged. It only takes a few messages to cause memory to bubble up a lot, and if that's not enough to cause the node to run Out Of Memory (OOM), it may slow the logger enough that additional messages will.
+特に(エラーではなく)ユーザーが生成したログメッセージや大きなプロセスがクラッシュしたときのログではこうしたことが起きます。
+前者に関しては、\module{error\_logger}は任意のレベルのメッセージが継続的にやってくることを想定していないからです。
+例外的な場合のみを想定していて、大量のトラフィックが来る場合は想定していないのです。
+後者に関しては、(プロセスのメールボックスも含めた)プロセス全体の状態がログされるためにコピーされるからです。
+たった数行のメッセージでもメモリを大量に増やす原因となりますし、もしそれがノードをOut Of Memory (OOM)にさせるに至らなくても、追加のメッセージの書き込み速度を下げるには十分です。
 
-The best solution for this at the time of writing is to use \href{https://github.com/basho/lager}{\otpapp{lager}} as a substitute logging library.
+%The best solution for this at the time of writing is to use \href{https://github.com/basho/lager}{\otpapp{lager}} as a substitute logging library.
+これに対する現行執筆時点での最適解は\href{https://github.com/basho/lager}{\otpapp{lager}}を代替のログライブラリとして使うことです。
 
-While \otpapp{lager} will not solve all your problems, it will truncate voluminous log messages, optionally drop OTP-generated error messages when they go over a certain threshold, and will automatically switch between asynchronous and synchronous modes for user-submitted messages in order to self-regulate.
+%While \otpapp{lager} will not solve all your problems, it will truncate voluminous log messages, optionally drop OTP-generated error messages when they go over a certain threshold, and will automatically switch between asynchronous and synchronous modes for user-submitted messages in order to self-regulate.
+\otpapp{lager}がすべての問題を解決するわけではない一方で、分量が多いログメッセージを切り詰めて、補足的にある閾値を超えたときにはOTPが生成したエラーメッセージを破棄して、ユーザーが送ったメッセージ用に自主規制のために自動的に非同期モードと同期モードを切り替えます。
 
-It won't be able to deal with very specific cases, such as when user-submitted messages are very large in volume and all coming from one-off processes. This is, however, a much rarer occurrence than everything else, and one where the programmer tends to have more control.
+%It won't be able to deal with very specific cases, such as when user-submitted messages are very large in volume and all coming from one-off processes. This is, however, a much rarer occurrence than everything else, and one where the programmer tends to have more control.
+ユーザーが送ったメッセージのサイズが非常に大きくかつワンオフのプロセスからやってくる、というような非常に固有の状況には対応出来ません。
+しかしながら、これは他の状況に比べるとずっと起こりにくいもので、プログラマーがずっと管理しやすい状況です。
 
+%\subsection{Locks and Blocking Operations}
+\subsection{ロックとブロック操作}
 
-\subsection{Locks and Blocking Operations}
+%Locking and blocking operations will often be problematic when they're taking unexpectedly long to execute in a process that's constantly receiving new tasks.
+ロック操作とブロック操作は新しいタスクを継続的に受け取るプロセス内で予想外に実行が長くなってしまうときに、しばしば問題になります。
 
-Locking and blocking operations will often be problematic when they're taking unexpectedly long to execute in a process that's constantly receiving new tasks.
+%One of the most common examples I've seen is a process blocking while accepting a connection or waiting for messages with TCP sockets. During blocking operations of this kind, messages are free to pile up in the message queue.
+私が経験してきたもっともよくある例は、接続を受け入れる間、あるいはTCPソケットでメッセージを待つ間プロセスがブロックするというものです。
+このようなブロック操作の間、メッセージは好きなだけメッセージキューに積み上がっていきます。
 
-One of the most common examples I've seen is a process blocking while accepting a connection or waiting for messages with TCP sockets. During blocking operations of this kind, messages are free to pile up in the message queue.
+%One particularly bad example was in a pool manager for HTTP connections that I had written in a fork of the \href{https://github.com/ferd/lhttpc}{\module{lhttpc}} library. It worked fine in most test cases we had, and we even had a connection timeout set to 10 milliseconds to be sure it never took too long\footnote{10 milliseconds is very short, but was fine for collocated servers used for real-time bidding.}. After a few weeks of perfect uptime, the HTTP client pool caused an outage when one of the remote servers went down.
+特に悪い状況の例が、\href{https://github.com/ferd/lhttpc}{\module{lhttpc}}ライブラリのフォークの中で私が書いたHTTP接続用のプールマネージャー内にありました。
+私達の運用状況においてはたいていはうまく動いていて、さらに接続のタイムアウトも10ミリ秒に設定して、接続待ちが長くなりすぎないようにしていました。\footnote{10ミリ秒は非常に短いですが、リアルタイムビッディングに使われる共用サーバーでは問題ありません。}
+数週間完璧に稼働したあとに、リモートサーバーの一つが落ちたときにHTTPクライアントプールが供給できない状態になりました。
 
-One particularly bad example was in a pool manager for HTTP connections that I had written in a fork of the \href{https://github.com/ferd/lhttpc}{\module{lhttpc}} library. It worked fine in most test cases we had, and we even had a connection timeout set to 10 milliseconds to be sure it never took too long\footnote{10 milliseconds is very short, but was fine for collocated servers used for real-time bidding.}. After a few weeks of perfect uptime, the HTTP client pool caused an outage when one of the remote servers went down.
+%The reason behind this degradation was that when the remote server would go down, all of a sudden, all connecting operations would take at least 10 milliseconds, the time before which the connection attempt is given up on. With around 9,000 messages per second to the central process, each usually taking under 5 milliseconds, the impact became similar to roughly 18,000 messages a second and things got out of hand.
+このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになりました。この10ミリ秒は接続試行がまだ断念されるよりも短い時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで、このあたりで手に負えなくなりました。
 
-The reason behind this degradation was that when the remote server would go down, all of a sudden, all connecting operations would take at least 10 milliseconds, the time before which the connection attempt is given up on. With around 9,000 messages per second to the central process, each usually taking under 5 milliseconds, the impact became similar to roughly 18,000 messages a second and things got out of hand.
+%The solution we came up with was to leave the task of connecting to the caller process, and enforce the limits as if the manager had done it on its own. The blocking operations were now distributed to all users of the library, and even less work was required to be done by the manager, now free to accept more requests.
+私達がいたった解決策は呼び出し元のプロセスに接続のタスクを譲って、プールマネージャーが自動で制限したかのように制限を強制することにしました。
+これでブロック操作はライブラリの全ユーザーに分散され、プールマネージャーによって行われるべき仕事はずっと少なくなり、より多くのリクエストを受け付けられるようになりました。
 
-The solution we came up with was to leave the task of connecting to the caller process, and enforce the limits as if the manager had done it on its own. The blocking operations were now distributed to all users of the library, and even less work was required to be done by the manager, now free to accept more requests.
+%When there is \emph{any} point of your program that ends up being a central hub for receiving messages, lengthy tasks should be moved out of there if possible. Handling predictable overload\footnote{Something you know for a fact gets overloaded in production} situations by adding more processes — which either handle the blocking operations or instead act as a buffer while the "main" process blocks — is often a good idea.
+プログラム内でメッセージを受信するための中央的なハブになっている場所が\emph{一つでも}あれば、できれば時間がかかるタスクはそこから取り除くべきでしょう。
+より多くのプロセスを追加することで予測可能な過負荷\footnote{本番環境で事実に基づいて過負荷になるもの}に対応する---ブロック操作に対処する、またはかわりに''main''プロセスがブロックする間のバッファとして機能する---のは良いアイデアです。
 
-When there is \emph{any} point of your program that ends up being a central hub for receiving messages, lengthy tasks should be moved out of there if possible. Handling predictable overload\footnote{Something you know for a fact gets overloaded in production} situations by adding more processes — which either handle the blocking operations or instead act as a buffer while the "main" process blocks — is often a good idea.
+%There will be increased complexity in managing more processes for activities that aren't intrinsically concurrent, so make sure you need them before programming defensively.
+本質的には並行ではない処理に対してより多くのプロセスを管理する複雑さが増すので、守りのプログラミングを始める前に確実にその実装が必要であることを確認しましょう。
 
-There will be increased complexity in managing more processes for activities that aren't intrinsically concurrent, so make sure you need them before programming defensively.
+%Another option is to transform the blocking task into an asynchronous one. If the type of work allows it, start the long-running job and keep a token that identifies it uniquely, along with the original requester you're doing work for. When the resource is available, have it send a message back to the server with the aforementioned token. The server will eventually get the message, match the token to the requester, and answer back, without being blocked by other requests in the mean time.\footnote{The \otpapp{redo} application is an example of a library doing this, in its \href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block} module. The [under-documented] module turns a pipelined connection into a blocking one, but does so while maintaining pipeline aspects to the caller — this allows the caller to know that only one call failed when a timeout occurs, not all of the in-transit ones, without having the server stop accepting requests.}
+他の選択肢としては、ブロッキングタスクを非同期なものに変形させることです。もし処理がそうした変更を受け入れられるものであれば、長時間実行されるジョブを起動して、そのジョブの一意な識別子としてのトークンともともとのリクエスト元を保持します。
+リソースが使えるようになったら、リソースからサーバーに対して先述のトークンと一緒にメッセージを送り返させます。
+結果サーバーはメッセージを受け取り、トークンとリクエスト元を対応させ、その間他のリクエストにブロックされることなく結果を返します。\footnote{\otpapp{redo}アプリケーションはこうした処理を行うライブラリの例です。redoの\href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block}モジュールにその処理があります。このあまりドキュメント化されていないモジュールは、パイプライン接続をブロッキングう接続にしますが、呼び出し元に対してパイプラインの面を維持している間だけそうします。---これによって呼び出し元はタイムアウトが発生したときに、サーバーがリクエストの受け入れを止めることなく、すべての未達の呼び出しが失敗したわけでなく1つの呼び出しだけが失敗したとわかります。}
 
-Another option is to transform the blocking task into an asynchronous one. If the type of work allows it, start the long-running job and keep a token that identifies it uniquely, along with the original requester you're doing work for. When the resource is available, have it send a message back to the server with the aforementioned token. The server will eventually get the message, match the token to the requester, and answer back, without being blocked by other requests in the mean time.\footnote{The \otpapp{redo} application is an example of a library doing this, in its \href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block} module. The [under-documented] module turns a pipelined connection into a blocking one, but does so while maintaining pipeline aspects to the caller — this allows the caller to know that only one call failed when a timeout occurs, not all of the in-transit ones, without having the server stop accepting requests.}
+%This option tends to be more obscure than using many processes and can quickly devolve into callback hell, but may use fewer resources.
+この選択肢は多くのプロセスを使う方法に比べてあいまいなものになりがちで、すぐにコールバック地獄になりえますが、使うリソースは少なくなるでしょう。
 
-This option tends to be more obscure than using many processes and can quickly devolve into callback hell, but may use fewer resources.
+%\subsection{Unexpected Messages}
+\subsection{予期せぬメッセージ}
 
-\subsection{Unexpected Messages}
+%Messages you didn't know about tend to be rather rare when using OTP applications. Because OTP behaviours pretty much expect you to handle anything with some clause in \function{handle\_info/2}, unexpected messages will not accumulate much.
+OTPアプリケーションを使っている場合は知らないメッセージを受け取ることはまれです。
+なぜならOTPビヘイビアはすべてを\function{handle\_info/2}にある節で処理することを期待しているので、予期せぬメッセージがたまることはあまりないでしょう。
 
-Messages you didn't know about tend to be rather rare when using OTP applications. Because OTP behaviours pretty much expect you to handle anything with some clause in \function{handle\_info/2}, unexpected messages will not accumulate much.
-
-However, all kinds of OTP-compliant systems end up having processes that may not implement a behaviour, or processes that go in a non-behaviour stretch where it overtakes message handling. If you're lucky enough, monitoring tools\footnote{See Section \ref{sec:global-view}} will show a constant memory increase, and inspecting for large queue sizes\footnote{See Subsection \ref{subsec:digging-procs}} will let you find which process is at fault. You can then fix the problem by handling the messages as required.
+%However, all kinds of OTP-compliant systems end up having processes that may not implement a behaviour, or processes that go in a non-behaviour stretch where it overtakes message handling. If you're lucky enough, monitoring tools\footnote{See Section \ref{sec:global-view}} will show a constant memory increase, and inspecting for large queue sizes\footnote{See Subsection \ref{subsec:digging-procs}} will let you find which process is at fault. You can then fix the problem by handling the messages as required.
+しかしながら、あらゆるOTP互換システムはビヘイビアを実装していないプロセスやメッセージハンドリングを頑張るビヘイビアではない方向で実装してしまったプロセスを持つことになります。あなたが十分に幸運であれば、監視ツール\footnote{\ref{sec:global-view}の節を見ましょう}が定常的なメモリ増加を示していて、大きなキューサイズを点検することで\footnote{\ref{subsec:digging-procs}の節を見ましょう}どのプロセスに問題があるかわかるでしょう。そのあと、メッセージを必要なように処理することで問題を修正できます。
 
 \section{Restricting Input}
 
