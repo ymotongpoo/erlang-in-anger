@@ -1,24 +1,49 @@
-\chapter{CPU and Scheduler Hogs}
+%\chapter{CPU and Scheduler Hogs}
+\chapter{CPUとスケジューラの浪費}
 \label{chap:cpu-hogs}
 
-While memory leaks tend to absolutely kill your system, CPU exhaustion tends to act like a bottleneck and limits the maximal work you can get out of a node. Erlang developers will have a tendency to scale horizontally when they face such issues. It is often an easy enough job to scale out the more basic pieces of code out there. Only centralized global state (process registries, ETS tables, and so on) usually need to be modified.\footnote{Usually this takes the form of sharding or finding a state-replication scheme that's suitable, and little more. It's still a decent piece of work, but nothing compared to finding out most of your program's semantics aren't applicable to distributed systems given Erlang usually forces your hand there in the first place.} Still, if you want to optimize locally before scaling out at first, you need to be able to find your CPU and scheduler hogs.
+% While memory leaks tend to absolutely kill your system, CPU exhaustion tends to act like a bottleneck and limits the maximal work you can get out of a node. Erlang developers will have a tendency to scale horizontally when they face such issues. It is often an easy enough job to scale out the more basic pieces of code out there. Only centralized global state (process registries, ETS tables, and so on) usually need to be modified.\footnote{Usually this takes the form of sharding or finding a state-replication scheme that's suitable, and little more. It's still a decent piece of work, but nothing compared to finding out most of your program's semantics aren't applicable to distributed systems given Erlang usually forces your hand there in the first place.} Still, if you want to optimize locally before scaling out at first, you need to be able to find your CPU and scheduler hogs.
+メモリリークはシステムを完全に停止させる傾向にありますが、CPUの枯渇はボトルネックのように振る舞う傾向があり、
+ノードから抜け出す重要な操作ができなくなることがあります。
+Erlang開発者は、そういった問題に直面したとき水平スケールしがちです。
+一般的に、基礎的なコードであれば、スケールアウトがとても簡単にできることが多いからです。
+ただし、集中化したグローバルの状態（プロセス辞書やETSテーブルなど）だけは、だいたい変更が必要になります。
+\footnote{通常、これはシャーディングの形を取るか、状態のレプリケーションスキームを見つけるのが適してます。最初の頃のErlangをきっかけに作られた分散システムが、大部分のプログラムのセマンティクスで適用できないと発覚することに比べれば、これはまだ適切な方法です。}
+それでも、スケールアウトする前にローカルで最適化したい場合は、CPUとスケジューラの浪費を見つけ出だす必要があります。
 
-It is generally difficult to properly analyze the CPU usage of an Erlang node to pin problems to a specific piece of code. With everything concurrent and in a virtual machine, there is no guarantee you will find out if a specific process, driver, your own Erlang code, NIFs you may have installed, or some third-party library is eating up all your processing power.
+% It is generally difficult to properly analyze the CPU usage of an Erlang node to pin problems to a specific piece of code. With everything concurrent and in a virtual machine, there is no guarantee you will find out if a specific process, driver, your own Erlang code, NIFs you may have installed, or some third-party library is eating up all your processing power.
+ErlangノードのCPU使用率を適切に分析し、問題となる特定のコードを見つけ出すのは難しいとされています。
+ある特定のプロセス、ドライバー、自前のErlangコード、組み込まれたNIF、あるいはサードパーティのライブラリーといった
+あらゆるものが並行する仮想マシンの中では、どれが処理能力を浪費しているのかを見つけ出せる保証はありません。
 
-The existing approaches are often limited to profiling and reduction-counting if it's in your code, and to monitoring the scheduler's work if it might be anywhere else (but also your code).
+% The existing approaches are often limited to profiling and reduction-counting if it's in your code, and to monitoring the scheduler's work if it might be anywhere else (but also your code).
+既存のアプローチは大体限られており、コード内にある場合はプロファイリングとリダクションカウント\footnote{プロセスごとにリダクションというカウンタがあり、このカウンターは通常一つの各関数呼び出しでインクリメントされます。このリダクション回数が最大値に達した時、コンテキストスイッチが発生します。例えば、 Erlang/OTP R12B ではリダクションの最大値は2000です。}を確認する二つのアプローチ、そして、どこか他の場所（コード内も含む）にある場合はスケジューラの動作をモニタリングするアプローチがあります。
 
-\section{Profiling and Reduction Counts}
+%\section{Profiling and Reduction Counts}
+\section{プロファイリングとリダクションカウント}
 \label{sec:cpu-profiling}
 
-To pin issues to specific pieces of Erlang code, as mentioned earlier, there are two main approaches. One will be to do the old standard profiling routine, likely using one of the following applications:\footnote{All of these profilers work using Erlang tracing functionality with almost no restraint. They will have an impact on the run-time performance of the application, and shouldn't be used in production.}
+% To pin issues to specific pieces of Erlang code, as mentioned earlier, there are two main approaches. One will be to do the old standard profiling routine, likely using one of the following applications:\footnote{All of these profilers work using Erlang tracing functionality with almost no restraint. They will have an impact on the run-time performance of the application, and shouldn't be used in production.}
+前述したとおり、Erlangコード内の問題箇所を特定するアプローチは主に二つあります。一つは、古い標準のプロファイリングルーチンで、次に示すアプリケーションを利用することがあるでしょう。\footnote{これらのプロファイラは殆ど制限なくErlangのトレース機能を使って動作します。そのため、ランタイム上のアプリケーションのパフォーマンスに影響します。本番環境では使わないほうが良いでしょう。}
 
 \begin{itemize*}
-	\item \otpapp{eprof},\footnote{\href{http://www.erlang.org/doc/man/eprof.html}{http://www.erlang.org/doc/man/eprof.html}} the oldest Erlang profiler around. It will give general percentage values and will mostly report in terms of time taken.
-	\item \otpapp{fprof},\footnote{\href{http://www.erlang.org/doc/man/fprof.html}{http://www.erlang.org/doc/man/fprof.html}} a more powerful replacement of eprof. It will support full concurrency and generate in-depth reports. In fact, the reports are so deep that they are usually considered opaque and hard to read. 
-	\item \otpapp{eflame},\footnote{\href{https://github.com/proger/eflame}{https://github.com/proger/eflame}} the newest kid on the block. It generates flame graphs to show deep call sequences and hot-spots in usage on a given piece of code. It allows one to quickly find issues with a single look at the final result.
+%	\item \otpapp{eprof},\footnote{\href{http://www.erlang.org/doc/man/eprof.html}{http://www.erlang.org/doc/man/eprof.html}} the oldest Erlang profiler around. It will give general percentage values and will mostly report in terms of time taken.
+ \item \otpapp{eprof}、\footnote{\href{http://www.erlang.org/doc/man/eprof.html}{http://www.erlang.org/doc/man/eprof.html}}一番古いErlangのプロファイラです。おおよそのパーセンテージ値とその所要時間を結果として出します。
+%	\item \otpapp{fprof},\footnote{\href{http://www.erlang.org/doc/man/fprof.html}{http://www.erlang.org/doc/man/fprof.html}} a more powerful replacement of eprof. It will support full concurrency and generate in-depth reports. In fact, the reports are so deep that they are usually considered opaque and hard to read.
+	\item \otpapp{fprof}、\footnote{\href{http://www.erlang.org/doc/man/fprof.html}{http://www.erlang.org/doc/man/fprof.html}}
+%a more powerful replacement of eprof. It will support full concurrency and generate in-depth reports. In fact, the reports are so deep that they are usually considered opaque and hard to read.
+eprofのよりも強力なプロファイラです。完全な並行性をサポートしており、詳細なレポートを出してくれます。レポート内容が深すぎるため、一般的に不透明で読みにくいとされています。
+
+%	\item \otpapp{eflame},\footnote{\href{https://github.com/proger/eflame}{https://github.com/proger/eflame}} the newest kid on the block. It generates flame graphs to show deep call sequences and hot-spots in usage on a given piece of code. It allows one to quickly find issues with a single look at the final result.
+  \item \otpapp{eflame}、\footnote{\href{https://github.com/proger/eflame}{https://github.com/proger/eflame}}
+新しいプロファイラの一つです。対象のコードの深い呼び出しシーケンスやホットスポットを可視化するFlame Graphsを生成します。
+最終結果を見るだけで問題をすぐに見つけることが出来ます。
+
 \end{itemize*}
 
-It will be left to the reader to thoroughly read each of these application's documentation. The other approach will be to run \function{recon:proc\_window/3} as introduced in Subsection \ref{subsec:digging-procs}:
+%It will be left to the reader to thoroughly read each of these application's documentation. The other approach will be to run \function{recon:proc\_window/3} as introduced in Subsection \ref{subsec:digging-procs}:
+各アプリケーションのドキュメントの熟読は読者にお任せします。
+もう一つのアプローチは、\ref{subsec:digging-procs}で紹介した\function{recon:proc\_window/3}を実行する方法です。
 
 \begin{VerbatimEshell}
 1> recon:proc_window(reductions, 3, 500).
@@ -33,11 +58,14 @@ It will be left to the reader to thoroughly read each of these application's doc
    {initial_call,{erlang,apply,2}}]}]
 \end{VerbatimEshell}
 
-The reduction count has a direct link to function calls in Erlang, and a high count is usually the synonym of a high amount of CPU usage. 
+%The reduction count has a direct link to function calls in Erlang, and a high count is usually the synonym of a high amount of CPU usage.
+リダクションカウントはErlangの関数呼び出しに直結していて、カウントが高いことはCPU使用量が高いこととほぼ同義です。
 
-What's interesting with this function is to try it while a system is already rather busy,\footnote{See Subsection \ref{subsec:global-cpu}} with a relatively short interval. Repeat it many times, and you should hopefully see a pattern emerge where the same processes (or the same \emph{kind} of processes) tend to always come up on top.
+%What's interesting with this function is to try it while a system is already rather busy,\footnote{See Subsection \ref{subsec:global-cpu}} with a relatively short interval. Repeat it many times, and you should hopefully see a pattern emerge where the same processes (or the same \emph{kind} of processes) tend to always come up on top.
+この関数の興味深いところは、既にシステムがビジー状態のとき、\footnote{\ref{subsec:global-cpu}を参照してください}比較的短い間隔で試してみることです。繰り返し何度も実行して、上手くいけば、同じプロセス（あるいは同じ\emph{種類}のプロセス）が常に上位に現れるパターンを確認できるはずです。
 
-Using the code locations\footnote{Call \expression{recon:info(PidTerm, location)} or \expression{process\_info(Pid, current\_stacktrace)} to get this information.} and current functions being run, you should be able to identify what kind of code hogs all your schedulers.
+%Using the code locations\footnote{Call \expression{recon:info(PidTerm, location)} or \expression{process\_info(Pid, current\_stacktrace)} to get this information.} and current functions being run, you should be able to identify what kind of code hogs all your schedulers.
+実行中のコードの位置\footnote{コードの位置は\expression{recon:info(PidTerm, location)}または\expression{process\_info(Pid, current\_stacktrace)}で取得してください。}や現在の関数を使って、どの種類のコードが全スケジューラを浪費しているか特定できるはずです。
 
 \section{System Monitors}
 \label{sec:cpu-system-monitors}
