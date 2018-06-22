@@ -185,17 +185,27 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 このように進める利点は、タイマーや抽象化のあらゆる層を同期的にするというような厄介なものを単純すべて避けられることです。
 かわりに、ボトルネックや周辺部の特定の場所あるいは制御点に見張りを置いて、その間にあるものはすべて最も読みやすい形で表現できます。
 
-\subsection{What Users See}
+%\subsection{What Users See}
+\subsection{ユーザーが見るもの}
 
-The tricky part about back-pressure is reporting it. When back-pressure is done implicitly through synchronous calls, the only way to know it is at work due to overload is that the system becomes slower and less usable. Sadly, this is also going to be a potential symptom of bad hardware, bad network, unrelated overload, and possibly a slow client.
+%The tricky part about back-pressure is reporting it. When back-pressure is done implicitly through synchronous calls, the only way to know it is at work due to overload is that the system becomes slower and less usable. Sadly, this is also going to be a potential symptom of bad hardware, bad network, unrelated overload, and possibly a slow client.
+バックプレッシャーで厄介なのはそれを報告することです。バックプレッシャーが暗黙的に同期呼び出し経由で行われたとき、それが過負荷によって起きていると知る唯一の方法はシステムが遅くなってあまり使えなくなる場合だけです。
+悲しいことに、これはハードウェアやネットワークの不調や、関係ない過負荷、そして遅いクライアントに起こりうる兆候でもあります。
 
-Trying to figure out that a system is applying back-pressure by measuring its responsiveness is equivalent to trying to diagnose which illness someone has by observing that person has a fever. It tells you something is wrong, but not what.
+%Trying to figure out that a system is applying back-pressure by measuring its responsiveness is equivalent to trying to diagnose which illness someone has by observing that person has a fever. It tells you something is wrong, but not what.
+システムの応答性によってシステムがバックプレッシャーを適用しているかを知ろうとすることは、その人に熱があるという診察結果から病気を診断しようとするようなものです。
 
-Asking for permission, as a mechanism, will generally allow you to define your interface in such a way that you can explicitly report what is going on: the system as a whole is overloaded, or you're hitting a limit into the rate at which you can perform an operation and adjust accordingly.
+%Asking for permission, as a mechanism, will generally allow you to define your interface in such a way that you can explicitly report what is going on: the system as a whole is overloaded, or you're hitting a limit into the rate at which you can perform an operation and adjust accordingly.
+機構として、許可を求めることは、一般的に何が起きているかを明示的に報告できるようなインターフェースを定義できるようにしています。
+たとえばシステム全体が過負荷になっていたり、あるいは処理を実行したり適宜調整できる限界の速度になったりした場合の報告などです。
 
-There is a choice to be made when designing the system. Are your users going to have per-account limits, or are the limits going to be global to the system?
+%There is a choice to be made when designing the system. Are your users going to have per-account limits, or are the limits going to be global to the system?
+システムを設計するときには選択をしなければなりません。
+ユーザーにアカウントごとの制限を設けるか、あるいはシステム全体で一つの制限を持つかです。
 
-System-global or node-global limits are usually easy to implement, but will have the downside that they may be unfair. A user doing 90\% of all your requests may end up making the platform unusable for the vast majority of the other users.
+%System-global or node-global limits are usually easy to implement, but will have the downside that they may be unfair. A user doing 90\% of all your requests may end up making the platform unusable for the vast majority of the other users.
+システム全体あるいはノード全体での制限というのは通常実装が簡単ですが、不公平に成りうるという欠点があります。
+あるユーザーがリクエストの99\%を行っていると、そのせいで他の大多数のユーザーがプラットフォームを使えない状態になってしまうでしょう。
 
 Per-account limits, on the other hand, tend to be very fair, and allow fancy schemes such as having premium users who can go above the usual limits. This is extremely nice, but has the downside that the more users use your system, the higher the effective global system limit tends to move. Starting with 100 users that can do 100 requests a minute gives you a global 10000 requests per minute. Add 20 new users with that same rate allowed, and suddenly you may crash a lot more often.
 
