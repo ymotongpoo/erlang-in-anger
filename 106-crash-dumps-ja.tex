@@ -156,16 +156,20 @@ Kernel pid terminated (application_controller)
 %A high count may be the result of overload, Denial of Service attacks, or plain old resource leaks. Looking at the type of port leaked (TCP, UDP, or files) can also help reveal if there was contention on specific resources, or if the code using them is just wrong.
 ポート数が多い場合、DoS攻撃や使わなくなったリソースのリークなどに、過負荷になっている可能性があります。リークしているポートの種類（TCP, UTP, ファイル)を見てみることで、リソースの競合やそれらのリソースを使っているコードが間違っているかどうかが分かる可能性があります。
 
-\section{Can't Allocate Memory}
+%\section{Can't Allocate Memory}
+\section{メモリ割り当てができない}
 
-These are by far the most common types of crashes you are likely to see. There's so much to cover, that Chapter \ref{chap:memory-leaks} is dedicated to understanding them and doing the required debugging on live systems.
+%These are by far the most common types of crashes you are likely to see. There's so much to cover, that Chapter \ref{chap:memory-leaks} is dedicated to understanding them and doing the required debugging on live systems.
+これらは、おそらくあなたが非常によく見る類のクラッシュです。カバーすべきことが多くあるため、\ref{chap:memory-leaks} 章ではその内容の理解と、稼働中のシステムでのデバッグで必要となることについてまとめています。
 
-In any case, the crash dump will help figure out what the problem was after the fact. The process mailboxes and individual heaps are usually good indicators of issues. If you're running out of memory without any mailbox being outrageously large, look at the processes heap and stack sizes as returned by the recon script.
+%In any case, the crash dump will help figure out what the problem was after the fact. The process mailboxes and individual heaps are usually good indicators of issues. If you're running out of memory without any mailbox being outrageously large, look at the processes heap and stack sizes as returned by the recon script.
+いずれにせよ、クラッシュダンプは何が問題であったかを事後に把握するために役立ちます。プロセスのメッセージボックスと個々のヒープは通常、問題に対する良い指標です。メールボックスにメールが大量にあるわけではないのにメモリが不足している時には、recon スクリプトにより返されるプロセスヒープとスタックサイズを見てみてください。
 
-In case of large outliers at the top, you know some restricted set of processes may be eating up most of your node's memory. In case they're all more or less equal, see if the amount of memory reported sounds like a lot.
+%In case of large outliers at the top, you know some restricted set of processes may be eating up most of your node's memory. In case they're all more or less equal, see if the amount of memory reported sounds like a lot.
+(サイズが）上に大きく外れている場合には、いくつかのプロセスによりノードのほとんどのメモリが食いつぶされているかもしれないとわかります。同等の量の場合、（スクリプトから）返されたメモリの量が多くないかを確認してください。
 
-If it looks more or less reasonable, head towards the "Memory" section of the dump and check if a type (ETS or Binary, for example) seems to be fairly large. They may point towards resource leaks you hadn't expected.
-
+%If it looks more or less reasonable, head towards the "Memory" section of the dump and check if a type (ETS or Binary, for example) seems to be fairly large. They may point towards resource leaks you hadn't expected.
+多い（少ない）ようであれば、ダンプの「メモリ」セクションでタイプ（ETSやバイナリーなど）が非常に大きくないかをチェックしてください。想定外のリソースのリークが見つかるかもしれません。
 
 \section{Exercises}
 
