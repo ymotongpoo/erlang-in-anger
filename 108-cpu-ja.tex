@@ -8,7 +8,7 @@
 Erlang開発者は、そういった問題に直面したとき水平スケールしがちです。
 一般的に、基礎的なコードであれば、スケールアウトがとても簡単にできることが多いからです。
 ただし、集中化したグローバルの状態（プロセス辞書やETSテーブルなど）だけは、だいたい変更が必要になります。
-\footnote{通常、これはシャーディングの形を取るか、状態のレプリケーションスキームを見つけるのが適してます。最初の頃のErlangをきっかけに作られた分散システムが、大部分のプログラムのセマンティクスで適用できないと発覚することに比べれば、これはまだ適切な方法です。}
+\footnote{通常、これはシャーディングの形を取るか、状態のレプリケーションスキームを見つけるのが適してます。最初、Erlangがきっかけで分散システムを作るが、その分散システムは大部分のプログラムのセマンティクスに適用できないと分かる。それに比べると、これらの方法はまだ適切です。}
 それでも、スケールアウトする前にローカルで最適化したい場合は、CPUとスケジューラの高負荷を見つけ出だす必要があります。
 
 % It is generally difficult to properly analyze the CPU usage of an Erlang node to pin problems to a specific piece of code. With everything concurrent and in a virtual machine, there is no guarantee you will find out if a specific process, driver, your own Erlang code, NIFs you may have installed, or some third-party library is eating up all your processing power.
