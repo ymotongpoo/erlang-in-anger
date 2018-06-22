@@ -1,8 +1,10 @@
 # README
-![PDF Build on Travis CI](https://travis-ci.org/ymotongpoo/erlang-in-anger.svg?branch=japanese)
-Erlang in Angarの翻訳用レポジトリです。オリジナルのREADMEは[こちら](./README.en.md)を参照してください。
+[![Build Status](https://travis-ci.org/ymotongpoo/erlang-in-anger.svg?branch=japanese)](https://travis-ci.org/ymotongpoo/erlang-in-anger)
+
+Erlang in Angerの翻訳用レポジトリです。オリジナルのREADMEは[こちら](./README.en.md)を参照してください。
 
 # 最新版
+* https://ymotongpoo.github.io/erlang-in-anger/text-ja.pdf
 * https://github.com/ymotongpoo/erlang-in-anger/blob/gh-pages/text-ja.pdf
 
 # Contribution
@@ -19,6 +21,10 @@ Erlang in Angarの翻訳用レポジトリです。オリジナルのREADMEは[�
 3. featureブランチ(`japanese` 以外に適当にブランチ)を切ってそこで作業する。(自分のアカウントにフォークしてから作業してもらっても構いません)
 4. 担当部分が終わったら `japanese` ブランチにmerge。心配ならpull-requestを出してください。(みんなでレビューしましょう)
 5. 以下2-4の繰り返し。
+
+また、pull-requestを出してCIに通った場合は次のリポジトリにPDFがアップロードされます。
+
+- https://github.com/y-yu/erlang-in-anger-pr
 
 ## レビュー
 訳がおかしいなと思ったら適宜Issueを立ててください。(TODO: Issueテンプレートの作成)

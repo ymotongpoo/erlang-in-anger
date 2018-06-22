@@ -156,18 +156,25 @@ Eshell Vx.x.x  (abort with ^G)
 %If you have trouble connecting, you can add the \command{-oLogLevel=DEBUG} option to \app{ssh} to get debug output.
 もし接続する際に問題が発生したら、\app{ssh}にオプションとして\command{-oLogLevel=DEBUG}をつければ、デバッグ出力が見られます。
 
-If you have trouble connecting, you can add the \command{-oLogLevel=DEBUG} option to \app{ssh} to get debug output.
+%\section{Named Pipes}
+\section{名前付きパイプ}
 
-\section{Named Pipes}
+% A little known way to connect with an Erlang node that requires no explicit distribution is through named pipes.
+あまり知られてはいませんが、分散Erlangを明示的に用いずにErlangノードに接続する方法として、名前付きパイプを利用するものがあります。
+%This can be done by starting Erlang with \app{run\_erl}, which wraps Erlang in a named pipe\footnote{\command{"erl"} is the command being run. Additional arguments can be added after it. For example \command{"erl +K true"} will turn kernel polling on.}:
+これはErlangを\app{run\_erl}で起動すれば実現できます。\app{run\_erl}が名前付きパイプの中にErlangをラップしてくれます\footnote{\command{"erl"}が実行されるコマンドです。引数はその後に追加できます。例えば\command{"erl +K true"}でカーネルポーリングが有効になります。}。
 
-A little known way to connect with an Erlang node that requires no explicit distribution is through named pipes. This can be done by starting Erlang with \app{run\_erl}, which wraps Erlang in a named pipe\footnote{\command{"erl"} is the command being run. Additional arguments can be added after it. For example \command{"erl +K true"} will turn kernel polling on.}:
 \begin{VerbatimEshell}
 $ run_erl /tmp/erl_pipe /tmp/log_dir "erl"
 \end{VerbatimEshell}
 
-The first argument is the name of the file that will act as the named pipe. The second one is where logs will be saved\footnote{Using this method ends up calling fsync for each piece of output, which may give quite a performance hit if a lot of IO is taking place over standard output}.
+%The first argument is the name of the file that will act as the named pipe.
+第一引数は名前付きパイプとして振る舞うファイル名です。
+% The second one is where logs will be saved\footnote{Using this method ends up calling fsync for each piece of output, which may give quite a performance hit if a lot of IO is taking place over standard output}.
+第二引数はログの保存場所になります\footnote{この方法を使うと出力のたびにfsyncが呼びだされますので、標準出力を介して多くの入出力が発生する場合は、性能にかなり影響するかもしれません。}
 
-To connect to the node, you use the \app{to\_erl} program:
+%To connect to the node, you use the \app{to\_erl} program:
+ノードに接続するには、\app{to\_erl}プログラムを使います。
 
 \begin{VerbatimEshell}
 $ to_erl /tmp/erl_pipe
@@ -176,20 +183,31 @@ Attaching to /tmp/erl_pipe (^D to exit)
 1>
 \end{VerbatimEshell}
 
-And the shell is connected. Closing stdio (with \command{\^{}D}) will disconnect from the shell while leaving it running.
+%And the shell is connected. 
+シェルに接続できました。
+%Closing stdio (with \command{\^{}D}) will disconnect from the shell while leaving it running.
+標準入出力を閉じる(コマンドは\command{\^{}D})ことで、シェルを実行させたまま切断ができます。
 
+%\section{Exercises}
+\section{演習}
 
-\section{Exercises}
-
-\subsection*{Review Questions}
+%\subsection*{Review Questions}
+\subsection*{復習問題}
 
 \begin{enumerate}
-	\item What are the 4 ways to connect to a remote node?
-	\item Can you connect to a node that wasn't given a name?
-	\item What's the command to go into the Job Control Mode (JCL)?
-	\item Which method(s) of connecting to a remote shell should you avoid for a system that outputs a lot of data to standard output?
-	\item What instances of remote connections shouldn't be disconnected using \command{\^{}G}?
-	\item What command(s) should never be used to disconnect from a session?
-	\item Can all of the methods mentioned support having multiple users connected onto the same Erlang node without issue?
+%	\item What are the 4 ways to connect to a remote node?
+	\item リモートノードに接続する４つの方法はなんですか？
+%	\item Can you connect to a node that wasn't given a name?
+	\item 名前のないノードに接続することはできますか？
+% \item What's the command to go into the Job Control Mode (JCL)?
+  \item ジョブ制御モードに入るコマンドはなんですか？
+% \item Which method(s) of connecting to a remote shell should you avoid for a system that outputs a lot of data to standard output?
+  \item 標準出力に多くのデータを吐き出すシステムの場合、リモートシェルの接続方法で避けるべき方法はなんですか？
+% \item What instances of remote connections shouldn't be disconnected using \command{\^{}G}?
+  \item リモート接続をした際に、\command{\^{}G} で切断してはいけない場合とはどんな時ですか？
+% \item What command(s) should never be used to disconnect from a session?
+  \item セッションを切断するときに決して行ってはいけないコマンドはなんですか？
+% \item Can all of the methods mentioned support having multiple users connected onto the same Erlang node without issue?
+  \item この章で説明した方法はすべて、複数ユーザーが同じErlangノードに問題なく接続できるような方法でしょうか？
 \end{enumerate}
 
