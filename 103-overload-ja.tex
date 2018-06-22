@@ -181,7 +181,7 @@ Erlangシステム外から流入速度を落とせず、かつスケールア�
 これは全ての人が目を背けたくなる悲しい現実です。プログラマーや、ソフトウェアエンジニア、そしてコンピュータサイエンティストは、不要なデータは消去し、有用なデータはすべて保持するよう学んできています。成功は地道な最適化によってもたらされます。
 
 %However, there's a point that can be reached where the data that comes in does so at a rate faster than it goes out, even if the Erlang system on its own is able to do everything fast enough. In some cases, It's the component \emph{after} it that blocks.
-しかし、Erlangシステム自身が全てのデータを十分な速度で処理できたとしても、出力速度よりも速くデータを受信する場合もあります。場合によっては、ブロックした \emph{後の} コンポーネントが。
+しかし、Erlangシステム自身が全てのデータを十分な速度で処理できたとしても、Erlangシステムの \emph{後ろ} に控えるコンポーネントがブロックし、出力よりもデータ入力の方が速くなることもあります。
 
 %If you don't have the option of limiting how much data you receive, you then have to drop messages to avoid crashing.
 受信するデータ量を制限する選択肢がない場合は、クラッシュを避けるためにメッセージをドロップする必要があります。
