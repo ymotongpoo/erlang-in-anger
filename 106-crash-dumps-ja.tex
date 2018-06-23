@@ -171,22 +171,32 @@ Kernel pid terminated (application_controller)
 %If it looks more or less reasonable, head towards the "Memory" section of the dump and check if a type (ETS or Binary, for example) seems to be fairly large. They may point towards resource leaks you hadn't expected.
 多い（少ない）ようであれば、ダンプの「メモリ」セクションでタイプ（ETSやバイナリーなど）が非常に大きくないかをチェックしてください。想定外のリソースのリークが見つかるかもしれません。
 
-\section{Exercises}
+%\section{Exercises}
+\section{演習}
 
-\subsection*{Review Questions}
-
-\begin{enumerate}
-	\item How can you choose where a crash dump will be generated?
-	\item What are common avenues to explore if the crash dump shows that the node ran out of memory?
-	\item What should you look for if the process count is suspiciously low?
-	\item If you find the node died with a process having a lot of memory, what could you do to find out which one it was?\end{enumerate}
-
-\subsection*{Hands-On}
-
-Using the analysis of a crash dump in Section \ref{sec:crashdump-general-view}:
+%\subsection*{Review Questions}
+\subsection*{復習問題}
 
 \begin{enumerate}
-	\item What are specific outliers that could point to an issue?
-	\item Does it look like repeated errors are the issue? If not, what could it be? 
+	%\item How can you choose where a crash dump will be generated?
+	\item クラッシュダンプが生成される場所をどのように指定しますか?
+	%\item What are common avenues to explore if the crash dump shows that the node ran out of memory?
+	\item クラッシュダンプがノードがメモリ不足で落ちていることを示している場合、通常どのように探しますか?
+	%\item What should you look for if the process count is suspiciously low?
+	\item プロセス数が疑わしいほど少ない場合、どこを見るべきでしょうか?
+	%\item If you find the node died with a process having a lot of memory, what could you do to find out which one it was?\end{enumerate}
+	\item ノードが大量のメモリを確保したプロセスとともに死んだことがわかる場合、それがどれであるか見つけるために何をすることができますか?\end{enumerate}
+
+%\subsection*{Hands-On}
+\subsection*{ハンズオン}
+
+%Using the analysis of a crash dump in Section \ref{sec:crashdump-general-view}:
+\ref{sec:crashdump-general-view}の章にあるクラッシュダンプの分析を使用します。
+
+\begin{enumerate}
+	%\item What are specific outliers that could point to an issue?
+	\item 問題を指し示すことができる特定の異常値は何でしょうか?
+	%\item Does it look like repeated errors are the issue? If not, what could it be?
+	\item 繰り返されるエラーは問題のように見えますか?そうではない場合、それは何になるのでしょうか?
 \end{enumerate}
 
