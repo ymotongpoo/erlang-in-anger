@@ -326,27 +326,43 @@ There are also cases where the data is sent to you in a "fire and forget" manner
 In the end, what is acceptable or not to deal with overload tends to depend on the humans that use the system. It is often easier to bend the requirements a bit than develop new technology, but sometimes it is just not avoidable.
 
 
-\section{Exercises}
+%\section{Exercises}
+\section{演習}
 
-\subsection*{Review Questions}
+%\subsection*{Review Questions}
+\subsection*{復習問題}
 
 \begin{enumerate}
-	\item Name the common sources of overload in Erlang systems
-	\item What are the two main classes of strategies to handle overload?
-	\item How can long-running operations be made safer?
-	\item When going synchronous, how should timeouts be chosen?
-	\item What is an alternative to having timeouts?
-	\item When would you pick a queue buffer before a stack buffer?
+  %\item Name the common sources of overload in Erlang systems
+  \item Erlangシステム内での過負荷のよくある原因を挙げてください
+  %\item What are the two main classes of strategies to handle overload?
+  \item 過負荷の対応策の主な戦略を2つ答えてください
+  %\item How can long-running operations be made safer?
+  \item 長時間稼働する処理はどのようにして安全にできますか  
+  %\item When going synchronous, how should timeouts be chosen?
+  \item 同期処理を行うとき、タイムアウトはどのように設定しますか  
+  %\item What is an alternative to having timeouts?
+  \item タイムアウト以外の代替案はなんでしょうか
+  %\item When would you pick a queue buffer before a stack buffer?
+  \item どんなときにスタックバッファの前にキューバッファを選びますか
 \end{enumerate}
 
-\subsection*{Open-ended Questions}
+%\subsection*{Open-ended Questions}
+\subsection*{自由回答問題}
 
 \begin{enumerate}
-	\item What is a \emph{true bottleneck}? How can you find it?
-	\item In an application that calls a third party API, response times vary by a lot depending on how healthy the other servers are. How could one design the system to prevent occasionally slow requests from blocking other concurrent calls to the same service?
-	\item What's likely to happen to new requests to an overloaded latency-sensitive service where data has backed up in a stack buffer? What about old requests?
-	\item Explain how you could turn a load-shedding overload mechanism into one that can also provide back-pressure.
-	\item Explain how you could turn a back-pressure mechanism into a load-shedding mechanism.
-	\item What are the risks, for a user, when dropping or blocking a request? How can we prevent duplicate messages or missed ones?
-	\item What can you expect to happen to your API design if you forget to deal with overload, and suddenly need to add back-pressure or load-shedding to it?
+  %\item What is a \emph{true bottleneck}? How can you find it?
+  \item \emph{真のボトルネック}とはなんでしょうか。それはどうやったら見つけられるでしょうか。
+  %\item In an application that calls a third party API, response times vary by a lot depending on how healthy the other servers are. How could one design the system to prevent occasionally slow requests from blocking other concurrent calls to the same service?
+  \item サードパーティのAPIを呼び出すアプリケーションでは、応答時間は他のサーバーの正常性によって大きく変化します。同じサービスへの他の並行呼び出しをブロックすることにより時折発生する遅いリクエストを予防するようにするにはシステムをどう設計すればよいでしょうか。
+  %\item What's likely to happen to new requests to an overloaded latency-sensitive service where data has backed up in a stack buffer? What about old requests?
+  \item データがスタックバッファ内にバックアップされた過負荷のレイテンシに敏感なサービスに対して新しいリクエストを送ったら、そのリクエストには何が起きるでしょうか。
+  %\item Explain how you could turn a load-shedding overload mechanism into one that can also provide back-pressure.
+  \item 部分的に送信停止する過負荷機構をバックプレッシャーも提供できるような機構に変えるにはどうしたらいいでしょうか
+  %\item Explain how you could turn a back-pressure mechanism into a load-shedding mechanism.
+  \item バックプレッシャー機構を部分的に送信停止する機構に変えるにはどうしたらいいでしょうか。
+  %\item What are the risks, for a user, when dropping or blocking a request? How can we prevent duplicate messages or missed ones?
+  \item ユーザーにとって、リクエストをドロップしたりブロックするときにどういうリスクがあるでしょうか。メッセージの重複やメッセージの喪失をどうやって防げばよいでしょうか。
+  %\item What can you expect to happen to your API design if you forget to deal with overload, and suddenly need to add back-pressure or load-shedding to it?
+  \item API設計をする際に過負荷対策を忘れてしまっていたあとに、急にバックプレッシャーや部分的な送信停止を追加する必要が出てきたら、設計にどういう影響があるでしょうか。
 \end{enumerate}
