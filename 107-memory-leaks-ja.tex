@@ -238,32 +238,45 @@ Memory fragmentation issues are intimately related to Erlang's memory model, as 
 
 The general symptoms of memory fragmentation are large amounts of memory being allocated during peak load, and that memory not going away after the fact. The damning factor will be that the node will internally report much lower usage (through \function{erlang:memory()}) than what is reported by the operating system.
 
-\subsection{Finding Fragmentation}
+%\subsection{Finding Fragmentation}
+\subsection{フラグメンテーションを見つける}
 
-The \module{recon\_alloc} module was developed specifically to detect and help point towards the resolution of such issues.
+%The \module{recon\_alloc} module was developed specifically to detect and help point towards the resolution of such issues.
+\module{recon\_alloc}モジュールはこのような問題を見つけたり、解決の助けとなるように開発されました。
 
-Given how rare this type of issue has been so far over the community (or happened without the developers knowing what it was), only broad steps to detect things are defined. They're all vague and require the operator's judgement.
+%Given how rare this type of issue has been so far over the community (or happened without the developers knowing what it was), only broad steps to detect things are defined. They're all vague and require the operator's judgement.
+この種の問題がコミュニティにとって稀であったと考えると(または開発者がそれが何であるか知らずに起こった)、手がかりを見つけるための様々な手順が定義されているだけです。これらはすべて曖昧で運用者の判断が必要です。
 
-\subsubsection{Check Allocated Memory}
+%\subsubsection{Check Allocated Memory}
+\subsubsection{割り当て済みのメモリを確認する}
 
-Calling \function{recon\_alloc:memory/1} will report various memory metrics with more flexibility than \function{erlang:memory/0}. Here are the possibly relevant arguments:
+%Calling \function{recon\_alloc:memory/1} will report various memory metrics with more flexibility than \function{erlang:memory/0}. Here are the possibly relevant arguments:
+\function{recon\_alloc:memory/1}を呼び出すことで様々なメモリのメトリクスを\function{erlang:memory/0}より柔軟にレポートします。これらは関連する引数です。
 
 \begin{enumerate}
-	\item call \expression{recon\_alloc:memory(usage)}. This will return a value between 0 and 1 representing a percentage of memory that is being actively used by Erlang terms versus the memory that the Erlang VM has obtained from the OS for such purposes. If the usage is close to 100\%, you likely do not have memory fragmentation issues. You're just using a lot of it.
-	\item check if \expression{recon\_alloc:memory(allocated)} matches what the OS reports.\footnote{You can call \expression{recon\_alloc:set\_unit(Type)} to set the values reported by \module{recon\_alloc} in bytes, kilobytes, megabytes, or gigabytes} It should match it fairly closely if the problem is really about fragmentation or a memory leak from Erlang terms.
+	%\item call \expression{recon\_alloc:memory(usage)}. This will return a value between 0 and 1 representing a percentage of memory that is being actively used by Erlang terms versus the memory that the Erlang VM has obtained from the OS for such purposes. If the usage is close to 100\%, you likely do not have memory fragmentation issues. You're just using a lot of it.
+	\item \expression{recon\_alloc:memory(usage)}を呼び出す。これはErlang VMがOSから取得したメモリに対して、Erlang項としてアクティブに使われているメモリの割合を0から1の値として返します。使用率が100\%に近い場合は、おそらくメモリフラグメンテーションの問題ではありません。たくさんメモリを使っているだけです。
+	%\item check if \expression{recon\_alloc:memory(allocated)} matches what the OS reports.\footnote{You can call \expression{recon\_alloc:set\_unit(Type)} to set the values reported by \module{recon\_alloc} in bytes, kilobytes, megabytes, or gigabytes} It should match it fairly closely if the problem is really about fragmentation or a memory leak from Erlang terms.
+  \item \expression{recon\_alloc:memory(allocated)}とOSがレポートするものがマッチするか確認してください。\footnote{\module{recon\_alloc}でレポートされた値をバイト、キロバイト、メガバイト、ギガバイト表記にするために\expression{recon\_alloc:set\_unit(Type)}を呼び出すことができます。}問題が本当にフラグメンテーションかErlang項のメモリリークの場合には、それはかなり近く一致する必要があります。
 \end{enumerate}
 
-That should confirm if memory seems to be fragmented or not.
+%That should confirm if memory seems to be fragmented or not.
+これでメモリがフラグメントしているかどうかを確認する必要があります。
 
-\subsubsection{Find the Guilty Allocator}
+%\subsubsection{Find the Guilty Allocator}
+\subsubsection{問題のアロケータを見つける}
 
-Call \expression{recon\_alloc:memory(allocated\_types)} to see which type of util allocator (see Section \ref{subsec:erlang-memory-model}) is allocating the most memory. See if one looks like an obvious culprit when you compare the results with \expression{erlang:memory()}.
+%Call \expression{recon\_alloc:memory(allocated\_types)} to see which type of util allocator (see Section \ref{subsec:erlang-memory-model}) is allocating the most memory. See if one looks like an obvious culprit when you compare the results with \expression{erlang:memory()}.
+どの種別のアロケータ(\ref{subsec:erlang-memory-model}を参照)がほとんどのメモリを確保しているか見るために\expression{recon\_alloc:memory(allocated\_types)}を呼び出してください。結果を\expression{erlang:memory()}と比較して、明らかに犯人のように見えるものがあるか確認してください。
 
-Try \expression{recon\_alloc:fragmentation(current)}. The resulting data dump will show different allocators on the node with various usage ratios.\footnote{More information is available at \href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}}
+%Try \expression{recon\_alloc:fragmentation(current)}. The resulting data dump will show different allocators on the node with various usage ratios.\footnote{More information is available at \href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}}
+\expression{recon\_alloc:fragmentation(current)}を試してください。データのダンプ結果はノード上のそれぞれ異なったアロケータを様々な使用比率とともに表示します。\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}に詳細な情報があります。}
 
-If you see very low ratios, check if they differ when calling \expression{recon\_alloc:fragmentation(max)}, which should show what the usage patterns were like under your max memory load.
+%If you see very low ratios, check if they differ when calling \expression{recon\_alloc:fragmentation(max)}, which should show what the usage patterns were like under your max memory load.
+とても少ない比率の場合、それらが\expression{recon\_alloc:fragmentation(max)}を呼び出した結果と異なるか確認してください。これは使用量のパターンが今までにロードした最大のメモリ量より低くなるように表示されるべきです。
 
-If there is a big difference, you are likely having issues with memory fragmentation for a few specific allocator types following usage spikes.
+%If there is a big difference, you are likely having issues with memory fragmentation for a few specific allocator types following usage spikes.
+大きく異なる場合は、使用率にスパイクのある特定の種別のアロケータについてメモリフラグメンテーションの問題がある可能性があります。
 
 \subsection{Erlang's Memory Model}
 \label{subsec:erlang-memory-model}
