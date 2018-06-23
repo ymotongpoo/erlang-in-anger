@@ -207,10 +207,15 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 システム全体あるいはノード全体での制限というのは通常実装が簡単ですが、不公平に成りうるという欠点があります。
 あるユーザーがリクエストの99\%を行っていると、そのせいで他の大多数のユーザーがプラットフォームを使えない状態になってしまうでしょう。
 
-Per-account limits, on the other hand, tend to be very fair, and allow fancy schemes such as having premium users who can go above the usual limits. This is extremely nice, but has the downside that the more users use your system, the higher the effective global system limit tends to move. Starting with 100 users that can do 100 requests a minute gives you a global 10000 requests per minute. Add 20 new users with that same rate allowed, and suddenly you may crash a lot more often.
+%Per-account limits, on the other hand, tend to be very fair, and allow fancy schemes such as having premium users who can go above the usual limits. This is extremely nice, but has the downside that the more users use your system, the higher the effective global system limit tends to move. Starting with 100 users that can do 100 requests a minute gives you a global 10000 requests per minute. Add 20 new users with that same rate allowed, and suddenly you may crash a lot more often.
+一方で、アカウントごとの制限は非常に公平で、通常の制限よりもゆるい制限になるプレミアムユーザーを設定するというような気の利いたこともできるようになります。
+これは極めて素晴らしいことですが、欠点もあって、システムを使うユーザーの数が増えるほど、快適に動作するためのシステム全体の制限は引き上げられます。
+1分間に100リクエストを投げられるユーザー100人がいると全体では1分間に10000リクエストとなります。
+同じ制限速度で20人新規ユーザーを追加すると、とたんにクラッシュが大量に発生するようになります。
 
-The safe margin of error you established when designing the system slowly erodes as more people use it. It's important to consider the tradeoffs your business can tolerate from that point of view, because users will tend not to appreciate seeing their allowed usage go down all the time, possibly even more so than seeing the system go down entirely from time to time.
-
+%The safe margin of error you established when designing the system slowly erodes as more people use it. It's important to consider the tradeoffs your business can tolerate from that point of view, because users will tend not to appreciate seeing their allowed usage go down all the time, possibly even more so than seeing the system go down entirely from time to time.
+システムを設計したときに作ったエラーに対するセーフマージンはユーザーの数が増えるにつれ徐々に失われていきます。
+その観点からビジネスが耐えられるかのトレードオフを考慮することが重要です。なぜなら、ユーザーはシステム全体がときどき落ちてしまうことよりもずっと、自分に割り当てられた使用量がいつも使えないことのほうが嫌だと思うからです。
 
 \section{Discarding Data}
 
