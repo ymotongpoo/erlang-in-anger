@@ -454,53 +454,91 @@ There is still some manual work involved into properly linking a misbehaving por
 
 %%%
 
-\section{Exercises}
+%\section{Exercises}
+\section{演習}
 
-\subsection*{Review Questions}
+%\subsection*{Review Questions}
+\subsection*{復習問題}
 
 \begin{enumerate}
-	\item What kind of values are reported for Erlang's memory?
-	\item What's a valuable process-related metric for a global view?
-	\item What's a port, and how should it be monitored globally?
-	\item Why can't you trust \app{top} or \app{htop} for CPU usage with Erlang systems? What's the alternative?
-	\item Name two types of signal-related information available for processes
-	\item How can you find what code a specific process is running?
-	\item What are the different kinds of memory information available for a specific process?
-	\item How can you know if a process is doing a lot of work?
-	\item Name a few of the values that are dangerous to fetch when inspecting processes in a production system.
-	\item What are some features provided to OTP processes through the sys module?
-	\item What kind of values are available when inspecting inet ports?
-	\item How can you find the type of a port (Files, TCP, UDP)?
+  %\item What kind of values are reported for Erlang's memory?
+  \item Erlangのメモリではどのような値が報告されますか。
+  %\item What's a valuable process-related metric for a global view?
+  \item グローバルビュー向けのプロセス関連で有益なメトリクスはなんでしょう。
+  %\item What's a port, and how should it be monitored globally?
+  \item ポートとはどんなもので、グローバルではどのように監視されているでしょう。
+  %\item Why can't you trust \app{top} or \app{htop} for CPU usage with Erlang systems? What's the alternative?
+  \item Erlangシステムにおいてなぜ\app{top}や\app{htop}が信頼できないのでしょうか。代替手段はなんでしょうか。
+  %\item Name two types of signal-related information available for processes
+  \item プロセス用に得られる2種類のシグナル関係の情報を挙げてください。
+  %\item How can you find what code a specific process is running?
+  \item 特定のプロセスがどのコードを動かしているかをどうやって見つけられるでしょうか。
+  %\item What are the different kinds of memory information available for a specific process?
+  \item 特定のプロセスのメモリ関連の情報にはどのような種類があるでしょうか。 
+  %\item How can you know if a process is doing a lot of work?
+  \item プロセスが大量の処理をしているかどうかをどうやって見極めますか。
+  %\item Name a few of the values that are dangerous to fetch when inspecting processes in a production system.
+  \item 本番システム内のプロセスを調査する際に取得すると危険な値を2つ、3つ挙げてください。
+  %\item What are some features provided to OTP processes through the sys module?
+  \item sysモジュール経由でOTPプロセスに提供されるいくつかの機能はなんでしょうか。
+  %\item What kind of values are available when inspecting inet ports?
+  \item inetポートを調査しているときに得られる値にはどんなものがあるでしょうか。
+  %\item How can you find the type of a port (Files, TCP, UDP)?
+  \item ポートの種類（ファイル、TCP、UDP）はどのように見つけられるでしょうか。
 \end{enumerate}
 
-\subsection*{Open-ended Questions}
+%\subsection*{Open-ended Questions}
+\subsection*{自由回答問題}
 
 \begin{enumerate}
-	\item Why do you want a long time window available on global metrics?
-	\item Which would be more appropriate between \function{recon:proc\_count/2} and \function{recon:proc\_window/3} to find issues with:
-		\begin{enumerate*}
-			\item Reductions \item Memory \item Message queue length
-		\end{enumerate*}
-	\item How can you find information about who is the supervisor of a given process?
-	\item When should you use \function{recon:inet\_count/2}? \function{recon:inet\_window/3}?
-	\item What could explain the difference in memory reported by the operating system and the memory functions in Erlang?
-	\item Why is it that Erlang can sometimes look very busy even when it isn't?
-	\item How can you find what proportion of processes on a node are ready to run, but can't be scheduled right away?
+  %\item Why do you want a long time window available on global metrics?
+  \item グローバルメトリクス内で利用できる長時間のウィンドウが欲しくなる理由はなんでしょうか。
+  %\item Which would be more appropriate between \function{recon:proc\_count/2} and \function{recon:proc\_window/3} to find issues with:
+  \item 次の問題を見つけるときに使うべき関数は\function{recon:proc\_count/2}と\function{recon:proc\_window/3}のどちらでしょうか。
+  \item
+    \begin{enumerate*}
+      %\item Reductions
+      \item リダクション
+      %\item Message queue length
+      \item メッセージキューの長さ
+      %\item Memory
+      \item メモリ
+    \end{enumerate*}
+  %\item How can you find information about who is the supervisor of a given process?
+  \item あるプロセスのスーパーバイザーがどれかに関する情報はどうやって見つけますか。  
+  %\item When should you use \function{recon:inet\_count/2}? \function{recon:inet\_window/3}?
+  \item  \function{recon:inet\_count/2} や \function{recon:inet\_window/3} はそれぞれいつ使うべきでしょう。
+  %\item What could explain the difference in memory reported by the operating system and the memory functions in Erlang?
+  \item OSから報告されたメモリとErlangのmemory関数から報告されるメモリの違いを説明してください。
+  %\item Why is it that Erlang can sometimes look very busy even when it isn't?
+  \item ときどきErlangが実際にはさほど稼働していないのに、非常に稼働率が上がっているように見えるのはなぜでしょうか。
+  %\item How can you find what proportion of processes on a node are ready to run, but can't be scheduled right away?
+  \item あるノード上のプロセスの何割が実行可能だがすぐにはスケジュールできない状況になっているかを調べる方法を教えてください。
 \end{enumerate}
 
-\subsection*{Hands-On}
+%\subsection*{Hands-On}
+\subsection*{ハンズオン}
 
-Using the code at \href{https://github.com/ferd/recon\_demo}{https://github.com/ferd/recon\_demo}:
+次のコードを使って回答してください。 \href{https://github.com/ferd/recon\_demo}{https://github.com/ferd/recon\_demo}:
 
 \begin{enumerate}
-	\item What's the system memory?
-	\item Is the node using a lot of CPU resources?
-	\item Is any process mailbox overflowing?
-	\item Which chatty process (\module{council\_member}) takes the most memory?
-	\item Which chatty process is eating the most CPU?
-	\item Which chatty process is consuming the most bandwidth?
-	\item Which chatty process sends the most messages over TCP? The least?
-	\item Can you find out if a specific process tends to hold multiple connections or file descriptors open at the same time on a node?
-	\item Can you find out which function is being called by the most processes at once on the node right now?
+  %\item What's the system memory?
+  \item システムメモリとはなんですか。
+  %\item Is the node using a lot of CPU resources?
+  \item ノードは多くのCPUリソースを使っていますか。
+  %\item Is any process mailbox overflowing?
+  \item メールボックスが溢れいているプロセスはありますか。
+  %\item Which chatty process (\module{council\_member}) takes the most memory?
+  \item どのchattyプロセス（\module{council\_member}）が一番メモリを使っていますか。
+  %\item Which chatty process is eating the most CPU?
+  \item どのchattyプロセスが一番CPUを使用していますか。
+  %\item Which chatty process is consuming the most bandwidth?
+  \item どのchattyプロセスが一番帯域を消費していますか。
+  %\item Which chatty process sends the most messages over TCP? The least?
+  \item どのchattyプロセスがTCPで一番メッセージを送っていますか。また一番メッセージを送っていないものも答えてください。
+  %\item Can you find out if a specific process tends to hold multiple connections or file descriptors open at the same time on a node?
+  \item ノード上のあるプロセスが複数の接続やファイルディスクリプタを同時に保持しがちかどうか、どのように判断しますか。
+  %\item Can you find out which function is being called by the most processes at once on the node right now?
+  \item 今現在あるノード上でほとんどのプロセスから同時に呼ばれている関数を見つけられますか。
 \end{enumerate}
 
