@@ -101,7 +101,7 @@
 %\expression{processes} is the memory used by Erlang processes, their stacks and heaps.
 \expression{processes}の項は、Erlangプロセスと、スタックやヒープとして使用されるメモリ量です。 % TODO: their = processesだと思うんですがあまり訳に反映されてないような
 i%\expression{system} is the rest: memory used by ETS tables, atoms in the VM, refc binaries\footnote{See Section \ref{sec:binaries}}, and some of the hidden data I mentioned was missing.
-\expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、参照カウントされたバイナリ\footnote{詳しくは\ref{sec:binaries}節}、失われた隠しデータなどです。%TODO: hidden data I mentioned was missingがしっくりこない。
+\expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、refcバイナリ\footnote{リファレンスカウントされたバイナリ(reference-counted binary)。プロセスヒープ外に保持した実データと、プロセスヒープ内の参照数をカウントするオブジェクトから構成されるバイナリのこと。\ref{sec:binaries}節参照}、失われた隠しデータなどです。%TODO: hidden data I mentioned was missingがしっくりこない。
 
 %If you want the total amount of memory owned by the virtual machine, as in the amount that will trip system limits (\app{ulimit}), this value is more difficult to get from within the VM.
 仮想マシンが保有する総メモリ量を知りたければ、システム限界(\app{ulimit})を突破する量と同じで、VM内部から取得するのはより困難です。 %TODO: as in the amount that will trip system limits, が謎
