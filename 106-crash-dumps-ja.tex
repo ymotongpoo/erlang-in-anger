@@ -106,10 +106,12 @@ Process States when crashing (sum):
 %In this particular dump, one process had 5 million messages in its mailbox. That's telling. Either it doesn't match on all it can get, or it is getting overloaded. There are also dozens of processes with hundreds of messages queued up — this can point towards overload or contention. It's hard to have general advice for your generic crash dump, but there still are a few pointers to help figure things out.
 この特定のダンプでは、1つのプロセスのメールボックスに5百万のメッセージが格納されていたと示されています。これは取得できるすべてのメッセージがパターンマッチしないか、過負荷になっています。そこには数百のメッセージをキューに溜めた数十のプロセスも存在しています。--- これは過負荷または競合を指すことがあります。あなたの一般的なクラッシュダンプについて一般的なアドバイスをすることは難しいですが、これらを理解するのに役立つ方法はまだいくつかあります。
 
-\section{Full Mailboxes}
+%\section{Full Mailboxes}
+\section{メールボックスがいっぱい}
 \label{sec:crash-full-mailboxes}
 
-For loaded mailboxes, looking at large counters is the best way to do it. If there is one large mailbox, go investigate the process in the crash dump. Figure out if it's happening because it's not matching on some message, or overload. If you have a similar node running, you can log on it and go inspect it. If you find out many mailboxes are loaded, you may want to use recon's \app{queue\_fun.awk} to figure out what function they're running at the time of the crash:
+%For loaded mailboxes, looking at large counters is the best way to do it. If there is one large mailbox, go investigate the process in the crash dump. Figure out if it's happening because it's not matching on some message, or overload. If you have a similar node running, you can log on it and go inspect it. If you find out many mailboxes are loaded, you may want to use recon's \app{queue\_fun.awk} to figure out what function they're running at the time of the crash:
+いっぱいのメールボックスについては、大きなカウンターを見るのが最良の方法です。もし大きなメールボックスが1つある場合は、クラッシュダンプのそのプロセスについて調べてください。メッセージがパターンマッチしないか、過負荷のために発生しているかどうかを把握してください。もし同様のノードが動いているのなら、そこに接続して調査することができます。いっぱい溜まっているメールボックスがたくさんあると分かっている場合は、クラッシュ時に何の関数が動いていたか把握するためreconの\app{queue\_fun.awk}を使うことができます。
 
 \begin{VerbatimText}
 $ awk -v threshold=10000 -f queue_fun.awk /path/to/erl_crash.dump 
@@ -124,7 +126,8 @@ MESSAGE QUEUE LENGTH: CURRENT FUNCTION
 ...
 \end{VerbatimText}
 
-This one will run over the crash dump and output all of the functions scheduled to run for processes with at least 10000 messages in their mailbox. In the case of this run, the script showed that the entire node was locking up waiting on IO for \function{io:format/2} calls, for example.
+%This one will run over the crash dump and output all of the functions scheduled to run for processes with at least 10000 messages in their mailbox. In the case of this run, the script showed that the entire node was locking up waiting on IO for \function{io:format/2} calls, for example.
+これはクラッシュダンプに対して実行され、メールボックスに少なくとも10000メッセージあるプロセスに対して実行がスケジュールされていた関数をすべて出力します。この実行の場合は、すべてのノードが\function{io:format/2}の呼び出しのためにIO待ちでロックしていたことをスクリプトが示していました。
 
 %\section{Too Many (or too few) Processes}
 \section{非常に多い（もしくは非常に少ない）プロセス}
