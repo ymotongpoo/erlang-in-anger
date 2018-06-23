@@ -111,7 +111,7 @@ Process States when crashing (sum):
 \label{sec:crash-full-mailboxes}
 
 %For loaded mailboxes, looking at large counters is the best way to do it. If there is one large mailbox, go investigate the process in the crash dump. Figure out if it's happening because it's not matching on some message, or overload. If you have a similar node running, you can log on it and go inspect it. If you find out many mailboxes are loaded, you may want to use recon's \app{queue\_fun.awk} to figure out what function they're running at the time of the crash:
-読み込み済みのメールボックスについては、大きなカウンターを見るのが最良の方法です。もし大きなメールボックスが1つある場合は、クラッシュダンプのそのプロセスについて調べてください。メッセージがパターンマッチしないか、過負荷のために発生しているかどうかを把握してください。もし同様のノードが動いているのなら、そこに接続して調査することができます。たくさんのメールボックスが読み込まれていることが分かっている場合は、クラッシュ時に何の関数が動いていたか把握するためreconの\app{queue\_fun.awk}を使うことができます。
+いっぱいのメールボックスについては、大きなカウンターを見るのが最良の方法です。もし大きなメールボックスが1つある場合は、クラッシュダンプのそのプロセスについて調べてください。メッセージがパターンマッチしないか、過負荷のために発生しているかどうかを把握してください。もし同様のノードが動いているのなら、そこに接続して調査することができます。いっぱい溜まっているメールボックスがたくさんあると分かっている場合は、クラッシュ時に何の関数が動いていたか把握するためreconの\app{queue\_fun.awk}を使うことができます。
 
 \begin{VerbatimText}
 $ awk -v threshold=10000 -f queue_fun.awk /path/to/erl_crash.dump 
@@ -127,7 +127,7 @@ MESSAGE QUEUE LENGTH: CURRENT FUNCTION
 \end{VerbatimText}
 
 %This one will run over the crash dump and output all of the functions scheduled to run for processes with at least 10000 messages in their mailbox. In the case of this run, the script showed that the entire node was locking up waiting on IO for \function{io:format/2} calls, for example.
-これはクラッシュダンプに対して実行され、メールボックスに少なくとも10000メッセージあるプロセスに対してスケジュールされ起動していたすべての関数を出力します。この実行の場合は、すべてのノードが\function{io:format/2}の呼び出しのためにIO待ちでロックしていたことをスクリプトが示していました。
+これはクラッシュダンプに対して実行され、メールボックスに少なくとも10000メッセージあるプロセスに対して実行がスケジュールされていた関数をすべて出力します。この実行の場合は、すべてのノードが\function{io:format/2}の呼び出しのためにIO待ちでロックしていたことをスクリプトが示していました。
 
 %\section{Too Many (or too few) Processes}
 \section{非常に多い（もしくは非常に少ない）プロセス}
