@@ -1,18 +1,37 @@
-\chapter{Runtime Metrics}
+%\chapter{Runtime Metrics}
+\chapter{ランタイムメトリクス}
 \label{chap:runtime-metrics}
 
-One of the best selling points of the Erlang VM for production use is how transparent it can be for all kinds of introspection, debugging, profiling, and analysis at run time.
+%One of the best selling points of the Erlang VM for production use is how transparent it can be for all kinds of introspection, debugging, profiling, and analysis at run time.
+実運用を考えた際、Erlang VMで最も良いセールスポイントの一つとして、ありとあらゆる内部調査やデバッグ、プロファイリング、実行時分析の透過性が挙げられます。
 
-The advantage of having these runtime metrics accessible programmatically is that building tools relying on them is easy, and building automation for some tasks or watchdogs is equally simple\footnote{Making sure your automated processes don't run away and go overboard with whatever corrective actions they take is more complex}. Then, in times of need, it's also possible to bypass the tools and go direct to the VM for information.
+%The advantage of having these runtime metrics accessible programmatically is that building tools relying on them is easy, and building automation for some tasks or watchdogs is equally simple\footnote{Making sure your automated processes don't run away and go overboard with whatever corrective actions they take is more complex}.
+プログラム上で取得できるランタイムメトリクスがある利点として、これらメトリクスに依存したツールを作ることも簡単ですし、何らかのタスクや監視を自動化するのも同じように単純です
+\footnote{自動化プロセスが何かしら是正措置を行おうとして、暴走したり、やり過ぎたりしないか保証するほうが、より一層複雑です}。
+%Then, in times of need, it's also possible to bypass the tools and go direct to the VM for information.
+それに、必要であれば、ツールを介さずにVMから直接情報を受け取ることも可能です。
 
-A practical approach to growing a system and keeping it healthy in production is to make sure all angles are observable: in the large, and in the small. There's no generic recipe to tell in advance what is going to be normal or not. You want to keep a lot of data and to look at it from time to time to form an idea about what your system looks like under normal circumstances. The day something goes awry, you will have all these angles you've grown to know, and it will be simpler to find what is off and needs fixing.
+%A practical approach to growing a system and keeping it healthy in production is to make sure all angles are observable: in the large, and in the small.
+システムを健全に保ちつつ成長させる実用的な方法は、すべての角度から―大域的にも、局所的にも―監視できるようにしておくことです。
+%There's no generic recipe to tell in advance what is going to be normal or not.
+将来起きることが通常の挙動なのか否かを先んじて知らせる一般的な方法はありません。
 
-For this chapter (and most of those that follow), most of the concepts or features to be shown are accessible through code in the standard library, part of the regular OTP distribution. 
+%You want to keep a lot of data and to look at it from time to time to form an idea about what your system looks like under normal circumstances.
+あなたのシステムが通常の状況下でどのように見えているのか。考えを形にするには、多くのデータを保持して、それらをことあるごとに観察したくなるでしょう。
+%The day something goes awry, you will have all these angles you've grown to know, and it will be simpler to find what is off and needs fixing.
+何かがうまく行かなくなったその日、あなたがこれまで培ってきたすべての観察方法を使えば、どこが不調で何を修正すべきかを簡単に見つけだせます。
 
-However, these features aren't all in one place, and can make it too easy to shoot yourself in the foot within a production system. They also tend to be closer to building blocks than usable tools.
+%For this chapter (and most of those that follow), most of the concepts or features to be shown are accessible through code in the standard library, part of the regular OTP distribution.
+この章(また、このあとの章のほとんど）では、紹介する概念や機能のほとんどは、標準ライブラリ---正規OTPディストリビューションの一部---に含まれるコードからアクセス可能です。
 
-Therefore, to make the text lighter and to be more usable, common operations have been regrouped in the \otpapp{recon}\footnote{\href{http://ferd.github.io/recon/}{http://ferd.github.io/recon/}} library, and are generally production-safe.
+%However, these features aren't all in one place, and can make it too easy to shoot yourself in the foot within a production system.
+しかしながら、これら機能は一箇所にまとまっているわけではありませんし、システムの中で自らの足を撃ちぬくことも非常に簡単にできてしまいます。
+%They also tend to be closer to building blocks than usable tools.
+これらは便利ツールというより、基本的な構成要素に近いものにもなりがちです。
 
+%Therefore, to make the text lighter and to be more usable, common operations have been regrouped in the \otpapp{recon}\footnote{\href{http://ferd.github.io/recon/}{http://ferd.github.io/recon/}} library, and are generally production-safe.
+したがって、本書をより軽く、利用しやすくするために、
+よく使う操作は、実運用で利用しても安全な\otpapp{recon}\footnote{\href{http://ferd.github.io/recon/}{http://ferd.github.io/recon/}}ライブラリにまとめ直されています。
 \section{Global View}
 \label{sec:global-view}
 
