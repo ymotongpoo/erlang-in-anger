@@ -354,24 +354,35 @@ The function, once running gives results like follows:
 With these two functions, it becomes possible to hone in on a specific process that is causing issues or misbehaving.
 
 
-\subsection{OTP Processes}
+%\subsection{OTP Processes}
+\subsection{OTPプロセス}
 
-When processes in question are OTP processes (most of the processes in a production system should definitely be OTP processes), you instantly win more tools to inspect them.
+%When processes in question are OTP processes (most of the processes in a production system should definitely be OTP processes), you instantly win more tools to inspect them.
+対象のプロセスがOTPプロセスの場合（本番環境のほとんどのプロセスはおそらくOTPプロセスです）、それらのプロセスを調査するための多くのツールをすぐに見つけられます。
 
-In general the \module{sys} module\footnote{\href{http://www.erlang.org/doc/man/sys.html}{http://www.erlang.org/doc/man/sys.html}} is what you want to look into. Read the documentation on it and you'll discover why it's so useful. It contains the following features for any OTP process:
+%In general the \module{sys} module\footnote{\href{http://www.erlang.org/doc/man/sys.html}{http://www.erlang.org/doc/man/sys.html}} is what you want to look into. Read the documentation on it and you'll discover why it's so useful. It contains the following features for any OTP process:
+通常は \module{sys}\footnote{\href{http://www.erlang.org/doc/man/sys.html}{http://www.erlang.org/doc/man/sys.html}}が知りたいツールでしょう。\module{sys}モジュールのドキュメントを読めば、なぜそんなに便利なのかがわかるはずです。OTPプロセスに対する下記のような機能を持っています。
 
 \begin{itemize*}
-	\item logging of all messages and state transitions, both to the shell or to a file, or even in an internal buffer to be queried;
-	\item statistics (reductions, message counts, time, and so on);
-	\item fetching the status of a process (metadata including the state);
-	\item fetching the state of a process (as in the \expression{\#state\{\}} record);
-	\item replacing that state
-	\item custom debugging functions to be used as callbacks
+	%\item logging of all messages and state transitions, both to the shell or to a file, or even in an internal buffer to be queried;
+	\item 全てのメッセージと状態遷移を、シェルやファイルまたは参照可能な内部バッファにすらロギングできます
+	%\item statistics (reductions, message counts, time, and so on);
+	\item 統計情報（リダクション、メッセージ数、時間など）
+	%\item fetching the status of a process (metadata including the state);
+	\item プロセスの状態（状態などのメタデータ）
+	%\item fetching the state of a process (as in the \expression{\#state\{\}} record);
+	\item （\expression{\#state\{\}} レコードに）プロセスの状態を取得
+	%\item replacing that state
+	\item 状態の書き換え
+	%\item custom debugging functions to be used as callbacks
+	\item コールバックとして使えるようにデバッグ関数をカスタマイズ
 \end{itemize*}
 
-It also provides functionality to suspend or resume process execution.
+%It also provides functionality to suspend or resume process execution.
+また、プロセスの実行を中断、再開する機能も提供します。
 
-I won't go into a lot of details about these functions, but be aware that they exist.
+%I won't go into a lot of details about these functions, but be aware that they exist.
+これらの機能の詳細は割愛しますが、それらの機能が存在しているということは認識しておいてください。
 
 \subsection{Ports}
 
