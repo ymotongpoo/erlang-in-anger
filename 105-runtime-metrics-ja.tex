@@ -13,29 +13,49 @@ However, these features aren't all in one place, and can make it too easy to sho
 
 Therefore, to make the text lighter and to be more usable, common operations have been regrouped in the \otpapp{recon}\footnote{\href{http://ferd.github.io/recon/}{http://ferd.github.io/recon/}} library, and are generally production-safe.
 
-\section{Global View}
+%\section{Global View}
+\section{グローバルビュー}
+
 \label{sec:global-view}
 
-For a view of the VM in the large, it's useful to track statistics and metrics general to the VM, regardless of the code running on it. Moreover, you should aim for a solution that allows long-term views of each metric — some problems show up as a very long accumulation over weeks that couldn't be detected over small time windows.
+% For a view of the VM in the large, it's useful to track statistics and metrics general to the VM, regardless of the code running on it.
+大域的にVMを見るなら、どんなコードが動いているかはさておき、VMの一般的なメトリクスの統計情報を監視すると役に立ちます。
+%Moreover, you should aim for a solution that allows long-term views of each metric — some problems show up as a very long accumulation over weeks that couldn't be detected over small time windows.
+更に言うなら、各メトリクスを長期的に見るソリューションをめざすべきです --- 一部の問題は幾週にも渡る非常に長い蓄積で発生しますし、これを短期間の情報表示画面から検知するのは不可能です。
 
-Good examples for issues exposed by a long-term view include memory or process leaks, but also could be regular or irregular spikes in activities relative to the time of the day or week, which can often require having months of data to be sure about it.
+%Good examples for issues exposed by a long-term view include memory or process leaks, but also could be regular or irregular spikes in activities relative to the time of the day or week, which can often require having months of data to be sure about it.
+長期的に見ることで問題が明るみになる良い例にはメモリやプロセスのリークがありますが、
+それだけでなく、一日もしくは一週間のうちの特定時刻に関連する活動の中で、周期的または不定期に発生するスパイクも良い例です。
+確証を持つためには、何ヶ月ものデータがしばしば必要になります。
 
-For these cases, using existing Erlang metrics applications is useful. Common options are:
+%For these cases, using existing Erlang metrics applications is useful. Common options are:
+このようなケースにおいて、 既存のErlang メトリクス アプリケーションは有用です。
+一般的な選択肢としては、以下のようなものがあります。
 
 \begin{itemize*}
-	\item \otpapp{folsom}\footnote{\href{https://github.com/boundary/folsom}{https://github.com/boundary/folsom}} to store metrics in memory within the VM, whether global or app-specific..
-	\item \otpapp{vmstats}\footnote{\href{https://github.com/ferd/vmstats}{https://github.com/ferd/vmstats}} and \otpapp{statsderl}\footnote{\href{https://github.com/lpgauth/statsderl}{https://github.com/lpgauth/statsderl}}, sending node metrics over to graphite through \app{statsd}\footnote{\href{https://github.com/etsy/statsd/}{https://github.com/etsy/statsd/}}.
-	\item \otpapp{exometer}\footnote{\href{https://github.com/Feuerlabs/exometer}{https://github.com/Feuerlabs/exometer}}, a fancy-pants metrics system that can integrate with \otpapp{folsom} (among other things),  and a variety of back-ends (graphite, collectd, \app{statsd}, Riak, SNMP, etc.). It's the newest player in town
-	\item \otpapp{ehmon}\footnote{\href{https://github.com/heroku/ehmon}{https://github.com/heroku/ehmon}} for output done directly to standard output, to be grabbed later through specific agents, splunk, and so on.
-	\item custom hand-rolled solutions, generally using ETS tables and processes periodically dumping the data.\footnote{Common patterns may fit the \otpapp{ectr} application, at \href{https://github.com/heroku/ectr}{https://github.com/heroku/ectr}}
-	\item or if you have nothing and are in trouble, a function printing stuff in a loop in a shell\footnote{The \otpapp{recon} application has the function \function{\href{http://ferd.github.io/recon/recon.html\#node\_stats\_print-2}{recon:node\_stats\_print/2}} to do this if you're in a pinch}.
+	%\item \otpapp{folsom}\footnote{\href{https://github.com/boundary/folsom}{https://github.com/boundary/folsom}} to store metrics in memory within the VM, whether global or app-specific..
+	\item \otpapp{folsom}\footnote{\href{https://github.com/boundary/folsom}{https://github.com/boundary/folsom}}。メトリクスをVM内のメモリに保存する。グローバル領域、アプリケーション領域のどちらも可能。
+	%\item \otpapp{vmstats}\footnote{\href{https://github.com/ferd/vmstats}{https://github.com/ferd/vmstats}} and \otpapp{statsderl}\footnote{\href{https://github.com/lpgauth/statsderl}{https://github.com/lpgauth/statsderl}}, sending node metrics over to graphite through \app{statsd}\footnote{\href{https://github.com/etsy/statsd/}{https://github.com/etsy/statsd/}}.
+  \item \otpapp{vmstats}\footnote{\href{https://github.com/ferd/vmstats}{https://github.com/ferd/vmstats}} と \otpapp{statsderl}\footnote{\href{https://github.com/lpgauth/statsderl}{https://github.com/lpgauth/statsderl}}。 \app{statsd}\footnote{\href{https://github.com/etsy/statsd/}{https://github.com/etsy/statsd/}}を通じてノードメトリクスをgraphiteに送る。
+	%\item \otpapp{exometer}\footnote{\href{https://github.com/Feuerlabs/exometer}{https://github.com/Feuerlabs/exometer}}, a fancy-pants metrics system that can integrate with \otpapp{folsom} (among other things),  and a variety of back-ends (graphite, collectd, \app{statsd}, Riak, SNMP, etc.). It's the newest player in town
+  \item \otpapp{exometer}\footnote{\href{https://github.com/Feuerlabs/exometer}{https://github.com/Feuerlabs/exometer}}。気取ったメトリクスシステムで、(とりわけ)\otpapp{folsom}と統合できる他、多くのバックエンド(graphite、collectd、\app{statsd}、Riak、SNMPなど)とも統合できます。この島では新参者ですね。
+	%\item \otpapp{ehmon}\footnote{\href{https://github.com/heroku/ehmon}{https://github.com/heroku/ehmon}} for output done directly to standard output, to be grabbed later through specific agents, splunk, and so on.
+	\item \otpapp{ehmon}\footnote{\href{https://github.com/heroku/ehmon}{https://github.com/heroku/ehmon}}は直接標準出力に書き出すときに使います。出力結果は専用のエージェントなり、splunkなどで取得します。
+	%\item custom hand-rolled solutions, generally using ETS tables and processes periodically dumping the data.\footnote{Common patterns may fit the \otpapp{ectr} application, at \href{https://github.com/heroku/ectr}{https://github.com/heroku/ectr}}
+	\item お手製のカスタムソリューション。一般的には、ETSテーブルと定期的にデータをダンプするプロセスを使います。
+    \footnote{よくあるパターンでは、\otpapp{ectr}アプリケーションが適しています。 \href{https://github.com/heroku/ectr}{https://github.com/heroku/ectr} を参照してください。}
+	%\item or if you have nothing and are in trouble, a function printing stuff in a loop in a shell\footnote{The \otpapp{recon} application has the function \function{\href{http://ferd.github.io/recon/recon.html\#node\_stats\_print-2}{recon:node\_stats\_print/2}} to do this if you're in a pinch}.
+	\item もし何も用意がない状態で障害になったら、シェルループで諸々の出力を行う関数\footnote{あなたがピンチの時にも諸々の出力ができるよう、\otpapp{recon}アプリケーションは関数 \function{\href{http://ferd.github.io/recon/recon.html\#node\_stats\_print-2}{recon:node\_stats\_print/2}}を備えています}。
 \end{itemize*}
 
-It is generally a good idea to explore them a bit, pick one, and get a persistence layer that will let you look through your metrics over time.
+%It is generally a good idea to explore them a bit, pick one, and get a persistence layer that will let you look through your metrics over time.
+これらを少し調べてみて、どれか一つを使い、あなたの興味あるメトリクスを刻々と見せてくれる永続レイヤーを用意するのが、一般的には良い方法です。
 
-\subsection{Memory}
+%\subsection{Memory}
+\subsection{メモリ}
 
-The memory reported by the Erlang VM in most tools will be a variant of what is reported by \expression{erlang:memory()}:
+%The memory reported by the Erlang VM in most tools will be a variant of what is reported by \expression{erlang:memory()}:
+大抵のツールでErlang VMから受けているmemoryの情報は、\expression{erlang:memory()} から取られる変数です。
 
 \begin{VerbatimEshell}
 1> erlang:memory().
@@ -50,43 +70,80 @@ The memory reported by the Erlang VM in most tools will be a variant of what is 
  {ets,305920}]
 \end{VerbatimEshell}
 
-This requires some explaining.
+%This requires some explaining.
+これは説明が必要ですね。
 
-First of all, all the values returned are in bytes, and they represent memory \emph{allocated} (memory actively used by the Erlang VM, not the memory set aside by the operating system for the Erlang VM). It will sooner or later look much smaller than what the operating system reports.
+%First of all, all the values returned are in bytes, and they represent memory \emph{allocated} (memory actively used by the Erlang VM, not the memory set aside by the operating system for the Erlang VM).
+まず第一に、すべての返り値はbyte単位の値となっていて、メモリの\emph{割り当てられた}量(Erlang VMが実際に使用しているメモリ量のことで、OSがErlang VMのために確保した量ではありません)を表します。
+%It will sooner or later look much smaller than what the operating system reports.
+遅かれ早かれ、OSが示す値よりはるかに少ない値だとわかるはずです。
 
-The \expression{total} field contains the sum of the memory used for \expression{processes} and \expression{system} (which is incomplete, unless the VM is instrumented!). \expression{processes} is the memory used by Erlang processes, their stacks and heaps. \expression{system} is the rest: memory used by ETS tables, atoms in the VM, refc binaries\footnote{See Section \ref{sec:binaries}}, and some of the hidden data I mentioned was missing.
+%The \expression{total} field contains the sum of the memory used for \expression{processes} and \expression{system} (which is incomplete, unless the VM is instrumented!).
+\expression{total}の項には、\expression{processes} と \expression{system} で利用してるメモリ量の和が入ります(VMを備えない限り、完璧な和にはなりません！)。
+%\expression{processes} is the memory used by Erlang processes, their stacks and heaps.
+\expression{processes}の項は、Erlangプロセスと、スタックやヒープとして使用されるメモリ量です。 % TODO: their = processesだと思うんですがあまり訳に反映されてないような
+i%\expression{system} is the rest: memory used by ETS tables, atoms in the VM, refc binaries\footnote{See Section \ref{sec:binaries}}, and some of the hidden data I mentioned was missing.
+\expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、参照カウントされたバイナリ\footnote{詳しくは\ref{sec:binaries}節}、失われた隠しデータなどです。%TODO: hidden data I mentioned was missingがしっくりこない。
 
-If you want the total amount of memory owned by the virtual machine, as in the amount that will trip system limits (\app{ulimit}), this value is more difficult to get from within the VM. If you want the data without calling \app{top} or \app{htop}, you have to dig down into the VM's memory allocators to find things out.\footnote{See Section \ref{subsec:erlang-memory-model}}
+%If you want the total amount of memory owned by the virtual machine, as in the amount that will trip system limits (\app{ulimit}), this value is more difficult to get from within the VM.
+仮想マシンが保有する総メモリ量を知りたければ、システム限界(\app{ulimit})を突破する量と同じで、VM内部から取得するのはより困難です。 %TODO: as in the amount that will trip system limits, が謎
+%If you want the data without calling \app{top} or \app{htop}, you have to dig down into the VM's memory allocators to find things out.\footnote{See Section \ref{subsec:erlang-memory-model}}
+もし\app{top}や\app{htop}を使うことなしにこのデータが欲しければ、あなたはVMのメモリアロケータを深堀して見つけ出すしかありません\footnote{詳しくは\ref{subsec:erlang-memory-model}節を見てください}。
 
-Fortunately, recon has the function \function{recon\_alloc:memory/1} to figure it out, where the argument is:
+%Fortunately, recon has the function \function{recon\_alloc:memory/1} to figure it out, where the argument is:
+運が良いことに、この値を取るために reconは関数 \function{recon\_alloc:memory/1} を用意しています。
+引数には以下のようなものがあります。
 
 \begin{itemize*}
-	\item \expression{used} reports the memory that is actively used for allocated Erlang data;
-   	\item \expression{allocated} reports the memory that is reserved by the VM. It includes the memory used, but also the memory yet-to-be-used but still given by the OS. This is the amount you want if you're dealing with \app{ulimit} and OS-reported values.
-	\item \expression{unused} reports the amount of memory reserved by the VM that is not being allocated. Equivalent to \expression{allocated - used}.
-	\item \expression{usage} returns a percentage (0.0 .. 1.0) of used over allocated memory ratios.
+%	\item \expression{used} reports the memory that is actively used for allocated Erlang data;
+	\item \expression{used}。 使用中のErlangデータが割り当てられているメモリの総量
+%   	\item \expression{allocated} reports the memory that is reserved by the VM. It includes the memory used, but also the memory yet-to-be-used but still given by the OS. This is the amount you want if you're dealing with \app{ulimit} and OS-reported values.
+    \item \expression{allocated}。 VMにより予約されているメモリ量。使用中のメモリ量だけでなく、OSから与えられた未使用な領域も含む。あなたが\app{ulimit}やOSの示す値を取り扱うなら、この値がほしい値でしょう。
+	%\item \expression{unused} reports the amount of memory reserved by the VM that is not being allocated. Equivalent to \expression{allocated - used}.
+	\item \expression{unused}。VMにより予約されているがまだ割り当てられていない容量。\expression{allocated - used}と等価です。
+	%\item \expression{usage} returns a percentage (0.0 .. 1.0) of used over allocated memory ratios.
+  \item \expression{usage}。割当てられたメモリ量に対する使用中のメモリ量の割合(0.0から1.0)。
 \end{itemize*}
 
-There are additional options available, but you'll likely only need them when investigating memory leaks in chapter \ref{chap:memory-leaks}
+%There are additional options available, but you'll likely only need them when investigating memory leaks in chapter \ref{chap:memory-leaks}
+利用可能なオプションは他にもありますが、\ref{chap:memory-leaks}の章でメモリリークの調査を行うにはこのくらいで十分でしょう。
 
+%\subsection{CPU}
 \subsection{CPU}
 \label{subsec:global-cpu}
 
-Unfortunately for Erlang developers, CPU is very hard to profile. There are a few reasons for this:
+%Unfortunately for Erlang developers, CPU is very hard to profile. There are a few reasons for this:
+Erlang 開発者にとって残念なことに、CPUの統計データを取ることは非常に困難です。
+それには少し理由があります。
 
 \begin{itemize*}
-	\item The VM does a lot of work unrelated to processes when it comes to scheduling — high scheduling work and high amounts of work done by the Erlang processes are hard to characterize.
-	\item The VM internally uses a model based on \emph{reductions}, which represent an arbitrary number of work actions. Every function call, including BIFs, will increment a process reduction counter. After a given number of reductions, the process gets descheduled.
-	\item To avoid going to sleep when work is low, the threads that control the Erlang schedulers will do busy looping. This ensures the lowest latency possible for sudden load spikes. The VM flag \command{+sbwt none|very\_short|short|medium|long|very\_long} can be used to change this value.
+	%\item The VM does a lot of work unrelated to processes when it comes to scheduling — high scheduling work and high amounts of work done by the Erlang processes are hard to characterize.
+  \item VMはスケジューリングの際にプロセスとは無関係のタスクをたくさん行っています。高度なスケジューリングタスクとErlangプロセスによる大量のタスクは、特徴付けすることが難しいのです。 %TODO: high scheduling workって高度なスケジューリングタスク、的な意味で良いんだろうか？
+	%\item The VM internally uses a model based on \emph{reductions}, which represent an arbitrary number of work actions. Every function call, including BIFs, will increment a process reduction counter. After a given number of reductions, the process gets descheduled.
+  \item VMは内部で \emph{リダクション} に基づくモデルを使っています。このモデルは任意の数のタスクで表せます。すべての(BIFを含む)関数呼び出しでプロセスリダクション数がインクリメントされ、所与のリダクション数に到達すると、プロセスが未スケジュール状態にもどります。 %TODO: descheduled、日本語にするの結構難しいですね。より良い言い方募集中
+	%\item To avoid going to sleep when work is low, the threads that control the Erlang schedulers will do busy looping. This ensures the lowest latency possible for sudden load spikes. The VM flag \command{+sbwt none|very\_short|short|medium|long|very\_long} can be used to change this value.
+  \item 負荷の低いタスクがすぐスリープ状態にならないように、Erlangスケジューラの扱うスレッドはしばらくビジーウェイト状態になります。これは、突然負荷が上がるケースでも遅延が大きくなり過ぎないための配慮です。この値を変更するには、VMフラグ (\command{+sbwt none|very\_short|short|medium|long|very\_long}) が使えます。 %TODO: busy looping = 何もしないloopをするビジーウェイトのことだと思うんですが、あまり良い訳は思いついておらず。
 \end{itemize*}
 
-These factors combine to make it fairly hard to find a good absolute measure of how busy your CPU is actually running Erlang code. It will be common for Erlang nodes in production to do a moderate amount of work and use a lot of CPU, but to actually fit a lot of work in the remaining place when the workload gets higher.
+%These factors combine to make it fairly hard to find a good absolute measure of how busy your CPU is actually running Erlang code.
+これらの要素が組み合わさっているため、実行中のErlangコードによるCPU使用量をしっかりと測る方法を見つけるのは大変です。
+%It will be common for Erlang nodes in production to do a moderate amount of work and use a lot of CPU, but to actually fit a lot of work in the remaining place when the workload gets higher.
+Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するように見えますが、負荷が上がっても、大量のタスクを残りのCPUリソースでまかなえることことが良くあります。 %% TODO:割と雰囲気で訳してしまっていますがあってますかね…
 
-The most accurate representation for this data is the scheduler wall time. It's an optional metric that needs to be turned on by hand on a node, and polled at regular intervals. It will reveal the time percentage a scheduler has been running processes and normal Erlang code, NIFs, BIFs, garbage collection, and so on, versus the amount of time it has spent idling or trying to schedule processes.
+%The most accurate representation for this data is the scheduler wall time.
+このデータを最も適切に表現するのは、スケジューラの総経過時間です。 %TODO: データだと唐突なので適切な言葉に変えたいきがするが何がいいだろう…
+%It's an optional metric that needs to be turned on by hand on a node, and polled at regular intervals.
+これは標準では無効のメトリクスで、ノードごとに手動で有効に設定すれば、一定間隔で取得されるようになります。
+%It will reveal the time percentage a scheduler has been running processes and normal Erlang code, NIFs, BIFs, garbage collection, and so on, versus the amount of time it has spent idling or trying to schedule processes.
+取得される値からわかるのは、スケジューラがプロセス、普通のErlangコード、NIF、BIF、ガベージコレクションなどを走らせる時間と、スケジューラがプロセススケジュールを試みているか、アイドル状態になっている時間の割合です。
 
-The value here represents \emph{scheduler utilization} rather than CPU utilization. The higher the ratio, the higher the workload.
+%The value here represents \emph{scheduler utilization} rather than CPU utilization.
+これはCPU使用率というより、どちらかといえば\emph{スケジューラ使用率}を表すものです。
+%The higher the ratio, the higher the workload.
+高い値であるほど、高い負荷がかかっていることを表します。
 
-While the basic usage is explained in the Erlang/OTP reference manual\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}}, the value can be obtained by calling recon:
+%While the basic usage is explained in the Erlang/OTP reference manual\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}}, the value can be obtained by calling recon:
+基本的な使い方はErlang/OTPのリファレンスマニュアル\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}{http://www.erlang.org/doc/man/erlang.html\#statistics\_scheduler\_wall\_time}}に記載されていますが、reconを使ってもこの値は取得できます。
 
 \begin{VerbatimEshell}
 1> recon:scheduler_usage(1000).
@@ -96,7 +153,12 @@ While the basic usage is explained in the Erlang/OTP reference manual\footnote{\
  {4,1.2087551402238991e-5}]
 \end{VerbatimEshell}
 
-The function \function{recon:scheduler\_usage(N)} will poll for \var{N} milliseconds (here, 1 second) and output the value of each scheduler. In this case, the VM has two very loaded schedulers (at 99.2\% and 93.7\% repectively), and two mostly unused ones at far below 1\%. Yet, a tool like \app{htop} would report something closer to this for each core:
+%The function \function{recon:scheduler\_usage(N)} will poll for \var{N} milliseconds (here, 1 second) and output the value of each scheduler.
+関数\function{recon:scheduler\_usage(N)}は\var{N} ミリ秒(ここでは1秒) 調査を行い、各スケジューラの値を出力します。
+%In this case, the VM has two very loaded schedulers (at 99.2\% and 93.7\% repectively), and two mostly unused ones at far below 1\%.
+今回の場合は、VMは高負荷なスケジューラが２つ (それぞれ99.2\%と93.7\%)と、1\%にも満たないくらいほとんど使われていないスケジューラが２つありますね。
+%Yet, a tool like \app{htop} would report something closer to this for each core:
+しかし、\app{htop}などのツールはCPUコアごとにこれと似たような値を出力してくれました。 %TODO: Yetがここで入ってくる理由がよくわからないが、「しかし」で良いのだろうか…
 
 \begin{VerbatimText}
 [|||||||||||||||||||||||||     70.4%]
@@ -105,36 +167,59 @@ The function \function{recon:scheduler\_usage(N)} will poll for \var{N} millisec
 [||||||||||||||||              40.2%]
 \end{VerbatimText}
 
-The result being that there is a decent chunk of CPU usage that would be mostly free for scheduling actual Erlang work (assuming the schedulers are busy waiting more than trying to select tasks to run), but is being reported as busy by the OS.
+%The result being that there is a decent chunk of CPU usage that would be mostly free for scheduling actual Erlang work (assuming the schedulers are busy waiting more than trying to select tasks to run), but is being reported as busy by the OS.
+結果として、(スケジューラが実行タスクを選択する状態でなく、ビジーウェイト状態だとを想定すると) Erlangのタスクスケジューリングでほとんど使っていないCPU領域があっても、OSからは高い使用率を表示されます。 % TODO:ここの訳、全般的に自信なしです。
 
-Another interesting behaviour possible is that the scheduler usage may show a higher rate (1.0) than what the OS will report. Schedulers waiting for os resources are considered utilized as they cannot handle more work. If the OS itself is holding up on non-CPU tasks it is still possible for Erlang's schedulers not to be able to do more work and report a full ratio.
+%Another interesting behaviour possible is that the scheduler usage may show a higher rate (1.0) than what the OS will report.
+もうひとつの面白い挙動として、スケジューラはOSが示す値よりも高い割合(1.0)を表示することもありえます。
+%Schedulers waiting for os resources are considered utilized as they cannot handle more work.
+スケジューラがOSリソースを待っている場合、それ以上のタスクを扱えないことから使用状態と認識される場合がその一例です。
+%If the OS itself is holding up on non-CPU tasks it is still possible for Erlang's schedulers not to be able to do more work and report a full ratio.
+他にも、OS自身がCPU以外のタスクで詰まっている場合にも、Erlangスケジューラも仕事を行えないことから、1.0の割合が表示されることになります。 %%TODO: 「一例です」「他にも」は文脈から補足したほうが良いと思って入れましたが、違和感あれば外します
 
-These behaviours may especially be important to consider when doing capacity planning, and can be better indicators of headroom than looking at CPU usage or load.
+%These behaviours may especially be important to consider when doing capacity planning, and can be better indicators of headroom than looking at CPU usage or load.
+これらのふるまいに関する考察は容量計画を行う際には特に大事で、CPU使用率や負荷を見る以上に経営判断の良い指標になるでしょう。 %TODO: indicators of headroom = リソース調達するときに幹部が判断するための指標＝経営判断の指標、と訳しましたが、思い切り過ぎ？
 
 %% 08:37 #erlounge: <+garazdawi> MononcQc: There is a cost when not doing work. The way it works is that when starting/stopping to do work it checks the time, but if the
 %%                              scheduler has something to do the entire time then there is no overhead. So you might see a slight cpu increase if the schedulers run out of
 %%                              work often, but it will (should) not affect the maximum possible throughput of the system.
 
-\subsection{Processes}
+%\subsection{Processes}
+\subsection{プロセス}
 \label{subsec:global-procs}
 
-Trying to get a global view of processes is helpful when trying to assess how much work is being done in the VM in terms of \emph{tasks}. A general good practice in Erlang is to use processes for truly concurrent activities — on web servers, you will usually get one process per request or connection, and on stateful systems, you may add one process per-user — and therefore the number of processes on a node can be used as a metric for load.
+%Trying to get a global view of processes is helpful when trying to assess how much work is being done in the VM in terms of \emph{tasks}.
+プロセスに関するグローバルビューがあると、\emph{タスク}の観点でVMはがどのくらいの仕事を完了したか知るのに役立ちます。 %%TODO: ここに来てtaskとworkの区別がいまいちわからなくなってきた。これまではworkもタスクととらえたほうがわかりやすく感じてそう訳してましたが…より良い言葉の使い分け方募集中です
+%A general good practice in Erlang is to use processes for truly concurrent activities — on web servers, you will usually get one process per request or connection, and on stateful systems, you may add one process per-user — and therefore the number of processes on a node can be used as a metric for load.
+Erlangにおいて一般的に良い方法となるのは、真に同時実行されているプロセスを用いることです --- Webサーバでは普段、１リクエストもしくは１接続ごとに１プロセスを持つでしょうし、状態を持つシステムであれば、ユーザごとに１つのプロセスを追加しているかもしれません --- したがって、１ノード中に存在するプロセス数がメトリクスとして利用できます。
 
-Most tools mentioned in section \ref{sec:global-view} will track them in one way or another, but if the process count needs to be done manually, calling the following expression is enough:
+%Most tools mentioned in section \ref{sec:global-view} will track them in one way or another, but if the process count needs to be done manually, calling the following expression is enough:
+\ref{sec:global-view}の章で説明するツールのほとんどが、何らかの方法でプロセス数を監視していますが、自前でプロセスカウントが必要であれば、以下のようにすれば十分です。
 
 \begin{VerbatimEshell}
 1> length(processes()).
 56535
 \end{VerbatimEshell}
 
-Tracking this value over time can be extremely helpful to try and characterize load or detect process leaks, along with other metrics you may have around.
+% Tracking this value over time can be extremely helpful to try and characterize load or detect process leaks, along with other metrics you may have around.
+この値を刻々と監視することは、どんなメトリクスよりも、負荷を特徴づけたり、プロセスリークを発見するのに非常に役立ちます。 %%TODO: try and characterizeのtryって負荷を下げるよう頑張る的な意味でしょうか…訳出ししてませんが良いだろうか…
 
-\subsection{Ports}
+%\subsection{Ports}
+\subsection{ポート}
 \label{subsec:global-ports}
 
-In a manner similar to processes, \emph{Ports} should be considered. Ports are a datatype that encompasses all kinds of connections and sockets opened to the outside world: TCP sockets, UDP sockets, SCTP sockets, file descriptors, and so on.
+%In a manner similar to processes, \emph{Ports} should be considered.
+プロセスと似たような理由で、\emph{ポート}も監視すべきです。
+%Ports are a datatype that encompasses all kinds of connections and sockets opened to the outside world: TCP sockets, UDP sockets, SCTP sockets, file descriptors, and so on.
+ポートはありとあらゆる種類のコネクションや、外部に開いているソケット--- TCPソケット、UDPソケット、SCTPソケット、ファイルディスクリプタなど --- を包含するデータ型です。
 
-There is a general function (again, similar to processes) to count them: \expression{length(erlang:ports())}. However, this function merges in all types of ports into a single entity. Instead, one can use \otpapp{recon} to get them sorted by type:
+%There is a general function (again, similar to processes) to count them: \expression{length(erlang:ports())}.
+これをカウントする一般的な関数として、\expression{length(erlang:ports())} があります(この関数が用意されているところも、プロセスの時の話と似ていますね)。
+%However, this function merges in all types of ports into a single entity.
+しかしながら、この関数では全種類のポートをひとつのエンティティにまとめてしまっています。
+%Instead, one can use \otpapp{recon} to get them sorted by type:
+ポートの種類ごとに値を取りたければ、この関数の代わりに \otpapp{recon} が使えます。
+
 
 \begin{VerbatimEshell}
 1> recon:port_types().
@@ -146,13 +231,21 @@ There is a general function (again, similar to processes) to count them: \expres
  {"inet_gethost 4 ",1}]
  \end{VerbatimEshell}
 
-This list contains the types and the count for each type of port. The type name is a string and is defined by the Erlang VM itself.
+%This list contains the types and the count for each type of port.
+このリストはポートの種類ごとに、タイプ名と数値を格納しています。
+%The type name is a string and is defined by the Erlang VM itself.
+タイプ名はErlang VM自身によって定義されている文字列です。
 
-All the \expression{*\_inet} ports are usually sockets, where the prefix is the protocol used (TCP, UDP, SCTP). The \expression{efile} type is for files, while \expression{"0/1"} and \expression{"2/2"} are file descriptors for standard I/O channels (\emph{stdin} and \emph{stdout}) and standard error channels (\emph{stderr}), respectively.
+%All the \expression{*\_inet} ports are usually sockets, where the prefix is the protocol used (TCP, UDP, SCTP).
+普通、すべての\expression{*\_inet}ポートはソケットで、接頭語が使用プロトコル(TCP, UDP, SCTP)を表します。
+%The \expression{efile} type is for files, while \expression{"0/1"} and \expression{"2/2"} are file descriptors for standard I/O channels (\emph{stdin} and \emph{stdout}) and standard error channels (\emph{stderr}), respectively.
+\expression{efile}タイプはファイルのためのもので、\expression{"0/1"}と\expression{"2/2"}はそれぞれ、標準入出力チャンネル (\emph{stdin}と\emph{stdout})と標準エラー出力チャンネル(\emph{stderror})へのファイルディスクリプタを表します。
 
-Most other types will be given names of the driver they're talking to, and will be examples of \emph{port programs}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_port.html}{http://www.erlang.org/doc/tutorial/c\_port.html}} or \emph{port drivers}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_portdriver.html}{http://www.erlang.org/doc/tutorial/c\_portdriver.html}}.
+%Most other types will be given names of the driver they're talking to, and will be examples of \emph{port programs}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_port.html}{http://www.erlang.org/doc/tutorial/c\_port.html}} or \emph{port drivers}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_portdriver.html}{http://www.erlang.org/doc/tutorial/c\_portdriver.html}}.
+その他のタイプのほとんどは、ポートがやり取りしているドライバ名が入ります。例としては\emph{port programs}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_port.html}{http://www.erlang.org/doc/tutorial/c\_port.html}}や\emph{port drivers}\footnote{\href{http://www.erlang.org/doc/tutorial/c\_portdriver.html}{http://www.erlang.org/doc/tutorial/c\_portdriver.html}}などです。
 
-Again, tracking these can be useful to assess load or usage of a system, detect leaks, and so on.
+%Again, tracking these can be useful to assess load or usage of a system, detect leaks, and so on.
+繰り返しになりますが、これらの値を監視することはシステム使用率や負荷を見たり、リークを見たり、その他いろいろなことに役立ちます。
 
 \section{Digging In}
 \label{sec:digging-in}
