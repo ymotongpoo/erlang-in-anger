@@ -97,7 +97,7 @@ Process States when crashing (sum):
 %	\item memory leaks in C code or drivers;
 	\item Cコードまたはドライバーのメモリリーク;
 %	\item lots of memory that got to be garbage-collected before generating the crash dump\footnote{Notably here is reference-counted binary memory, which sits in a global heap, but ends up being garbage-collected before generating the crash dump. The binary memory can therefore be underreported. See Chapter \ref{chap:memory-leaks} for more details}.
-	\item クラッシュダンプを生成する前にガベージコレクトされてしまった大量のメモリ\footnote{特にここでは参照カウンタされたバイナリメモリです。これはグローバルのヒープ領域に格納されるますが、クラッシュダンプを生成する前にガベージコレクトされ消えます。従ってそのバイナリメモリは過小にレポートされます。より詳しくは\ref{chap:memory-leaks}を参照}.
+	\item クラッシュダンプを生成する前にガベージコレクトされてしまった大量のメモリ\footnote{特にここではリファレンスカウントされたバイナリメモリです。これはグローバルのヒープ領域に格納されるますが、クラッシュダンプを生成する前にガベージコレクトされ消えます。従ってそのバイナリメモリは過小にレポートされます。より詳しくは\ref{chap:memory-leaks}を参照}.
 \end{itemize*}
 
 %More generally, look for anything surprising for memory there. Correlate it with the number of processes and the size of mailboxes. One may explain the other. 
