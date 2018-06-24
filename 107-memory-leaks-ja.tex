@@ -385,15 +385,20 @@ After a given number of minor GCs and/or reallocations, a full-sweep GC is perfo
 
 When that happens, over 80\% of the time, the only thing that happens is that the memory is marked as available in the sub-allocator and can be taken back by new processes or other ones that may need to be resized. Only after having this memory unused — and the multiblock carrier unused also — is it returned to \term{mseg\_alloc} or \term{sys\_alloc}, which may or may not keep it for a while longer.
 
-\subsection{Fixing Memory Fragmentation with a Different Allocation Strategy}
+%\subsection{Fixing Memory Fragmentation with a Different Allocation Strategy}
+\subsection{異なるアロケーション戦略でメモリフラグメンテーションを修正する}
 
-Tweaking your VM's options for memory allocation may help.
+%Tweaking your VM's options for memory allocation may help.
+メモリアロケーションに関するVMのオプションを調整することが助けになるかもしれません。
 
-You will likely need to have a good understanding of what your type of memory load and usage is, and be ready to do a lot of in-depth testing. The \module{recon\_alloc} module contains a few helper functions to provide guidance, and the module's documentation\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}} should be read at this point.
+%You will likely need to have a good understanding of what your type of memory load and usage is, and be ready to do a lot of in-depth testing. The \module{recon\_alloc} module contains a few helper functions to provide guidance, and the module's documentation\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}} should be read at this point.
+あなたはメモリ負荷とメモリ使用量の種類が何かについてよく理解し、大量の徹底的なテストを覚悟する必要があります。\module{recon\_alloc}モジュールはガイダンスを提供するためのいくつかの役立つ機能を含んでおり、この時点でモジュールのドキュメント\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}}を読むべきです。
 
-You will need to figure out what the average data size is, the frequency of allocation and deallocation, whether the data fits in \term{mbcs} or \term{sbcs},  and you will then need to try playing with a bunch of the options mentioned in \module{recon\_alloc}, try the different strategies, deploy them, and see if things improve or if they impact times negatively.
+%You will need to figure out what the average data size is, the frequency of allocation and deallocation, whether the data fits in \term{mbcs} or \term{sbcs},  and you will then need to try playing with a bunch of the options mentioned in \module{recon\_alloc}, try the different strategies, deploy them, and see if things improve or if they impact times negatively.
+あなたは平均的なデータサイズがどれくらいかや、アロケーションとアロケーション解除の頻度、データが\term{mbcs}か\term{sbcs}に収まるかどうかについて把握する必要があります。その上で\module{recon\_alloc}のたくさんのオプションを試し、別の戦略を試し、それらをデプロイし、改善したかマイナスの影響があったかを見る必要があります。
 
-This is a very long process for which there is no shortcut, and if issues happen only every few months per node, you may be in for the long haul. 
+%This is a very long process for which there is no shortcut, and if issues happen only every few months per node, you may be in for the long haul.
+これは近道のないとても長いプロセスで、しかも問題はノードごとに数ヶ月ごとにしか起こりませんので、あなたは長期間それに携わることになるでしょう。
 
 
 \section{Exercises}
