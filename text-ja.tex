@@ -1,8 +1,12 @@
-\documentclass[autodetect-engine, dvipdfmx-if-dvi, base=11pt, oneside, ja=standard]{bxjsreport}
+\documentclass[autodetect-engine, dvipdfmx-if-dvi, base=11pt, ja=standard, openany]{bxjsbook}
 % !TEX encoding = UTF-8 Unicode
 \usepackage{graphicx}
 \usepackage{text}
-\usepackage{comment}
+
+% 欧文のフォント設定
+\usepackage[default, regular, bold]{sourcesanspro}
+\usepackage[default, regular, bold]{sourceserifpro}
+\setmonofont{CMU Typewriter Text}
 
 % 日本語フォント設定
 \usepackage[sourcehan-jp, nfssonly, deluxe]{luatexja-preset}
@@ -11,8 +15,12 @@
 \let\emph\relax
 \DeclareTextFontCommand{\emph}{\gtfamily\bfseries}
 
+% 見出しのフォントをゴシックに設定
+\renewcommand{\headfont}{\gtfamily\sffamily}
+
 % チャプタータイトルの設定
 \usepackage[Glenn]{fncychap}
+\ChNameVar{\Large\headfont}
 \ChTitleVar{\bfseries\Large\mcfamily\rmfamily}
 \makeatletter
 \renewcommand{\DOCH}{%
@@ -31,6 +39,9 @@
 % GitのコミットIDを埋め込む用
 \input{vc.tex}
 
+% ページレイアウト
+\geometry{centering}
+
 %%% Cover
 
 \title{Stuff Goes Bad:\protect\\ Erlang in Anger}
@@ -42,6 +53,7 @@
 }
 
 \begin{document}
+
 \frontmatter
 
 \maketitle
@@ -99,6 +111,9 @@
 %% Kernel Polling
 
 %%
+
+\backmatter
+
 \bookmarksetup{startatroot} % Split conclusion from previous Part
 \addtocontents{toc}{\bigskip} % Add space in ToC
 \include{201-conclusion-ja}
