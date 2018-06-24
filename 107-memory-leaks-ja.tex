@@ -392,7 +392,7 @@ When that happens, over 80\% of the time, the only thing that happens is that th
 メモリアロケーションに関するVMのオプションを調整することが助けになるかもしれません。
 
 %You will likely need to have a good understanding of what your type of memory load and usage is, and be ready to do a lot of in-depth testing. The \module{recon\_alloc} module contains a few helper functions to provide guidance, and the module's documentation\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}} should be read at this point.
-あなたはメモリ負荷とメモリ使用量の種類が何かについてよく理解し、大量の徹底的なテストを準備する必要があります。\module{recon\_alloc}モジュールはガイダンスを提供するためのいくつかの役立つ機能を含んでおり、この時点でモジュールのドキュメント\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}}を読むべきです。
+あなたはメモリ負荷とメモリ使用量の種類が何かについてよく理解し、大量の徹底的なテストを覚悟する必要があります。\module{recon\_alloc}モジュールはガイダンスを提供するためのいくつかの役立つ機能を含んでおり、この時点でモジュールのドキュメント\footnote{\href{http://ferd.github.io/recon/recon\_alloc.html}{http://ferd.github.io/recon/recon\_alloc.html}}を読むべきです。
 
 %You will need to figure out what the average data size is, the frequency of allocation and deallocation, whether the data fits in \term{mbcs} or \term{sbcs},  and you will then need to try playing with a bunch of the options mentioned in \module{recon\_alloc}, try the different strategies, deploy them, and see if things improve or if they impact times negatively.
 あなたは平均的なデータサイズがどれくらいかや、アロケーションとアロケーション解除の頻度、データが\term{mbcs}か\term{sbcs}に収まるかどうかについて把握する必要があります。その上で\module{recon\_alloc}のたくさんのオプションを試し、別の戦略を試し、それらをデプロイし、改善したかマイナスの影響があったかを見る必要があります。
