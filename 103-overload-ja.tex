@@ -175,7 +175,7 @@ The safe margin of error you established when designing the system slowly erodes
 \section{データの破棄}
 
 %When nothing can slow down outside of your Erlang system and things can't be scaled up, you must either drop data or crash (which drops data that was in flight, for most cases, but with more violence).
-Erlangシステム外から流入速度を落とせず、かつスケールアップもできない場合、データをドロップさせるか、クラッシュさせる必要があります（ほとんどの場合、処理中のデータですが、強制的に）。
+Erlangシステム以外から流入速度を落とせず、かつスケールアップもできない場合、データをドロップさせるか、クラッシュさせる必要があります（ほとんどの場合、処理中のデータですが、強制的に）。
 
 %It's a sad reality that nobody really wants to deal with. Programmers, software engineers, and computer scientists are trained to purge the useless data, and keep everything that's useful. Success comes through optimization, not giving up.
 これは全ての人が目を背けたくなる悲しい現実です。プログラマーや、ソフトウェアエンジニア、そしてコンピュータサイエンティストは、不要なデータは消去し、有用なデータはすべて保持するよう学んできています。地道な最適化をすることにより、Erlangシステムは入力データを問題なく処理できる状態になります。
