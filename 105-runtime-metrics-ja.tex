@@ -527,51 +527,70 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
 %I won't go into a lot of details about these functions, but be aware that they exist.
 これらの機能の詳細は割愛しますが、それらの機能が存在しているということは認識しておいてください。
 
-\subsection{Ports}
+%\subsection{Ports}
+\subsection{ポート}
 
-Similarly to processes, Erlang ports allow a lot of introspection. The info can be accessed by calling \function{erlang:port\_info(Port, Key)}, and more info is available through the \module{inet} module. Most of it has been regrouped by the \function{recon:port\_info/1-2} functions, which work using a somewhat similar interface to their process-related counterparts. 
+%Similarly to processes, Erlang ports allow a lot of introspection. The info can be accessed by calling \function{erlang:port\_info(Port, Key)}, and more info is available through the \module{inet} module. Most of it has been regrouped by the \function{recon:port\_info/1-2} functions, which work using a somewhat similar interface to their process-related counterparts.
+プロセスと同様に、Erlangのポートは沢山の内省する機会を与えてくれます。ポートの情報へは \function{erlang:port\_info(Port, Key)} を呼ぶことによってアクセスでき、それ以上の情報は \module{inet} モジュールを通して取得できます。それらのほとんどは、 \function{recon:port\_info/1-2} によって再編成され、それはプロセス関連の同等の関数のインターフェースとやや似ているものを使っています。
 
 \begin{description*}
-	\item[Meta] \hfill
+	%\item[Meta] \hfill
+	\item[メタ情報] \hfill
 		\begin{description}		
-			\item[\expression{id}] internal index of a port. Of no particular use except to differentiate ports.
+			%\item[\expression{id}] internal index of a port. Of no particular use except to differentiate ports.
+			\item[\expression{id}] ポートの内部インデックス。ポートを区別すること以外に用途はありません。
 			
-			\item[\expression{name}] type of the port — with names such as \expression{"tcp\_inet"}, \expression{"udp\_inet"}, or \expression{"efile"}, for example.
+			%\item[\expression{name}] type of the port — with names such as \expression{"tcp\_inet"}, \expression{"udp\_inet"}, or \expression{"efile"}, for example.
+      \item[\expression{name}] ポートのタイプです。例えば、\expression{"tcp\_inet"}、\expression{"udp\_inet"}、\expression{"efile"}などの名前で表します。
 			
-			\item[\expression{os\_pid}] if the port is not an inet socket, but rather represents an external process or program, this value contains the os pid related to the said external program.
+			%\item[\expression{os\_pid}] if the port is not an inet socket, but rather represents an external process or program, this value contains the os pid related to the said external program.
+			\item[\expression{os\_pid}] もしもポートがinetソケットではなく、プログラムの外のプロセスを表しているのであれば、このポートの値は先述した外部プログラムに関連するOSのpidを含んでいます。
 		\end{description}
 
-	\item[Signals] \hfill
+	%\item[Signals] \hfill
+	\item[シグナル] \hfill
 		\begin{description}		
-			\item[\expression{connected}] Each port has a controlling process in charge of it, and this process' pid is the \expression{connected} one.
+			%\item[\expression{connected}] Each port has a controlling process in charge of it, and this process' pid is the \expression{connected} one.
+			\item[\expression{connected}] 各ポートは、その責務として controlling process の機能を持っており、このプロセスの pid は \expression{connected} となります。
 			
-			\item[\expression{links}] ports can be linked with processes, much like other processes can be. The list of linked processes is contained here. Unless the process has been owned by or manually linked to a lot of processes, this should be safe to use.
+			%\item[\expression{links}] ports can be linked with processes, much like other processes can be. The list of linked processes is contained here. Unless the process has been owned by or manually linked to a lot of processes, this should be safe to use.
+			\item[\expression{links}] ポートは、他のプロセスと同様にプロセスとリンクできます。この値にリンクされたプロセスのリストが含まれます。このプロセスが獲得されてしまったり、手作業によりプロセスとリンクされない限り、この値の使用は安全です。
 			
-			\item[\expression{monitors}] ports that represent external programs can have these programs end up monitoring Erlang processes. These processes are listed here.
+			%\item[\expression{monitors}] ports that represent external programs can have these programs end up monitoring Erlang processes. These processes are listed here.
+			\item[\expression{monitors}] 外部プログラムを表すポートは、それらのプログラムの情報を持ち、最終的にErlangのプロセスをモニターします。これらのプロセスはここで列挙されています。
 		\end{description}
 		
 	\item[IO] \hfill
 		\begin{description}		
-			\item[\expression{input}] the number of bytes read from the port.
+			%\item[\expression{input}] the number of bytes read from the port.
+			\item[\expression{input}] ポートに読み込まれたバイト数です。
 			
-			\item[\expression{output}] the number of bytes written to the port.
+			%\item[\expression{output}] the number of bytes written to the port.
+			\item[\expression{output}] ポートに書き込まれたバイト数です。
 		\end{description}
 
-	\item[Memory Used] \hfill
+	%\item[Memory Used] \hfill
+	\item[メモリ使用量] \hfill
 		\begin{description}		
-			\item[\expression{memory}] this is the memory (in bytes) allocated by the runtime system for the port. This number tends to be small-ish and excludes space allocated by the port itself.
+			%\item[\expression{memory}] this is the memory (in bytes) allocated by the runtime system for the port. This number tends to be small-ish and excludes space allocated by the port itself.
+			\item[\expression{memory}] これは、ポートのランタイムシステムによって割り当てられたメモリ（バイト単位）です。この数値は小さくなる傾向があり、そのポート自身によって割り当てられたスペースは除外しています。
 			
-			\item[\expression{queue\_size}] Port programs have a specific queue, called the driver queue\footnote{The driver queue is available to queue output from the emulator to the driver (data from the driver to the emulator is queued by the emulator in normal Erlang message queues). This can be useful if the driver has to wait for slow devices etc, and wants to yield back to the emulator.}. This return the size of this queue, in bytes.
+			%\item[\expression{queue\_size}] Port programs have a specific queue, called the driver queue\footnote{The driver queue is available to queue output from the emulator to the driver (data from the driver to the emulator is queued by the emulator in normal Erlang message queues). This can be useful if the driver has to wait for slow devices etc, and wants to yield back to the emulator.}. This return the size of this queue, in bytes.
+      \item[\expression{queue\_size}] ポートのプログラムは、ドライバキューと呼ばれる特別なキューを持っています\footnote{ドライバキューはエミュレータからドライバ（ドライバからエミュレータへのデータは通常のErlangのメッセージキューにキューイングされます。）へ出力をキューイングするのに使えます。}。これはドライバが遅いデバイスを待ったり、エミュレータに処理を返却するのに便利です。
 		\end{description}
 		
-	\item[Type-Specific] \hfill
+	%\item[Type-Specific] \hfill
+	\item[タイプ特有の情報] \hfill
 		\begin{description}		
-			\item[Inet Ports] Returns inet-specific data, including statistics\footnote{\href{http://www.erlang.org/doc/man/inet.html\#getstat-1}{http://www.erlang.org/doc/man/inet.html\#getstat-1}}, the local address and port number for the socket (\expression{sockname}), and the inet options used\footnote{\href{http://www.erlang.org/doc/man/inet.html\#setopts-2}{http://www.erlang.org/doc/man/inet.html\#setopts-2}}
-			\item[Others] currently no other form than inet ports are supported in recon, and an empty list is returned.
+			%\item[Inet Ports] Returns inet-specific data, including statistics\footnote{\href{http://www.erlang.org/doc/man/inet.html\#getstat-1}{http://www.erlang.org/doc/man/inet.html\#getstat-1}}, the local address and port number for the socket (\expression{sockname}), and the inet options used\footnote{\href{http://www.erlang.org/doc/man/inet.html\#setopts-2}{http://www.erlang.org/doc/man/inet.html\#setopts-2}}
+			\item[inet ポート] inet に関するデータを返却します。このデータは統計情報\footnote{\href{http://www.erlang.org/doc/man/inet.html\#getstat-1}{http://www.erlang.org/doc/man/inet.html\#getstat-1}}、ソケット (\expression{sockname}) のローカルアドレスとポート番号、そして 使われている inet オプション\footnote{\href{http://www.erlang.org/doc/man/inet.html\#setopts-2}{http://www.erlang.org/doc/man/inet.html\#setopts-2}}を含んでいます。
+			%\item[Others] currently no other form than inet ports are supported in recon, and an empty list is returned.
+			\item[その他] 現在のところ、 recon では inet ポート以外の形式はサポートされておらず、空のリストが返却されます。
 		\end{description}
 \end{description*}
 		
-The list can be obtained as follows:
+%The list can be obtained as follows:
+次のようなリストが取得されます:
 
 \begin{VerbatimEshell}
 1> recon:port_info("#Port<0.818>").
@@ -596,9 +615,12 @@ The list can be obtained as follows:
                   {...}|...]}]}]
 \end{VerbatimEshell}
 		
-On top of this, functions to find out specific problematic ports exist the way they do for processes. The gotcha is that so far, recon only supports them for inet ports and with restricted attributes: the number of octets (bytes) sent, received, or both (\expression{send\_oct}, \expression{recv\_oct}, \expression{oct}, respectively), or the number of packets sent, received, or both (\expression{send\_cnt}, \expression{recv\_cnt}, \expression{cnt}, respectively).
 
-So for the cumulative total, which can help find out who is slowly but surely eating up all your bandwidth:
+%On top of this, functions to find out specific problematic ports exist the way they do for processes. The gotcha is that so far, recon only supports them for inet ports and with restricted attributes: the number of octets (bytes) sent, received, or both (\expression{send\_oct}, \expression{recv\_oct}, \expression{oct}, respectively), or the number of packets sent, received, or both (\expression{send\_cnt}, \expression{recv\_cnt}, \expression{cnt}, respectively).
+この例の一番上に、特定の、プロセスに関与している問題のあるポートを見つけ出す関数があります。これまででわかることは、 recon は inet ポートと限定された属性についてサポートするのみということです: 送信、受信、そして両者のオクテット（バイト）数（それぞれ\expression{send\_oct}、 \expression{recv\_oct}、\expression{oct}）か、送信、受信、そして両者のパケット数（それぞれ\expression{send\_cnt}、\expression{recv\_cnt}、\expression{cnt}）です。
+
+%So for the cumulative total, which can help find out who is slowly but surely eating up all your bandwidth:
+ここまでの累積合計量は、どのポートが遅い一方で確かに帯域を食いつぶしているかを見つけるのに役立ちます:
 
 \begin{VerbatimEshell}
 2> recon:inet_count(oct, 3).
@@ -610,9 +632,11 @@ So for the cumulative total, which can help find out who is slowly but surely ea
   [{recv_oct,15630954707},{send_oct,0}]}]
 \end{VerbatimEshell}
 
-Which suggest some ports are doing only input and eating lots of bytes. You can then use \function{recon:port\_info("\#Port<0.6821166>")} to dig in and find who owns that socket, and what is going on with it.
+%Which suggest some ports are doing only input and eating lots of bytes. You can then use \function{recon:port\_info("\#Port<0.6821166>")} to dig in and find who owns that socket, and what is going on with it.
+これは、いくつかのポートがただ受信しているだけで沢山のバイトを食い荒らしていることを示してします。そして\function{recon:port\_info("\#Port<0.6821166>")} を使って深掘り、誰がそのソケットを所有しているか、何が起こっているかを見つけることができます。
 
-Or in any other case, we can look at what is sending the most data within any time window\footnote{See the explanations for the \function{recon:proc\_window/3} in the preceding subsection} with the \function{recon:inet\_window(Attribute, Count, Milliseconds)} function:
+%Or in any other case, we can look at what is sending the most data within any time window\footnote{See the explanations for the \function{recon:proc\_window/3} in the preceding subsection} with the \function{recon:inet\_window(Attribute, Count, Milliseconds)} function:
+もしくはその他のケースで、\function{recon:inet\_window(Attribute, Count, Milliseconds)}を使って、あるタイムウィンドウの間で何がほとんどのデータを送信しているのか\footnote{前小節の\function{recon:proc\_window/3}の説明を見てください}を見ることができます:
 
 \begin{VerbatimEshell}
 3> recon:inet_window(send_oct, 3, 5000).
@@ -621,9 +645,11 @@ Or in any other case, we can look at what is sending the most data within any ti
  {#Port<0.12518151>,1214051,[{send_oct,600070031}]}]
 \end{VerbatimEshell}
 
-For this one, the value in the middle of the tuple is what \expression{send\_oct} was worth (or any chosen attribute for each call) during the specific time interval chosen (5 seconds here).
+%For this one, the value in the middle of the tuple is what \expression{send\_oct} was worth (or any chosen attribute for each call) during the specific time interval chosen (5 seconds here).
+この例では、中ほどのタプルの値は設定した特定の時間の間（ここでは5秒間） \expression{send\_oct} どのような値だったか（もしくは呼び出し時に設定した属性に対応するもの）を表しています。
 
-There is still some manual work involved into properly linking a misbehaving port to a process (and then possibly to a specific user or customer), but all the tools are in place. 
+%There is still some manual work involved into properly linking a misbehaving port to a process (and then possibly to a specific user or customer), but all the tools are in place.
+依然、正しくプロセス（と、もしかしたら特定のユーザや顧客）にリンクされた行儀の悪いポートの巻き添えになった手作業がありますが、これらすべてのツールはちゃんとしています。
 
 %%%
 
