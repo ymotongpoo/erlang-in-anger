@@ -73,7 +73,7 @@
 \subsection{メモリ}
 
 %The memory reported by the Erlang VM in most tools will be a variant of what is reported by \expression{erlang:memory()}:
-大抵のツールでErlang VMから受けているmemoryの情報は、\expression{erlang:memory()} から取られる変数です。
+大抵のツールでErlang VMから受けているメモリの情報は、\expression{erlang:memory()} から取られる変数です。
 
 \begin{VerbatimEshell}
 1> erlang:memory().
@@ -97,14 +97,14 @@
 遅かれ早かれ、OSが示す値よりはるかに少ない値だとわかるはずです。
 
 %The \expression{total} field contains the sum of the memory used for \expression{processes} and \expression{system} (which is incomplete, unless the VM is instrumented!).
-\expression{total}の項には、\expression{processes} と \expression{system} で利用してるメモリ量の和が入ります(VMを備えない限り、完璧な和にはなりません！)。
+\expression{total}の項には、\expression{processes} と \expression{system} で利用してるメモリ量の和が入ります(instrumentモジュールを有効にして\footnote{訳註：例えば\expression{erl -instr}などで有効化できます。}VMを実行しないかぎり、完璧な和にはなりません！)。
 %\expression{processes} is the memory used by Erlang processes, their stacks and heaps.
-\expression{processes}の項は、Erlangプロセスと、スタックやヒープとして使用されるメモリ量です。 % TODO: their = processesだと思うんですがあまり訳に反映されてないような
-i%\expression{system} is the rest: memory used by ETS tables, atoms in the VM, refc binaries\footnote{See Section \ref{sec:binaries}}, and some of the hidden data I mentioned was missing.
-\expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、refcバイナリ\footnote{リファレンスカウントされたバイナリ(reference-counted binary)。プロセスヒープ外に保持した実データと、プロセスヒープ内の参照数をカウントするオブジェクトから構成されるバイナリのこと。\ref{sec:binaries}節参照}、失われた隠しデータなどです。%TODO: hidden data I mentioned was missingがしっくりこない。
+\expression{processes}の項は、スタックやヒープとしてErlangプロセスが使用するメモリ量です。
+%\expression{system} is the rest: memory used by ETS tables, atoms in the VM, refc binaries\footnote{See Section \ref{sec:binaries}}, and some of the hidden data I mentioned was missing.
+\expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、refcバイナリ\footnote{リファレンスカウントされたバイナリ(reference-counted binary)。プロセスヒープ外に保持するバイナリオブジェクト(実データ及び参照カウンタ)と、プロセスヒープ内に保持するProcBinオブジェクト(バイナリオブジェクトを参照するオブジェクト)から構成されるバイナリのこと。\ref{sec:binaries}節参照}。先述の通り、instrumentモジュールを使わない限り一部データは失われます。
 
 %If you want the total amount of memory owned by the virtual machine, as in the amount that will trip system limits (\app{ulimit}), this value is more difficult to get from within the VM.
-仮想マシンが保有する総メモリ量を知りたければ、システム限界(\app{ulimit})を突破する量と同じで、VM内部から取得するのはより困難です。 %TODO: as in the amount that will trip system limits, が謎
+システム限界(\app{ulimit})を突破する時などに仮想マシンが保有する総メモリ量を知りたいなら、VM内部から取得するのはより困難です。 
 %If you want the data without calling \app{top} or \app{htop}, you have to dig down into the VM's memory allocators to find things out.\footnote{See Section \ref{subsec:erlang-memory-model}}
 もし\app{top}や\app{htop}を使うことなしにこのデータが欲しければ、あなたはVMのメモリアロケータを深堀して見つけ出すしかありません\footnote{詳しくは\ref{subsec:erlang-memory-model}節を見てください}。
 
@@ -136,22 +136,22 @@ Erlang 開発者にとって残念なことに、CPUの統計データを取る�
 
 \begin{itemize*}
 	%\item The VM does a lot of work unrelated to processes when it comes to scheduling — high scheduling work and high amounts of work done by the Erlang processes are hard to characterize.
-  \item VMはスケジューリングの際にプロセスとは無関係のタスクをたくさん行っています。高度なスケジューリングタスクとErlangプロセスによる大量のタスクは、特徴付けすることが難しいのです。 %TODO: high scheduling workって高度なスケジューリングタスク、的な意味で良いんだろうか？
+  \item VMはスケジューリングの際にプロセスとは無関係のタスクをたくさん行っています。高度なスケジューリングタスクとErlangプロセスによる大量のタスクは、特徴付けすることが難しいのです。 
 	%\item The VM internally uses a model based on \emph{reductions}, which represent an arbitrary number of work actions. Every function call, including BIFs, will increment a process reduction counter. After a given number of reductions, the process gets descheduled.
-  \item VMは内部で \emph{リダクション} に基づくモデルを使っています。このモデルは任意の数のタスクで表せます。すべての(BIFを含む)関数呼び出しでプロセスリダクション数がインクリメントされ、所与のリダクション数に到達すると、プロセスが未スケジュール状態にもどります。 %TODO: descheduled、日本語にするの結構難しいですね。より良い言い方募集中
+  \item VMは内部で \emph{リダクション} に基づくモデルを使っています。このモデルは任意の数のタスクで表せます。すべての(BIFを含む)関数呼び出しでプロセスリダクション数がインクリメントされ、所与のリダクション数に到達すると、プロセスがスケジューラ上の実行中から外れます。
 	%\item To avoid going to sleep when work is low, the threads that control the Erlang schedulers will do busy looping. This ensures the lowest latency possible for sudden load spikes. The VM flag \command{+sbwt none|very\_short|short|medium|long|very\_long} can be used to change this value.
-  \item 負荷の低いタスクがすぐスリープ状態にならないように、Erlangスケジューラの扱うスレッドはしばらくビジーウェイト状態になります。これは、突然負荷が上がるケースでも遅延が大きくなり過ぎないための配慮です。この値を変更するには、VMフラグ (\command{+sbwt none|very\_short|short|medium|long|very\_long}) が使えます。 %TODO: busy looping = 何もしないloopをするビジーウェイトのことだと思うんですが、あまり良い訳は思いついておらず。
+  \item 負荷の低いスケジューラスレッドがすぐスリープ状態にならないように、Erlangスケジューラの扱うスレッドはしばらくビジーウェイト状態になります。これは、突然負荷が上がるケースでも遅延が大きくなり過ぎないための配慮です。この値を変更するには、VMフラグ (\command{+sbwt none|very\_short|short|medium|long|very\_long}) が使えます。 
 \end{itemize*}
 
 %These factors combine to make it fairly hard to find a good absolute measure of how busy your CPU is actually running Erlang code.
 これらの要素が組み合わさっているため、実行中のErlangコードによるCPU使用量をしっかりと測る方法を見つけるのは大変です。
 %It will be common for Erlang nodes in production to do a moderate amount of work and use a lot of CPU, but to actually fit a lot of work in the remaining place when the workload gets higher.
-Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するように見えますが、負荷が上がっても、大量のタスクを残りのCPUリソースでまかなえることことが良くあります。 %% TODO:割と雰囲気で訳してしまっていますがあってますかね…
+Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するようによく見えますが、これは負荷が上がっても残りのCPUリソースで多くのタスクをこなせるよう適合させているのです。 
 
 %The most accurate representation for this data is the scheduler wall time.
-このデータを最も適切に表現するのは、スケジューラの総経過時間です。 %TODO: データだと唐突なので適切な言葉に変えたいきがするが何がいいだろう…
+このデータを最も適切に表現するのは、スケジューラの総経過時間です。 
 %It's an optional metric that needs to be turned on by hand on a node, and polled at regular intervals.
-これは標準では無効のメトリクスで、ノードごとに手動で有効に設定すれば、一定間隔で取得されるようになります。
+これは標準では無効のメトリクスで、ノードごとに手動で有効に設定して一定間隔で取得させる必要があります。
 %It will reveal the time percentage a scheduler has been running processes and normal Erlang code, NIFs, BIFs, garbage collection, and so on, versus the amount of time it has spent idling or trying to schedule processes.
 取得される値からわかるのは、スケジューラがプロセス、普通のErlangコード、NIF、BIF、ガベージコレクションなどを走らせる時間と、スケジューラがプロセススケジュールを試みているか、アイドル状態になっている時間の割合です。
 
@@ -176,7 +176,7 @@ Erlangノードは実運用において、ほどほどのタスクもでCPUを�
 %In this case, the VM has two very loaded schedulers (at 99.2\% and 93.7\% repectively), and two mostly unused ones at far below 1\%.
 今回の場合は、VMは高負荷なスケジューラが２つ (それぞれ99.2\%と93.7\%)と、1\%にも満たないくらいほとんど使われていないスケジューラが２つありますね。
 %Yet, a tool like \app{htop} would report something closer to this for each core:
-しかし、\app{htop}などのツールはCPUコアごとにこれと似たような値を出力してくれました。 %TODO: Yetがここで入ってくる理由がよくわからないが、「しかし」で良いのだろうか…
+しかし、\app{htop}などのツールはCPUコアごとにこれと似たような値を出力してくれました。 
 
 \begin{VerbatimText}
 [|||||||||||||||||||||||||     70.4%]
@@ -186,17 +186,17 @@ Erlangノードは実運用において、ほどほどのタスクもでCPUを�
 \end{VerbatimText}
 
 %The result being that there is a decent chunk of CPU usage that would be mostly free for scheduling actual Erlang work (assuming the schedulers are busy waiting more than trying to select tasks to run), but is being reported as busy by the OS.
-結果として、(スケジューラが実行タスクを選択する状態でなく、ビジーウェイト状態だとを想定すると) Erlangのタスクスケジューリングでほとんど使っていないCPU領域があっても、OSからは高い使用率を表示されます。 % TODO:ここの訳、全般的に自信なしです。
+結果として、(スケジューラが実行タスクを選択する状態でなく、ビジーウェイト状態だとを想定すると) Erlangのタスクスケジューリングでほとんど使っていないCPU領域があっても、OSからは高い使用率を表示されます。 
 
 %Another interesting behaviour possible is that the scheduler usage may show a higher rate (1.0) than what the OS will report.
 もうひとつの面白い挙動として、スケジューラはOSが示す値よりも高い割合(1.0)を表示することもありえます。
 %Schedulers waiting for os resources are considered utilized as they cannot handle more work.
 スケジューラがOSリソースを待っている場合、それ以上のタスクを扱えないことから使用状態と認識される場合がその一例です。
 %If the OS itself is holding up on non-CPU tasks it is still possible for Erlang's schedulers not to be able to do more work and report a full ratio.
-他にも、OS自身がCPU以外のタスクで詰まっている場合にも、Erlangスケジューラも仕事を行えないことから、1.0の割合が表示されることになります。 %%TODO: 「一例です」「他にも」は文脈から補足したほうが良いと思って入れましたが、違和感あれば外します
+他にも、OS自身がCPU以外のタスクで詰まっている場合にも、Erlangスケジューラも仕事を行えないことから、1.0の割合が表示されることになります。 
 
 %These behaviours may especially be important to consider when doing capacity planning, and can be better indicators of headroom than looking at CPU usage or load.
-これらのふるまいに関する考察は容量計画を行う際には特に大事で、CPU使用率や負荷を見る以上に経営判断の良い指標になるでしょう。 %TODO: indicators of headroom = リソース調達するときに幹部が判断するための指標＝経営判断の指標、と訳しましたが、思い切り過ぎ？
+これらのふるまいに関する考察は容量計画を行う際には特に大事で、CPU使用率や負荷を見る以上に余力をみる良い指標になるでしょう。 
 
 %% 08:37 #erlounge: <+garazdawi> MononcQc: There is a cost when not doing work. The way it works is that when starting/stopping to do work it checks the time, but if the
 %%                              scheduler has something to do the entire time then there is no overhead. So you might see a slight cpu increase if the schedulers run out of
@@ -220,7 +220,7 @@ Erlangにおいて一般的に良い方法となるのは、真に同時実行�
 \end{VerbatimEshell}
 
 % Tracking this value over time can be extremely helpful to try and characterize load or detect process leaks, along with other metrics you may have around.
-この値を刻々と監視することは、どんなメトリクスよりも、負荷を特徴づけたり、プロセスリークを発見するのに非常に役立ちます。 %%TODO: try and characterizeのtryって負荷を下げるよう頑張る的な意味でしょうか…訳出ししてませんが良いだろうか…
+この値を刻々と監視することは、どんなメトリクスよりも、負荷を特徴づけたり、プロセスリークを発見するのに非常に役立ちます。
 
 %\subsection{Ports}
 \subsection{ポート}
