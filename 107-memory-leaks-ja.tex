@@ -348,125 +348,174 @@ A fix for this can be implemented transparently in the router's API functions, w
 %If there is a big difference, you are likely having issues with memory fragmentation for a few specific allocator types following usage spikes.
 大きく異なる場合は、使用率にスパイクのある特定の種別のアロケータについてメモリフラグメンテーションの問題がある可能性があります。
 
-\subsection{Erlang's Memory Model}
+%\subsection{Erlang's Memory Model}
+\subsection{Erlangのメモリモデル}
 \label{subsec:erlang-memory-model}
 
-\subsubsection{The Global Level}
+%\subsubsection{The Global Level}
+\subsubsection{グローバルレベル}
 
-To understand where memory goes, one must first understand the many allocators being used. Erlang's memory model, for the entire virtual machine, is hierarchical. As shown in Figure \ref{fig:allocators},  there are two main allocators, and a bunch of sub-allocators (numbered 1-9). The sub-allocators are the specific allocators used directly by Erlang code and the VM for most data types:\footnote{The complete list of where each data type lives can be found in \href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
+%To understand where memory goes, one must first understand the many allocators being used. Erlang's memory model, for the entire virtual machine, is hierarchical. As shown in Figure \ref{fig:allocators},  there are two main allocators, and a bunch of sub-allocators (numbered 1-9). The sub-allocators are the specific allocators used directly by Erlang code and the VM for most data types:\footnote{The complete list of where each data type lives can be found in \href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
+メモリがどこへ行くのか理解するために、たくさんのメモリアロケータが使われていることを最初に理解しなければならない。VM 全体のためのErlangのメモリモデルは階層的になっています。\ref{fig:allocators}の図にあるように、2つのメインとなるアロケータがあり、他にサブアロケータ(1−9までの番号が付けられた)があります。サブアロケータはErlangコードとVMから使われるほとんどのデータ型用の特定のアロケータです。\footnote{各データ型の完全なリストはこちらで見つけることができます。\href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
 
 
 \begin{figure}
   \includegraphics{memory-allocs.pdf}%
-  \caption{Erlang's Memory allocators and their hierarchy. Not shown is the special \emph{super carrier}, optionally allowing to pre-allocate (and limit) all memory available to the Erlang VM since R16B03.}%
+  %\caption{Erlang's Memory allocators and their hierarchy. Not shown is the special \emph{super carrier}, optionally allowing to pre-allocate (and limit) all memory available to the Erlang VM since R16B03.}%
+  \caption{Erlangのメモリアロケータとそれらの階層。R16B03 からオプションでErlang VMのために利用可能なすべてのメモリを事前に確保すること(加えて制限も)が許されている特別な\emph{スーパーキャリア}は図示していません。}%
    \label{fig:allocators}
 \end{figure}
 
 \begin{enumerate*}
-    \item \term{temp\_alloc}: does temporary allocations for short use cases (such as data living within a single C function call).
-    \item \term{eheap\_alloc}: heap data, used for things such as the Erlang processes' heaps.
-    \item \term{binary\_alloc}: the allocator used for reference counted binaries (what their 'global heap' is). Reference counted binaries stored in an ETS table remain in this allocator.
-    \item \term{ets\_alloc}: ETS tables store their data in an isolated part of memory that isn't garbage collected, but allocated and deallocated as long as terms are being stored in tables.
-    \item \term{driver\_alloc}: used to store driver data in particular, which doesn't keep drivers that generate Erlang terms from using other allocators. The driver data allocated here contains locks/mutexes, options, Erlang ports, etc.
-    \item \term{sl\_alloc}: short-lived memory blocks will be stored there, and include items such as some of the VM's scheduling information or small buffers used for some data types' handling.
-    \item \term{ll\_alloc}: long-lived allocations will be in there. Examples include Erlang code itself and the atom table, which stay there.
-    \item \term{fix\_alloc}: allocator used for frequently used fixed-size blocks of memory. One example of data used there is the internal processes' C struct, used internally by the VM.
-    \item \term{std\_alloc}: catch-all allocator for whatever didn't fit the previous categories. The process registry for named process is there.
+    %\item \term{temp\_alloc}: does temporary allocations for short use cases (such as data living within a single C function call).
+    \item \term{temp\_alloc}: 短期間のユースケース用(1つのCの関数呼び出しで使われるデータのような)の一時的なアロケーション。
+    %\item \term{eheap\_alloc}: heap data, used for things such as the Erlang processes' heaps.
+    \item \term{eheap\_alloc}: Erlangプロセスのヒープなどに使われるヒープデータ。
+    %\item \term{binary\_alloc}: the allocator used for reference counted binaries (what their 'global heap' is). Reference counted binaries stored in an ETS table remain in this allocator.
+    \item \term{binary\_alloc}: リファレンスカウントされたバイナリ(グローバルヒープにある)に使われるアロケータ。ETSテーブルに格納されたリファレンスカウントされたバイナリはこのアロケータに残ります。
+    %\item \term{ets\_alloc}: ETS tables store their data in an isolated part of memory that isn't garbage collected, but allocated and deallocated as long as terms are being stored in tables.
+    \item \term{ets\_alloc}: ETSテーブルはガベージコレクトされないメモリの独立した部分へデータを格納しますが、項がテーブルに格納されている限り、割り当ておよび割り当て解除されます。
+    %\item \term{driver\_alloc}: used to store driver data in particular, which doesn't keep drivers that generate Erlang terms from using other allocators. The driver data allocated here contains locks/mutexes, options, Erlang ports, etc.
+    \item \term{driver\_alloc}: とりわけドライバーデータを格納するために使われ、他のアロケータを使ってErlang項を生成したドライバーは保持しません。ここで割り当てられたドライバーデータはロック/ミューテックス、オプション、Erlangポートなどを含みます。
+    %\item \term{sl\_alloc}: short-lived memory blocks will be stored there, and include items such as some of the VM's scheduling information or small buffers used for some data types' handling.
+    \item \term{sl\_alloc}: 短期間生存するメモリブロックがここに保存されます。VMのスケジューリング情報の一部や、いくつかのデータ型の処理に使う小さなバッファを含みます。
+    %\item \term{ll\_alloc}: long-lived allocations will be in there. Examples include Erlang code itself and the atom table, which stay there.
+    \item \term{ll\_alloc}: 長期間生存するアロケーションはここにあります。例えばErlangコード自身やアトムのテーブルが存在します。
+    %\item \term{fix\_alloc}: allocator used for frequently used fixed-size blocks of memory. One example of data used there is the internal processes' C struct, used internally by the VM.
+    \item \term{fix\_alloc}: 頻繁に使われる固定サイズのメモリブロックのために使われるアロケータ。ここで使われるデータの1つとしてはVMで内部的に使われている内部プロセスのC構造体があります。
+    %\item \term{std\_alloc}: catch-all allocator for whatever didn't fit the previous categories. The process registry for named process is there.
+    \item \term{std\_alloc}: 上記カテゴリに適合しないものを全てキャッチするアロケータ。名前付きのプロセス用のプロセスレジストリがここにあります。
 \end{enumerate*}
 
-By default, there will be one instance of each allocator per scheduler (and you should have one scheduler per core), plus one instance to be used by linked-in drivers using async threads. This ends up giving you a structure a bit like in Figure \ref{fig:allocators}, but split it in \var{N} parts at each leaf.
+%By default, there will be one instance of each allocator per scheduler (and you should have one scheduler per core), plus one instance to be used by linked-in drivers using async threads. This ends up giving you a structure a bit like in Figure \ref{fig:allocators}, but split it in \var{N} parts at each leaf.
+デフォルトでは、スケジューラごとに各アロケータのインスタンスが1つずつ(そしてコアごとに1つのスケジューラを持つはずです)、加えて非同期のスレッドを使うリンクされたドライバーで使われるインスタンスが一つあります。これは\ref{fig:allocators}の図にあるような構造をあなた与えますが、それぞれの葉で\var{N}個の部分に分かれます。
 
-Each of these sub-allocators will request memory from \term{mseg\_alloc} and \term{sys\_alloc} depending on the use case, and in two possible ways. The first way is to act as a multiblock carrier (\term{mbcs}), which will fetch chunks of memory that will be used for many Erlang terms at once. For each \term{mbc}, the VM will set aside a given amount of memory (about 8MB by default in our case, which can be configured by tweaking VM options), and each term allocated will be free to go look into the many multiblock carriers to find some decent space in which to reside.
+%Each of these sub-allocators will request memory from \term{mseg\_alloc} and \term{sys\_alloc} depending on the use case, and in two possible ways. The first way is to act as a multiblock carrier (\term{mbcs}), which will fetch chunks of memory that will be used for many Erlang terms at once. For each \term{mbc}, the VM will set aside a given amount of memory (about 8MB by default in our case, which can be configured by tweaking VM options), and each term allocated will be free to go look into the many multiblock carriers to find some decent space in which to reside.
+これらのサブアロケータはユースケースに応じて\term{mseg\_alloc}と\term{sys\_alloc}の2つあるうちのどちらかからメモリを要求します。最初の方法はマルチブロックキャリア(\term{mbcs})として行動します。それは多数のErlang項のために使われるメモリの塊を一度に取得します。それぞれの\term{mbc}のために、VMは与えられたメモリ量(我々の場合はデフォルトでは8MBですが、VMオプションを調整して設定できます)を確保し、それぞれの割り当てられた項は格納されるための十分な空間を探すために、自由にたくさんのマルチブロックキャリアの中を見に行けます。
 
-Whenever the item to be allocated is greater than the single block carrier threshold (\term{sbct})\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}}, the allocator switches this allocation into a single block carrier (\term{sbcs}). A single block carrier will request memory directly from \term{mseg\_alloc} for the first \term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}} entries, and then switch over to \term{sys\_alloc} and store the term there until it's deallocated.
+%Whenever the item to be allocated is greater than the single block carrier threshold (\term{sbct})\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}}, the allocator switches this allocation into a single block carrier (\term{sbcs}). A single block carrier will request memory directly from \term{mseg\_alloc} for the first \term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}} entries, and then switch over to \term{sys\_alloc} and store the term there until it's deallocated.
+割り当てられるアイテムがシングルブロックキャリア(\term{sbct})\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}{http://erlang.org/doc/man/erts\_alloc.html\#M\_sbct}}の閾値より大きい場合はいつでも、アロケータはこのアロケーションをシングルブロックキャリア(\term{sbcs})に切り替えます。シングルブロックキャリアは最初の\term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}}のエントリに対して\term{mseg\_alloc}から直接メモリをリクエストし、その時に\term{sys\_alloc}へ切り替え、割り当てが解除されるまで項をそこへ格納します。
 
-So looking at something such as the binary allocator, we may end up with something similar to Figure \ref{fig:allocation-1-normal}
+%So looking at something such as the binary allocator, we may end up with something similar to Figure \ref{fig:allocation-1-normal}
+バイナリアロケータの例も見てみると、\ref{fig:allocation-1-normal}の図のようなものになるでしょう。
 
 \begin{figure}
   \includegraphics{allocation-1-normal.pdf}%
-  \caption{Example memory allocated in a specific sub-allocator}%
+  %\caption{Example memory allocated in a specific sub-allocator}%
+  \caption{特定のサブアロケータに割り当てられたメモリの例}%
    \label{fig:allocation-1-normal}
 \end{figure}
 \FloatBarrier
 
-Whenever a multiblock carrier (or the first \term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}} single block carriers) can be reclaimed, \term{mseg\_alloc} will try to keep it in memory for a while so that the next allocation spike that hits your VM can use pre-allocated memory rather than needing to ask the system for more each time.
+%Whenever a multiblock carrier (or the first \term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}} single block carriers) can be reclaimed, \term{mseg\_alloc} will try to keep it in memory for a while so that the next allocation spike that hits your VM can use pre-allocated memory rather than needing to ask the system for more each time.
+マルチブロックキャリア(または最初の\term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}}シングルブロックキャリア)が再利用できる時はいつでも、\term{mseg\_alloc}はVMに届く次のアロケーションスパイクが、毎回もっととシステムに問い合わせる必要はなく、事前に割り当てたメモリを使うことができるように、しばらくの間それをメモリ内に留めようとします。
 
-You then need to know the different memory allocation strategies of the Erlang virtual machine:
+%You then need to know the different memory allocation strategies of the Erlang virtual machine:
+次にErlang VMの色々なメモリアロケーション戦略を知る必要があります。
 
 \begin{enumerate*}
+    %\item Best fit (\term{bf})
     \item Best fit (\term{bf})
+    %\item Address order best fit (\term{aobf})
     \item Address order best fit (\term{aobf})
+    %\item Address order first fit (\term{aoff})
     \item Address order first fit (\term{aoff})
+    %\item Address order first fit carrier best fit (\term{aoffcbf})
     \item Address order first fit carrier best fit (\term{aoffcbf})
+    %\item Address order first fit carrier address order best fit (\term{aoffcaobf})
     \item Address order first fit carrier address order best fit (\term{aoffcaobf})
+    %\item Good fit (\term{gf})
     \item Good fit (\term{gf})
+    %\item A fit (\term{af})
     \item A fit (\term{af})
 \end{enumerate*}
 
-Each of these strategies can be configured individually for each \term{alloc\_util} allocator\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}}
+%Each of these strategies can be configured individually for each \term{alloc\_util} allocator\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}}
+これらの戦略はそれぞれの\term{alloc\_util}アロケータ\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}{http://erlang.org/doc/man/erts\_alloc.html\#M\_as}}ごとに個別に設定できます。
 
 \begin{figure}
   \includegraphics[max height=7cm]{allocation-strategy-1.pdf}%
   \centering%
-  \caption{Example memory allocated in a specific sub-allocator}%
+  %\caption{Example memory allocated in a specific sub-allocator}%
+  \caption{特定のサブアロケータに割り当てられたメモリの例}%
    \label{fig:allocation-strategy-1}
 \end{figure}
 \FloatBarrier
 
-For \emph{best fit} (\term{bf}), the VM builds a balanced binary tree of all the free blocks' sizes, and will try to find the smallest one that will accommodate the piece of data and allocate it there. In Figure \ref{fig:allocation-strategy-1}, having a piece of data that requires three blocks would likely end in area 3.
+%For \emph{best fit} (\term{bf}), the VM builds a balanced binary tree of all the free blocks' sizes, and will try to find the smallest one that will accommodate the piece of data and allocate it there. In Figure \ref{fig:allocation-strategy-1}, having a piece of data that requires three blocks would likely end in area 3.
+\emph{best fit}(\term{bf})用に、VMは全てのフリーブロックのサイズで平衡バイナリ木を構築し、データが格納できる最も小さいものを探そうとし、それを割り当てます。\ref{fig:allocation-strategy-1}の図では、3つのブロックを必要とするデータがあるとするとエリア3になるでしょう。
 
-\emph{Address order best fit} (\term{aobf}) will work similarly, but the tree instead is based on the addresses of the blocks. So the VM will look for the smallest block available that can accommodate the data, but if many of the same size exist, it will favor picking one that has a lower address. If I have a piece of data that requires three blocks, I'll still likely end up in area 3, but if I need two blocks, this strategy will favor the first \term{mbcs} in Figure \ref{fig:allocation-strategy-1} with area 1 (instead of area 5). This could make the VM have a tendency to favor the same carriers for many allocations.
+%\emph{Address order best fit} (\term{aobf}) will work similarly, but the tree instead is based on the addresses of the blocks. So the VM will look for the smallest block available that can accommodate the data, but if many of the same size exist, it will favor picking one that has a lower address. If I have a piece of data that requires three blocks, I'll still likely end up in area 3, but if I need two blocks, this strategy will favor the first \term{mbcs} in Figure \ref{fig:allocation-strategy-1} with area 1 (instead of area 5). This could make the VM have a tendency to favor the same carriers for many allocations.
+\emph{Address order best fit}(\term{aobf})は似たように働きますが、代わりに木はブロックのアドレスに基づきます。VMはデータが格納できる利用可能な最も小さなブロックを探しますが、もし同じサイズのものがたくさんある場合は、ブロックのアドレスがより低いものを選びます。3つのブロックを必要とするデータがある場合、またエリア3となりますが、もし2つのブロックが必要な場合は、この戦略では\ref{fig:allocation-strategy-1}の図にある最初の\term{mbcs}のエリア1(エリア5ではなく)になります。これによりVMは多くの割り当てに対し、同じキャリアを優先する傾向を持たせられます。
 
-\emph{Address order first fit} (\term{aoff}) will favor the address order for its search, and as soon as a block fits, \term{aoff} uses it. Where \term{aobf} and bf would both have picked area 3 to allocate four blocks in Figure \ref{fig:allocation-strategy-1}, this one will get area 2 as a first priority given its address is lowest. In Figure \ref{fig:allocation-strategy-2}, if we were to allocate four blocks, we'd favor block 1 to block 3 because its address is lower, whereas \term{bf} would have picked either 3 or 4, and \term{aobf} would have picked 3.
+%\emph{Address order first fit} (\term{aoff}) will favor the address order for its search, and as soon as a block fits, \term{aoff} uses it. Where \term{aobf} and bf would both have picked area 3 to allocate four blocks in Figure \ref{fig:allocation-strategy-1}, this one will get area 2 as a first priority given its address is lowest. In Figure \ref{fig:allocation-strategy-2}, if we were to allocate four blocks, we'd favor block 1 to block 3 because its address is lower, whereas \term{bf} would have picked either 3 or 4, and \term{aobf} would have picked 3.
+\emph{Address order first fit}(\term{aoff})は検索時にアドレス順を優先し、ブロックに収まるならすぐに\term{aoff}がそれを使います。\ref{fig:allocation-strategy-1}の図で4つのブロックを割りあてるために\term{aobf}とbfの両方共がエリア3を選びますが、これはエリア2をアドレスが最も低いために最優先して取得します。\ref{fig:allocation-strategy-2}の図で、もし4つのブロックを割り当てるなら、この戦略ではアドレスが低いためにブロック3ではなくブロック1を選び、一方\term{bf}は3か4を選び、\term{aobf}は3を選ぶでしょう。
 
 \begin{figure}
   \includegraphics[max height=7cm]{allocation-strategy-2.pdf}%
   \centering%
-  \caption{Example memory allocated in a specific sub-allocator}%
+  %\caption{Example memory allocated in a specific sub-allocator}%
+  \caption{特定のサブアロケータに割り当てられたメモリの例}%
    \label{fig:allocation-strategy-2}
 \end{figure}
 \FloatBarrier
 
-\emph{Address order first fit carrier best fit} (\term{aoffcbf}) is a strategy that will first favor a carrier that can accommodate the size and then look for the best fit within that one. So if we were to allocate two blocks in Figure \ref{fig:allocation-strategy-2}, \term{bf} and \term{aobf} would both favor block 5, \term{aoff} would pick block 1. \term{aoffcbf} would pick area 2, because the first \term{mbcs} can accommodate it fine, and area 2 fits it better than area 1.
+%\emph{Address order first fit carrier best fit} (\term{aoffcbf}) is a strategy that will first favor a carrier that can accommodate the size and then look for the best fit within that one. So if we were to allocate two blocks in Figure \ref{fig:allocation-strategy-2}, \term{bf} and \term{aobf} would both favor block 5, \term{aoff} would pick block 1. \term{aoffcbf} would pick area 2, because the first \term{mbcs} can accommodate it fine, and area 2 fits it better than area 1.
+\emph{Address order first fit carrier best fit}(\term{aoffcbf})はサイズを格納できる最初のキャリアを選び、その中で最も適合するものを探すという戦略です。\ref{fig:allocation-strategy-2}の図で2つブロックを割り当てたい場合、\term{bf}と\term{aobf}は共にブロック5となるが、\term{aoff}はブロック1を選ぶでしょう。\term{aoffcbf}は最初の\term{mbcs}に格納できて、エリア2よりエリア1の方がより良く収まるのでエリア2を選びます。
 
-\emph{Address order first fit carrier address order best fit} (\term{aoffcaobf}) will be similar to \term{aoffcbf}, but if multiple areas within a carrier have the same size, it will favor the one with the smallest address between the two rather than leaving it unspecified.
+%\emph{Address order first fit carrier address order best fit} (\term{aoffcaobf}) will be similar to \term{aoffcbf}, but if multiple areas within a carrier have the same size, it will favor the one with the smallest address between the two rather than leaving it unspecified.
+\emph{Address order first fit carrier address order best fit}(\term{aoffcaobf})は\term{aoffcbf}と似ていますが、もしキャリアにある複数のエリアが同じサイズである場合に、それを不特定にしたままではなく、その2つの中でアドレスが最も小さいものを選びます。
 
-\emph{Good fit} (\term{gf}) is a different kind of allocator; it will try to work like best fit (\term{bf}), but will only search for a limited amount of time. If it doesn't find a perfect fit there and then, it will pick the best one encountered so far. The value is configurable through the \term{mbsd}\footnote{\href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}} VM argument.
+%\emph{Good fit} (\term{gf}) is a different kind of allocator; it will try to work like best fit (\term{bf}), but will only search for a limited amount of time. If it doesn't find a perfect fit there and then, it will pick the best one encountered so far. The value is configurable through the \term{mbsd}\footnote{\href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}} VM argument.
+\emph{Good fit}(\term{gf})は異なる種類のアロケータで、best fit(\term{bf})と同様の働きを試みますが、限られた時間だけ探します。もし完全に収まるところを探せなかったら、これまでに探せたものの中で最も良いものを選びます。この値(時間)はVMの\term{mbsd}\footnote{\href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_mbsd}}引数を通して設定可能です。
 
-\emph{A fit} (\term{af}), finally, is an allocator behaviour for temporary data that looks for a single existing memory block, and if the data can fit, \term{af} uses it. If the data can't fit, \term{af} allocates a new one.
+%\emph{A fit} (\term{af}), finally, is an allocator behaviour for temporary data that looks for a single existing memory block, and if the data can fit, \term{af} uses it. If the data can't fit, \term{af} allocates a new one.
+最後に\emph{A fit}(\term{af})は一時的なデータのためのアロケータ挙動で、一つの存在しているメモリブロックを探し、データが収まるなら\term{af}はそれを使います。もしデータが収まらなければ、\term{af}は新しいものを割り当てます。
 
-Each of these strategies can be applied individually to every kind of allocator, so that the heap allocator and the binary allocator do not necessarily share the same strategy.
+%Each of these strategies can be applied individually to every kind of allocator, so that the heap allocator and the binary allocator do not necessarily share the same strategy.
+これらの戦略はそれぞれ個別に全ての種類のアロケータに適用することができ、ヒープアロケータとバイナリアロケータで同じ戦略を共有する必要はありません。
 
-Finally, starting with Erlang version 17.0, each \term{alloc\_util} allocator on each scheduler has what is called a \emph{\term{mbcs} pool}. The \term{mbcs} pool is a feature used to fight against memory fragmentation on the VM. When an allocator gets to have one of its multiblock carriers become mostly empty,\footnote{The threshold is configurable through \href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}} the carrier becomes \emph{abandoned}.
+%Finally, starting with Erlang version 17.0, each \term{alloc\_util} allocator on each scheduler has what is called a \emph{\term{mbcs} pool}. The \term{mbcs} pool is a feature used to fight against memory fragmentation on the VM. When an allocator gets to have one of its multiblock carriers become mostly empty,\footnote{The threshold is configurable through \href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}} the carrier becomes \emph{abandoned}.
+Erlangのバージョン17.0からついにそれぞれのスケジューラの\term{alloc\_util}アロケータごとに\emph{\term{mbcs}プール}と呼ばれるものを持つようになりました。\term{mbcs}プールはVMのメモリフラグメンテーションと戦うために使われる機能です。アロケータの持つマルチブロックキャリアの1つがほとんど空になると\footnote{\href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}を通して閾値を設定できます}、そのキャリアは\emph{放棄された}状態になります。
 
-This abandoned carrier will stop being used for new allocations, until new multiblock carriers start being required. When this happens, the carrier will be fetched from the \term{mbcs} pool. This can be done across multiple \term{alloc\_util} allocators of the same type across schedulers. This allows the VM to cache mostly-empty carriers without forcing deallocation of their memory.\footnote{In cases this consumes too much memory, the feature can be disabled with the options \term{+MBacul 0}.} It also enables the migration of carriers across schedulers when they contain little data, according to their needs.
+%This abandoned carrier will stop being used for new allocations, until new multiblock carriers start being required. When this happens, the carrier will be fetched from the \term{mbcs} pool. This can be done across multiple \term{alloc\_util} allocators of the same type across schedulers. This allows the VM to cache mostly-empty carriers without forcing deallocation of their memory.\footnote{In cases this consumes too much memory, the feature can be disabled with the options \term{+MBacul 0}.} It also enables the migration of carriers across schedulers when they contain little data, according to their needs.
+この放棄されたキャリアは新しいマルチブロックキャリアが必要とされるまで、新しい割り当てのために使われなくなります。もしそれが起こると(新しいマルチブロックキャリアが必要になる)、キャリアは\term{mbcs}プールから取得されます。これはスケジューラを超えて同じ種類の複数の\term{alloc\_util}アロケータに渡って行われます。これはVMにメモリの割り当て解除を強制することなしに、ほとんど空のキャリアをキャッシュすることを許可します\footnote{これはあまりにもたくさんのメモリを消費する場合がありますが、\term{+MBacul 0}オプションによってこの機能を無効にできます。}。それはまたキャリアが少ないデータを保持していて、それらが必要とされる場合に、スケジューラをまたがったキャリアのマイグレーションを有効にできます。
 
-\subsubsection{The Process Level}
+%\subsubsection{The Process Level}
+\subsubsection{プロセスレベル}
 \label{subsec:memory-process-level}
 
-On a smaller scale, for each Erlang process, the layout still is a bit different. It basically has this piece of memory that can be imagined as one box:
+%On a smaller scale, for each Erlang process, the layout still is a bit different. It basically has this piece of memory that can be imagined as one box:
+より小さなスケールでは、それぞれのErlangプロセスごとにレイアウトはまだ少し異なっています。それは基本的に1つの箱として想像できるメモリを持っています。
 
 \begin{VerbatimText}
 [                  ]
 \end{VerbatimText}
 
-On one end you have the heap, and on the other, you have the stack:
+%On one end you have the heap, and on the other, you have the stack:
+片側の端にはヒープを、その反対側にはスタックを持ちます。
 
 \begin{VerbatimText}
-[heap |     | stack]
+%[heap |     | stack]
+[ヒープ |     | スタック]
 \end{VerbatimText}
 
-In practice there's more data (you have an old heap and a new heap, for generational GC, and also a virtual binary heap, to account for the space of reference-counted binaries on a specific sub-allocator not used by the process — \term{binary\_alloc} vs. \term{eheap\_alloc}):
+%In practice there's more data (you have an old heap and a new heap, for generational GC, and also a virtual binary heap, to account for the space of reference-counted binaries on a specific sub-allocator not used by the process — \term{binary\_alloc} vs. \term{eheap\_alloc}):
+実際にはそこにはもっとたくさんのデータがあります(世代別GCのための古いヒープ、新しいヒープに、プロセスから使われていない特定のサブアロケータにあるリファレンスカウントされたバイナリの領域を考慮した仮想のバイナリヒープも持ちます --- \term{binary\_alloc}対\term{eheap\_alloc})。
 
 \begin{VerbatimText}
-[heap   ||    stack]
+%[heap   ||    stack]
+[ヒープ   ||    スタック]
 \end{VerbatimText}
 
-The space is allocated more and more up until either the stack or the heap can't fit in anymore. This triggers a minor GC. The minor GC moves the data that can be kept into the old heap. It then collects the rest, and may end up reallocating more space.
+%The space is allocated more and more up until either the stack or the heap can't fit in anymore. This triggers a minor GC. The minor GC moves the data that can be kept into the old heap. It then collects the rest, and may end up reallocating more space.
+その領域はスタックかヒープが何も格納できなくなるまでもっと割り当てられる。これはマイナーGCを引き起こします。マイナーGCはオールド領域のヒープに保持できるデータを動かします。そして残りを集め、さらなる領域を再割り当てするかもしれません。
 
-After a given number of minor GCs and/or reallocations, a full-sweep GC is performed, which inspects both the new and old heaps, frees up more space, and so on. When a process dies, both the stack and heap are taken out at once. reference-counted binaries are decreased, and if the counter is at 0, they vanish.
+%After a given number of minor GCs and/or reallocations, a full-sweep GC is performed, which inspects both the new and old heaps, frees up more space, and so on. When a process dies, both the stack and heap are taken out at once. reference-counted binaries are decreased, and if the counter is at 0, they vanish.
+与えられた回数のマイナーGCや再割り当ての後で、新しいヒープと古いヒープを検査し、より多くの領域を解放するなどフルスイープGCが行われます。プロセスが死んだ時、スタックとヒープの両方は一度に解放されます。リファレンスカウントされたバイナリはカウントが減り、カウンターが0になるとそれらは消滅します。
 
-When that happens, over 80\% of the time, the only thing that happens is that the memory is marked as available in the sub-allocator and can be taken back by new processes or other ones that may need to be resized. Only after having this memory unused — and the multiblock carrier unused also — is it returned to \term{mseg\_alloc} or \term{sys\_alloc}, which may or may not keep it for a while longer.
+%When that happens, over 80\% of the time, the only thing that happens is that the memory is marked as available in the sub-allocator and can be taken back by new processes or other ones that may need to be resized. Only after having this memory unused — and the multiblock carrier unused also — is it returned to \term{mseg\_alloc} or \term{sys\_alloc}, which may or may not keep it for a while longer.
+それが起こると時間の80\%以上はメモリはサブアロケータで利用可能とマークされ、リサイズが必要な新しいプロセスまたは他のプロセスによって取り戻せるようになります。このメモリが使われていない --- マルチブロックキャリアもまた使われていない --- 状態になった後でのみ、しばらくの間それが保持されていてもいなくてもよいが\term{mseg\_alloc}または\term{sys\_alloc}へ返されます。
 
 %\subsection{Fixing Memory Fragmentation with a Different Allocation Strategy}
 \subsection{異なるアロケーション戦略でメモリフラグメンテーションを修正する}
