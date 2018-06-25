@@ -18,27 +18,38 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 % This chapter will mostly focus on the latter kind of leak, because they're easier to investigate and see grow in real time. We will focus on finding what is growing on the node and common remediation options, handling binary leaks (they're a special case), and detecting memory fragmentation.
 この章では主に後者のようなリークに焦点を当てます。その理由は、こちらのほうが調査しやすく、変化がリアルタイムで見えるためです。ここでは、ノード上で何の数値が伸びているか、一般的な対処の選択肢、（特別なケースである）バイナリリーク、メモリの断片化の発見方法を扱います。
 
-\section{Common Sources of Leaks}
+% \section{Common Sources of Leaks}
+\section{よくあるリークの原因}
 
-Whenever someone calls for help saying "oh no, my nodes are crashing", the first step is always to ask for data. Interesting questions to ask and pieces of data to consider are:
-
-\begin{itemize*}
-	\item Do you have a crash dump and is it complaining about memory specifically? If not, the issue may be unrelated. If so, go dig into it, it's full of data.
-	\item Are the crashes cyclical? How predictable are they? What else tends to happen at around the same time and could it be related?
-	\item Do crashes coincide with peaks in load on your systems, or do they seem to happen at more or less any time? Crashes that happen especially \emph{during} peak times are often due to bad overload management (see Chapter \ref{chap:overload}). Crashes that happen at any time, even when load goes down following a peak are more likely to be actual memory issues.
-\end{itemize*}
-
-If all of this seems to point towards a memory leak, install one of the metrics libraries mentioned in Chapter \ref{chap:runtime-metrics} and/or \otpapp{recon} and get ready to dive in.\footnote{See Chapter \ref{chap:connecting} if you need help to connect to a running node}
-
-The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
+% Whenever someone calls for help saying "oh no, my nodes are crashing", the first step is always to ask for data. Interesting questions to ask and pieces of data to consider are:
+誰かが「助けて！ノードがクラッシュしているの！」と助けを求めてきたとき、最初にするべきことは常にデータを求めることです。ここで重要な質問やデータには以下のようなものがあります:
 
 \begin{itemize*}
-	\item Is any type of memory growing faster than others?
-	\item Is there any type of memory that's taking the majority of the space available?
-	\item Is there any type of memory that never seems to go down, and always up (other than atoms)?
+	% \item Do you have a crash dump and is it complaining about memory specifically? If not, the issue may be unrelated. If so, go dig into it, it's full of data.
+	\item クラッシュダンプはありますか、そしてそれはメモリについて文句を言っていますか？もし違うのならば、この問題はメモリとは関係がない可能性があります。もしそうであるならば、クラッシュダンプを掘り返しましょう。データが山のようにあります。
+	% \item Are the crashes cyclical? How predictable are they? What else tends to happen at around the same time and could it be related?
+	\item クラッシュは周期的に起こりますか？どのくらい予測可能ですか？クラッシュと同じくらいの時間にはほかに何が起こる傾向があり、関連していそうですか？
+	% \item Do crashes coincide with peaks in load on your systems, or do they seem to happen at more or less any time? Crashes that happen especially \emph{during} peak times are often due to bad overload management (see Chapter \ref{chap:overload}). Crashes that happen at any time, even when load goes down following a peak are more likely to be actual memory issues.
+	\item クラッシュは負荷のピークと同じくして起こりますか、それとも無関係にどんなときでも起こりますか？特にピーク\emph{中に}起こるクラッシュはしばしば負荷のマネジメントの失敗から来ます（\ref{chap:overload}を参照）。どんな状況でも起こるクラッシュ、特にピーク後に負荷が減っても起こるようなクラッシュは本当にメモリに起因する問題である可能性が高いです。
 \end{itemize*}
 
-Many options are available depending on the type of memory that's growing.
+% If all of this seems to point towards a memory leak, install one of the metrics libraries mentioned in Chapter \ref{chap:runtime-metrics} and/or \otpapp{recon} and get ready to dive in.\footnote{See Chapter \ref{chap:connecting} if you need help to connect to a running node}
+これらの質問ですべてメモリリークを指し示すような回答を得たならば、\ref{chap:runtime-metrics} 章にて説明されているメトリクスライブラリまたは \otpapp{recon} をインストールし、データを探索する準備をしましょう。\footnote{動作しているノードに接続する必要がある場合は \ref{chap:connecting} 章を参照。}
+
+% The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
+どのようなケースでも、最初に見るべきはデータの傾向です。\expression{erlang:memory()} またはライブラリやメモリシステムにあるこれのヴァリアントを使ってすべてのメモリのタイプについて調べましょう。以下の点を調べるとよいです:
+
+\begin{itemize*}
+	% \item Is any type of memory growing faster than others?
+	\item あるタイプのメモリ使用量が他のタイプのメモリ使用量よりも速く伸びていますか？
+	% \item Is there any type of memory that's taking the majority of the space available?
+	\item あるタイプのメモリが利用可能なメモリ空間の大部分を占めていませんか？
+	% \item Is there any type of memory that never seems to go down, and always up (other than atoms)?
+	\item あるタイプ（atomを除く）のメモリ使用量が全く減りそうになく、常に増えていませんか？
+\end{itemize*}
+
+% Many options are available depending on the type of memory that's growing.
+増えているメモリ使用の種類に応じて使える選択肢は様々です。
 
 \subsection{Atom}
 
