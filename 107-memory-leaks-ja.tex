@@ -45,23 +45,29 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 	% \item Is there any type of memory that's taking the majority of the space available?
 	\item あるタイプのメモリが利用可能なメモリ空間の大部分を占めていませんか？
 	% \item Is there any type of memory that never seems to go down, and always up (other than atoms)?
-	\item あるタイプ（atomを除く）のメモリ使用量が全く減りそうになく、常に増えていませんか？
+	\item あるタイプ（アトムを除く）のメモリ使用量が全く減りそうになく、常に増えていませんか？
 \end{itemize*}
 
 % Many options are available depending on the type of memory that's growing.
 増えているメモリ使用の種類に応じて使える選択肢は様々です。
 
-\subsection{Atom}
+% \subsection{Atom}
+\subsection{アトム}
 
-\emph{Don't use dynamic atoms!} Atoms go in a global table and are cached forever. Look for places where you call \function{erlang:binary\_to\_term/1} and \function{erlang:list\_to\_atom/1}, and consider switching to safer variants (\expression{erlang:binary\_to\_term(Bin, [safe])} and\newline \function{erlang:list\_to\_existing\_atom/1}).
+% \emph{Don't use dynamic atoms!} Atoms go in a global table and are cached forever. Look for places where you call \function{erlang:binary\_to\_term/1} and \function{erlang:list\_to\_atom/1}, and consider switching to safer variants (\expression{erlang:binary\_to\_term(Bin, [safe])} and\newline \function{erlang:list\_to\_existing\_atom/1}).
+\emph{動的にアトムを生成してはいけません！}アトムはグローバルなテーブルに保存され永久にキャッシュされるためです。\function{erlang:binary\_to\_term/1} や \function{erlang:list\_to\_atom/1} を呼んでいるや場所を探し、\expression{erlang:binary\_to\_term(Bin, [safe])} や \function{erlang:list\_to\_existing\_atom/1} のようなより安全なヴァリアントを用いるようにしましょう。
 
-If you use the \otpapp{xmerl} library that ships with Erlang, consider open source alternatives\footnote{I don't dislike \href{https://github.com/paulgray/exml}{exml} or \href{https://github.com/willemdj/erlsom}{erlsom}} or figuring the way to add your own SAX parser that can be safe\footnote{See Ulf Wiger at \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}}.
+% If you use the \otpapp{xmerl} library that ships with Erlang, consider open source alternatives\footnote{I don't dislike \href{https://github.com/paulgray/exml}{exml} or \href{https://github.com/willemdj/erlsom}{erlsom}} or figuring the way to add your own SAX parser that can be safe\footnote{See Ulf Wiger at \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}}.
+もしErlangに同梱されている \otpapp{xmerl} ライブラリを使っているのならば、オープンソースの代替品を使うか\footnote{\href{https://github.com/paulgray/exml}{exml} や \href{https://github.com/willemdj/erlsom}{erlsom} などは悪くないでしょう}、自分で安全なSAXパーサーを追加するか\footnote{Ulf Wiger の以下の記事を参照:  \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}} を検討してみてください。
 
-If you do none of this, consider what you do to interact with the node. One specific case that bit me in production was that some of our common tools used random names to connect to nodes remotely, or generated nodes with random names that connected to each other from a central server.\footnote{This is a common approach to figuring out how to connect nodes together: have one or two central nodes with fixed names, and have every other one log to them. Connections will then propagate automatically.} Erlang node names are converted to atoms, so just having this was enough to slowly but surely exhaust space on atom tables. Make sure you generate them from a fixed set, or slowly enough that it won't be a problem in the long run.
+% If you do none of this, consider what you do to interact with the node. One specific case that bit me in production was that some of our common tools used random names to connect to nodes remotely, or generated nodes with random names that connected to each other from a central server.\footnote{This is a common approach to figuring out how to connect nodes together: have one or two central nodes with fixed names, and have every other one log to them. Connections will then propagate automatically.} Erlang node names are converted to atoms, so just having this was enough to slowly but surely exhaust space on atom tables. Make sure you generate them from a fixed set, or slowly enough that it won't be a problem in the long run.
+これらのことをしていない場合、ノードとどのようにインタラクションを行っているかを調査してみてください。実運用で問題を起こした一つの例として、我々の使っていたいくつかの共通ツールが外部のノードに接続するときにランダムな名前を使っていたり、中央サーバーを介してお互いにつながっている\footnote{これはノード同士をどのようにつなげるかを見つけるためのよく使われるアプローチです。一つか二つの名前の固定された中央ノードを用意し、他のノードはそれらに接続するようにします。そうすると、自ずと接続は伝搬します。}ランダムな名前のプロセスを生成していました。Erlangノード名はアトムに変換されるため、このような仕組みがあるだけでゆっくりとしかし確実にアトムテーブルの空間を埋め尽くしていくのでした。固定された範囲の中で生成するか、長期的に問題にならないくらい遅いペースで生成するように気をつけましょう。
 
-\subsection{Binary}
+% \subsection{Binary}
+\subsection{バイナリ}
 
-See Section \ref{sec:binaries}.
+% See Section \ref{sec:binaries}.
+\ref{sec:binaries} 章を参照。
 
 \subsection{Code}
 
