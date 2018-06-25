@@ -1,16 +1,23 @@
-\chapter{Memory Leaks}
+%\chapter{Memory Leaks}
+\chapter{メモリリーク}
 \label{chap:memory-leaks}
 
-There are truckloads of ways for an Erlang node to bleed memory. They go from extremely simple to astonishingly hard to figure out (fortunately, the latter type is also rarer), and it's possible you'll never encounter any problem with them.
+% There are truckloads of ways for an Erlang node to bleed memory. They go from extremely simple to astonishingly hard to figure out (fortunately, the latter type is also rarer), and it's possible you'll never encounter any problem with them.
+Erlangノードがメモリを垂れ流す原因は山ほどあります。それらは非常に簡単に見つけられるから驚くほど見つけにくいものまであり（幸いにして、後者は稀です）、場合によってはそれらのメモリリークが何の問題も引き起こさないこともあります。
 
-You will find out about memory leaks in two ways:
+% You will find out about memory leaks in two ways:
+メモリリークについては以下の2通りの方法で知ることができます:
 
 \begin{enumerate*}
-	\item A crash dump (see Chapter \ref{chap:crash-dumps});
-	\item By finding a worrisome trend in the data you are monitoring. 
+	% \item A crash dump (see Chapter \ref{chap:crash-dumps});
+	\item クラッシュダンプ（\ref{chap:crash-dumps}を参照）
+	% \item By finding a worrisome trend in the data you are monitoring.
+	\item モニタリングしているデータにやっかいな傾向を見つける
 \end{enumerate*}
 
-This chapter will mostly focus on the latter kind of leak, because they're easier to investigate and see grow in real time. We will focus on finding what is growing on the node and common remediation options, handling binary leaks (they're a special case), and detecting memory fragmentation. 
+% This chapter will mostly focus on the latter kind of leak, because they're easier to investigate and see grow in real time. We will focus on finding what is growing on the node and common remediation options, handling binary leaks (they're a special case), and detecting memory fragmentation.
+この章では主に後者のようなリークに焦点を当てます。その理由は、こちらのほうが調査しやすく、変化がリアルタイムで見えるためです。ここでは、ノード上で何の数値が伸びているか、一般的な対処の選択肢、（特別なケースである）バイナリリーク、メモリの断片化の発見方法を扱います。
+
 \section{Common Sources of Leaks}
 
 Whenever someone calls for help saying "oh no, my nodes are crashing", the first step is always to ask for data. Interesting questions to ask and pieces of data to consider are:
