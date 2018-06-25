@@ -231,12 +231,15 @@ The solution to this pattern is to have the router process return the pid to rou
 
 A fix for this can be implemented transparently in the router's API functions, without any visible change required by the callers.
 
-\section{Memory Fragmentation}
+%\section{Memory Fragmentation}
+\section{メモリフラグメンテーション}
 \label{sec:memory-fragmentation}
 
-Memory fragmentation issues are intimately related to Erlang's memory model, as described in Section \ref{subsec:erlang-memory-model}. It is by far one of the trickiest issues of running long-lived Erlang nodes (often when individual node uptime reaches many months), and will show up relatively rarely.
+%Memory fragmentation issues are intimately related to Erlang's memory model, as described in Section \ref{subsec:erlang-memory-model}. It is by far one of the trickiest issues of running long-lived Erlang nodes (often when individual node uptime reaches many months), and will show up relatively rarely.
+メモリフラグメンテーションの問題は\ref{subsec:erlang-memory-model}の章で記述されているようにErlangのメモリモデルと密接に関連しています。これは長時間動いているErlangノードの最も難しい問題(個々のノードの稼働時間が数ヶ月にも達する時によく起こる)の一つで、比較的まれに見られます。
 
-The general symptoms of memory fragmentation are large amounts of memory being allocated during peak load, and that memory not going away after the fact. The damning factor will be that the node will internally report much lower usage (through \function{erlang:memory()}) than what is reported by the operating system.
+%The general symptoms of memory fragmentation are large amounts of memory being allocated during peak load, and that memory not going away after the fact. The damning factor will be that the node will internally report much lower usage (through \function{erlang:memory()}) than what is reported by the operating system.
+一般的なメモリフラグメンテーションの症状は、ピーク時に大量のメモリが割り当てられ、その後に解放されないというものです。ノードが内部的にレポートするメモリ使用量(\function{erlang:memory()}を通した)がOSがレポートするものに比べてとても少ない場合は、明らかにこれが要因です。
 
 \subsection{Finding Fragmentation}
 
