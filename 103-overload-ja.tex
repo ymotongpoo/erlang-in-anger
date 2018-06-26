@@ -217,15 +217,20 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 システムを設計したときに作ったエラーに対するセーフマージンはユーザーの数が増えるにつれ徐々に失われていきます。
 その観点からビジネスが耐えられるかのトレードオフを考慮することが重要です。なぜなら、ユーザーはシステム全体がときどき落ちてしまうことよりもずっと、自分に割り当てられた使用量がいつも使えないことのほうが嫌だと思うからです。
 
-\section{Discarding Data}
+%\section{Discarding Data}
+\section{データの破棄}
 
-When nothing can slow down outside of your Erlang system and things can't be scaled up, you must either drop data or crash (which drops data that was in flight, for most cases, but with more violence).
+%When nothing can slow down outside of your Erlang system and things can't be scaled up, you must either drop data or crash (which drops data that was in flight, for most cases, but with more violence).
+Erlangシステム以外から流入速度を落とせず、かつスケールアップもできない場合、データをドロップさせるか、クラッシュ（結局それでも大抵の場合は、処理中のデータをより乱暴にドロップ）させる必要があります。
 
-It's a sad reality that nobody really wants to deal with. Programmers, software engineers, and computer scientists are trained to purge the useless data, and keep everything that's useful. Success comes through optimization, not giving up.
+%It's a sad reality that nobody really wants to deal with. Programmers, software engineers, and computer scientists are trained to purge the useless data, and keep everything that's useful. Success comes through optimization, not giving up.
+これは全ての人が目を背けたくなる悲しい現実です。プログラマーや、ソフトウェアエンジニア、そしてコンピュータサイエンティストは、不要なデータは消去し、有用なデータはすべて保持するよう学んできています。地道な最適化をすることにより、Erlangシステムは入力データを問題なく処理できる状態になります。
 
-However, there's a point that can be reached where the data that comes in does so at a rate faster than it goes out, even if the Erlang system on its own is able to do everything fast enough. In some cases, It's the component \emph{after} it that blocks.
+%However, there's a point that can be reached where the data that comes in does so at a rate faster than it goes out, even if the Erlang system on its own is able to do everything fast enough. In some cases, It's the component \emph{after} it that blocks.
+しかし、Erlangシステム自身が全てのデータを十分な速度で処理できたとしても、Erlangシステムの \emph{後ろ} に控えるコンポーネントがブロックし、出力よりもデータ入力の方が速くなることもあります。
 
-If you don't have the option of limiting how much data you receive, you then have to drop messages to avoid crashing.
+%If you don't have the option of limiting how much data you receive, you then have to drop messages to avoid crashing.
+受信するデータ量を制限する選択肢がない場合は、クラッシュを避けるためにメッセージをドロップする必要があります。
 
 \subsection{Random Drop}
 
