@@ -269,7 +269,7 @@ ok
 上記のパターンでは、特定の関数（\expression{'\_'}）にはマッチしていないことに注意してください。fun は２つの引数を持つ関数に限定され、また最初の引数はリストもしくは1よりも大きい数値です。
 
 %Be aware that extremely broad patterns with lax rate-limitting (or very high absolute limits) may impact your node's stability in ways \module{recon\_trace} cannot easily help you with. Similarly, tracing extremely large amounts of function calls (all of them, or all of \module{io} for example) can be risky if more trace messages are generated than any process on the node could ever handle, despite the precautions taken by the library.
-レート制限を緩めて非常に広範囲にマッチするパターン（あるいは制限を非常に高い数値にする）にした場合、ノードの安定性に影響を与える可能性があり、また\module{recon\_trace}はそれに対して何も支援できなくなるかもしれないということに注意してください。同様に、非常に大量の関数呼び出し（関数や\module{io}の全ての呼び出しなど）をトレースした場合、ライブラリで注意していはいますが、そのノードが処理できるプロセスよりも多くのトレースメッセージが生成されるリスクがあります。
+レート制限を緩めて非常に広範囲にマッチするパターン（あるいは制限を非常に高い数値にする）にした場合、ノードの安定性に影響を与える可能性があり、また\module{recon\_trace}はそれに対して何も支援できなくなるかもしれないということに注意してください。同様に、非常に大量の関数呼び出し（全ての関数や\module{io}の全ての呼び出しなど）をトレースした場合、ライブラリで注意していはいますが、そのノード上のどんなプロセスも処理できないほど多くのトレースメッセージが生成されるリスクがあります。
 
 %In doubt, start with the most restrictive tracing possible, with low limits, and progressively increase your scope.
 よくわからない場合、最も制限した量でトレースを開始し、少しずつ増やしていってください。
@@ -298,7 +298,7 @@ ok
 
 \begin{enumerate}
 	%\item When would you want to move time stamping of traces to the VM's trace mechanisms directly? What would be a possible downside of doing this?	
-	\item トレースにタイムスタンプを記録する時に、VMのトレース機能を直接利用するようにしたくなるのはどういう時ですか？ これによる欠点は何ですか？
+	\item トレースにタイムスタンプを記録する時に、VMのトレース機能として直接利用するようにしたくなるのはどういう時ですか？ これによる欠点は何ですか？
 	%\item Imagine that traffic sent out of a node does so over SSL, over a multi-tenant system. However, due to wanting to validate data sent (following a customer complain), you need to be able to inspect what was seen clear text. Can you think up a plan to be able to snoop in the data sent to their end through the \module{ssl} socket, without snooping on the data sent to any other customer?
 	\item ノードから送信されるトラフィックがSSL経由の、マルチテナントシステムを想像してみてください。ただし、（顧客からのクレームに対応するため）送信されるデータをバリデートしたいので、平文で中身を参照できる必要があります。\module{ssl}ソケット経由で送信されたデータを覗くための方法を考えられますか？ しかも、その他の顧客宛のデータは覗かずにです。
 \end{enumerate}
