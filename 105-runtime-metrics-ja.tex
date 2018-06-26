@@ -207,7 +207,7 @@ Erlangノードは実運用において、ほどほどのタスクもでCPUを�
 \label{subsec:global-procs}
 
 %Trying to get a global view of processes is helpful when trying to assess how much work is being done in the VM in terms of \emph{tasks}.
-プロセスに関するグローバルビューがあると、\emph{タスク}の観点でVMはがどのくらいの仕事を完了したか知るのに役立ちます。 %%TODO: ここに来てtaskとworkの区別がいまいちわからなくなってきた。これまではworkもタスクととらえたほうがわかりやすく感じてそう訳してましたが…より良い言葉の使い分け方募集中です
+プロセスに関するグローバルビューがあると、\emph{タスク}の観点でVMはがどのくらいの仕事を完了したか知るのに役立ちます。
 %A general good practice in Erlang is to use processes for truly concurrent activities — on web servers, you will usually get one process per request or connection, and on stateful systems, you may add one process per-user — and therefore the number of processes on a node can be used as a metric for load.
 Erlangにおいて一般的に良い方法となるのは、真に同時実行されているプロセスを用いることです --- Webサーバでは普段、１リクエストもしくは１接続ごとに１プロセスを持つでしょうし、状態を持つシステムであれば、ユーザごとに１つのプロセスを追加しているかもしれません --- したがって、１ノード中に存在するプロセス数がメトリクスとして利用できます。
 
