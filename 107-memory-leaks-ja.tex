@@ -192,8 +192,7 @@ Erlangのバイナリは2つの主な型から成ります： ProcBinとrefcバ�
 \end{VerbatimEshell}
 
 %This will show how many individual binaries were held and then freed by each process as a delta. The value \expression{-5580} means there were 5580 fewer refc binaries after the call than before.
-この例では、どれくらいの独立したバイナリが保持された後に開放されているかをデルタとして表しています。この \expression{-5580} は、この関数が実行される前と後で5580少ないrefcバイナリが存在したことを表しています。
-TODO: デルタの表現
+この例では、どれくらいの独立したバイナリが保持された後に開放されているかを差分として表しています。この \expression{-5580} は、この関数が実行される前と後で5580少ないrefcバイナリが存在したことを表しています。
 
 %It is normal to have a given amount of them stored at any point in time, and not all numbers are a sign that something is bad. If you see the memory used by the VM go down drastically after running this call, you may have had a lot of idling refc binaries.
 これが常時一定量あることを示しているのは普通のことですし、すべての数字が何かが悪いことを示しているわけではありません。もしあなたが、VMが使用しているメモリがこの関数の呼び出しよりも後に大幅に減っていることを確認したら、それはアイドル状態のrefcバイナリがあるということかもしれません。
