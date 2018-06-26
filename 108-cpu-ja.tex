@@ -39,14 +39,18 @@ What's interesting with this function is to try it while a system is already rat
 
 Using the code locations\footnote{Call \expression{recon:info(PidTerm, location)} or \expression{process\_info(Pid, current\_stacktrace)} to get this information.} and current functions being run, you should be able to identify what kind of code hogs all your schedulers.
 
-\section{System Monitors}
+%\section{System Monitors}
+\section{システムモニター}
 \label{sec:cpu-system-monitors}
 
-If nothing seems to stand out through either profiling or checking reduction counts, it's possible some of your work ends up being done by NIFs, garbage collections, and so on. These kinds of work may not always increment their reductions count correctly, so they won't show up with the previous methods, only through long run times.
+%If nothing seems to stand out through either profiling or checking reduction counts, it's possible some of your work ends up being done by NIFs, garbage collections, and so on. These kinds of work may not always increment their reductions count correctly, so they won't show up with the previous methods, only through long run times.
+もしプロファイリングやリダクションカウントの調査から何も目立つものが見つからない場合、NIFやガベージコレクションなどに行き着いている可能性があります。それらは常にリダクションカウントを正確に増加させるとは限らないため、これまでのやり方では表れず、実行時間の長さとしてのみ表れます。
 
-To find about such cases, the best way around is to use \function{erlang:system\_monitor/2}, and look for \term{long\_gc} and \term{long\_schedule}. The former will show whenever garbage collection ends up doing a lot of work (it takes time!), and the latter will likely catch issues with busy processes, either through NIFs or some other means, that end up making them hard to de-schedule.\footnote{Long garbage collections count towards scheduling time. It is very possible that a lot of your long schedules will be tied to garbage collections depending on your system.}
+%To find about such cases, the best way around is to use \function{erlang:system\_monitor/2}, and look for \term{long\_gc} and \term{long\_schedule}. The former will show whenever garbage collection ends up doing a lot of work (it takes time!), and the latter will likely catch issues with busy processes, either through NIFs or some other means, that end up making them hard to de-schedule.\footnote{Long garbage collections count towards scheduling time. It is very possible that a lot of your long schedules will be tied to garbage collections depending on your system.}
+そういったケースを見つけるために、一番の方法は \function{erlang:system\_monitor/2} を使い、 \term{long\_gc} と \term{long\_schedule} を探すことです。前者はガベージコレクションが沢山の作業（時間がかかります！）を終えるたびに表示され、そして後者はNIFや他の理由のせいでスケジューリングを解除するのが難しいビジープロセスの可能性にあるものを捕捉しやすくします。\footnote{長いガベージコレクションの数はスケジュール時間に近づきます。システムによってはガベージコレクションが沢山の長いスケジュールに結びついている可能性は非常に高いです。}
 
-We've seen how to set such a system monitor In Garbage Collection in \ref{subsubsec:leak-gc}, but here's a different pattern\footnote{If you're on 17.0 or newer versions, the shell functions can be made recursive far more simply by using their named form, but to have the widest compatibility possible with older versions of Erlang, I've let them as is.} I've used before to catch long-running items:
+%We've seen how to set such a system monitor In Garbage Collection in \ref{subsubsec:leak-gc}, but here's a different pattern\footnote{If you're on 17.0 or newer versions, the shell functions can be made recursive far more simply by using their named form, but to have the widest compatibility possible with older versions of Erlang, I've let them as is.} I've used before to catch long-running items:
+\ref{subsubsec:leak-gc} のガベージコレクションではシステムモニターをどのように設置するかを見てきましたが、私が以前長時間稼動しているアイテムを捉えるのに使った別のパターン\footnote{もし17.0以降の新しいバージョンなら、この関数は名前つきフォームで再帰することで簡潔にできますが、それより古いバージョンのErlangでも互換性を保てるようそのままにしておきます}があります
 
 \begin{VerbatimEshell}
 1> F = fun(F) ->
@@ -70,9 +74,11 @@ monitor=long_schedule pid=<0.54.0> info=[{timeout,1102},
                                          {out,{some_module,some_function,3}}]
 \end{VerbatimEshell}
 
-Be sure to set the \term{long\_schedule} and \term{long\_gc} values to large-ish values that might be reasonable to you. In this example, they're set to 1000 milliseconds. You can either kill the monitor by calling \expression{exit(whereis(temp\_sys\_monitor), kill)} (which will in turn kill the shell because it's linked), or just disconnect from the node (which will kill the process because it's linked to the shell.)
+%Be sure to set the \term{long\_schedule} and \term{long\_gc} values to large-ish values that might be reasonable to you. In this example, they're set to 1000 milliseconds. You can either kill the monitor by calling \expression{exit(whereis(temp\_sys\_monitor), kill)} (which will in turn kill the shell because it's linked), or just disconnect from the node (which will kill the process because it's linked to the shell.)
+\term{long\_schedule}と\term{long\_gc}をあなたが筋の通った説明をできるような大きな値にしてください。この例では、1000ミリ秒にします。あなたは\expression{exit(whereis(temp\_sys\_monitor), kill)}を呼ぶ（リンクされているため次にシェルを殺すことになります）か、単にノードから切断する（リンクされているためプロセスを殺すことになります）だけでモニターを殺すことができます。
 
-This kind of code and monitoring can be moved to its own module where it reports to a long-term logging storage, and can be used as a canary for performance degradation or overload detection.
+%This kind of code and monitoring can be moved to its own module where it reports to a long-term logging storage, and can be used as a canary for performance degradation or overload detection.
+こういったコードとモニタリングは長期間ロギングするストレージにレポートしているモジュール自身へ移すことができ、パフォーマンス劣化や過負荷の発見のためのカナリアとして使うことができます。
 
 \subsection{Suspended Ports}
 \label{subsec:port-system-monitors}
