@@ -3,7 +3,7 @@
 \label{chap:crash-dumps}
 
 %Whenever an Erlang node crashes, it will generate a crash dump\footnote{If it isn't killed by the OS for violating ulimits while dumping or didn't segfault.}.
-Erlangノードはクラッシュすると、クラッシュダンプを出力します。\footnote{ダンプ中にulimitsの制限を超えてOSに殺されたり、セグメンテーションフォールトしない限りは}.
+Erlangノードはクラッシュすると、クラッシュダンプを出力します。\footnote{ダンプ中にulimitsの制限を超えてOSに殺されたり、セグメンテーションフォールトしない限りは}
 
 %The format is mostly documented in Erlang's official documentation\footnote{\href{http://www.erlang.org/doc/apps/erts/crash\_dump.html}{http://www.erlang.org/doc/apps/erts/crash\_dump.html}}, and anyone willing to dig deeper inside of it will likely be able to figure out what data means by looking at that documentation. There will be specific data that is hard to understand without also understanding the part of the VM they refer to, but that might be too complex for this document.
 フォーマットについてはErlangのオフィシャルドキュメントにほとんど書かれており\footnote{\href{http://www.erlang.org/doc/apps/erts/crash\_dump.html}{http://www.erlang.org/doc/apps/erts/crash\_dump.html}}、深く掘り下げたい人は誰でもそのドキュメントを見ることで、データが意味していることを把握することができるでしょう。特定のデータについては更にVMの一部についても理解していないと理解することが難しいものがありますが、このドキュメントに載せるには複雑過ぎます。
@@ -166,13 +166,13 @@ Kernel pid terminated (application_controller)
 これらは、おそらくあなたが非常によく見る類のクラッシュです。カバーすべきことが多くあるため、\ref{chap:memory-leaks} 章ではその内容の理解と、稼働中のシステムでのデバッグで必要となることについてまとめています。
 
 %In any case, the crash dump will help figure out what the problem was after the fact. The process mailboxes and individual heaps are usually good indicators of issues. If you're running out of memory without any mailbox being outrageously large, look at the processes heap and stack sizes as returned by the recon script.
-いずれにせよ、クラッシュダンプは何が問題であったかを事後に把握するために役立ちます。プロセスのメッセージボックスと個々のヒープは通常、問題に対する良い指標です。メールボックスにメールが大量にあるわけではないのにメモリが不足している時には、recon スクリプトにより返されるプロセスヒープとスタックサイズを見てみてください。
+いずれにせよ、クラッシュダンプは何が問題であったかを事後に把握するために役立ちます。プロセスのメッセージボックスと個々のヒープは通常、問題に対する良い指標です。メールボックスにメッセージが大量にあるわけではないのにメモリが不足している時には、recon スクリプトにより返されるプロセスヒープとスタックサイズを見てみてください。
 
 %In case of large outliers at the top, you know some restricted set of processes may be eating up most of your node's memory. In case they're all more or less equal, see if the amount of memory reported sounds like a lot.
-(サイズが）上に大きく外れている場合には、いくつかのプロセスによりノードのほとんどのメモリが食いつぶされているかもしれないとわかります。同等の量の場合、（スクリプトから）返されたメモリの量が多くないかを確認してください。
+最初に大きな外れ値がある場合には、いくつかの特定プロセスによりノードのほとんどのメモリが食いつぶされているかもしれないとわかります。同等の量の場合、（スクリプトから）返されたメモリの量が多くないかを確認してください。
 
 %If it looks more or less reasonable, head towards the "Memory" section of the dump and check if a type (ETS or Binary, for example) seems to be fairly large. They may point towards resource leaks you hadn't expected.
-多い（少ない）ようであれば、ダンプの「メモリ」セクションでタイプ（ETSやバイナリーなど）が非常に大きくないかをチェックしてください。想定外のリソースのリークが見つかるかもしれません。
+ある程度納得できる量であれば、ダンプの「メモリ」セクションでタイプ（ETSやバイナリーなど）が非常に大きくないかをチェックしてください。想定外のリソースのリークが見つかるかもしれません。
 
 %\section{Exercises}
 \section{演習}
