@@ -146,23 +146,31 @@ You can then find out if such monitoring messages tend to coincide with the memo
 
 If nothing seems to stand out in the preceding material, binary leaks (Section \ref{sec:binaries}) and memory fragmentation (Section \ref{sec:memory-fragmentation}) may be the culprits. If nothing there fits either, it's possible a C driver, NIF, or even the VM itself is leaking. Of course, a possible scenario is that load on the node and memory usage were proportional, and nothing specifically ended up being leaky or modified. The system just needs more resources or nodes.
 
-\section{Binaries}
+%\section{Binaries}
+\section{バイナリ}
 \label{sec:binaries}
 
-Erlang's binaries are of two main types: ProcBins and Refc binaries\footnote{\href{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}}. Binaries up to 64 bytes are allocated directly on the process's heap, and their entire life cycle is spent in there. Binaries bigger than that get allocated in a global heap for binaries only, and each process to use one holds a local reference to it in its local heap. These binaries are reference-counted, and the deallocation will occur only once all references are garbage-collected from all processes that pointed to a specific binary.
+%Erlang's binaries are of two main types: ProcBins and Refc binaries\footnote{\href{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}}. Binaries up to 64 bytes are allocated directly on the process's heap, and their entire life cycle is spent in there. Binaries bigger than that get allocated in a global heap for binaries only, and each process to use one holds a local reference to it in its local heap. These binaries are reference-counted, and the deallocation will occur only once all references are garbage-collected from all processes that pointed to a specific binary.
+Erlangのバイナリは2つの主な型から成ります： ProcBinとrefcバイナリです\footnote{\href{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}{http://www.erlang.org/doc/efficiency\_guide/binaryhandling.html\#id65798}}。64バイトまでのバイナリはプロセスのヒープ上に直接割り当てられ、それらの全ライフサイクルはそのヒープ上で費やされます。それより大きいバイナリは、バイナリのためだけのグローバルヒープ上に割り当てられ、バイナリを使うプロセスは、ローカルヒープ内にローカル参照を保持します。これらのバイナリは参照をカウントされており、割り当ての解除は、ある特定のバイナリを参照しているすべてのプロセスのすべての参照がガベージコレクトされたときに1回だけ発生します。
 
-In 99\% of the cases, this mechanism works entirely fine. In some cases, however, the process will either:
+%In 99\% of the cases, this mechanism works entirely fine. In some cases, however, the process will either:
+99\%のケースでは、このメカニズムは正常に動作します。しかしながら、一部のケースでは、このプロセスはうまくいきません:
 
 \begin{enumerate*}
-	\item do too little work to warrant allocations and garbage collection;
-         \item eventually grow a large stack or heap with various data structures, collect them, then get to work with a lot of refc binaries. Filling the heap again with binaries (even though a virtual heap is used to account for the refc binaries' real size) may take a lot of time, giving long delays between garbage collections.
+	%\item do too little work to warrant allocations and garbage collection;
+	\item メモリの割り当てとガベージコレクションを保証することについてほとんど機能しません。
+         %\item eventually grow a large stack or heap with various data structures, collect them, then get to work with a lot of refc binaries. Filling the heap again with binaries (even though a virtual heap is used to account for the refc binaries' real size) may take a lot of time, giving long delays between garbage collections.
+         \item 最終的には様々なデータ構造の大きなスタックやヒープを広げ、それらを集め、そして沢山のrefcバイナリと動きます。バイナリでヒープを満たすことは（たとえ仮想ヒープが、そのrefcバイナリの実際のサイズに対するカウントに使われていても）、長い時間がかかってしまうかもしれません。それは、ガベージコレクションの間に長い遅延を発生させます。
 \end{enumerate*}
 
-\subsection{Detecting Leaks}
+%\subsection{Detecting Leaks}
+\subsection{リークを検出する}
 
-Detecting leaks for reference-counted binaries is easy enough: take a measure of all of each process' list of binary references (using the \expression{binary} attribute), force a global garbage collection, take another snapshot, and calculate the difference.
+%Detecting leaks for reference-counted binaries is easy enough: take a measure of all of each process' list of binary references (using the \expression{binary} attribute), force a global garbage collection, take another snapshot, and calculate the difference.
+参照カウントされたバイナリによるリークを検出することは十分に簡単です。すべての各プロセスのバイナリ参照のリストを基準とし（\expression{binary}属性を使って）、ガベージコレクションを強制的に実行し、別のスナップショットを取得し、その差を計算します。
 
-This can be done directly with \function{recon:bin\_leak(Max)} and looking at the node's total memory before and after the call:
+%This can be done directly with \function{recon:bin\_leak(Max)} and looking at the node's total memory before and after the call:
+この作業は \function{recon:bin\_leak(Max)} を使い、その前後でノードの全体メモリ使用量を見ることで端的に実行することができます。
 
 \begin{VerbatimEshell}
 1> recon:bin_leak(5).
@@ -183,13 +191,17 @@ This can be done directly with \function{recon:bin\_leak(Max)} and looking at th
    {initial_call,{proc_lib,init_p,5}}]}]
 \end{VerbatimEshell}
 
-This will show how many individual binaries were held and then freed by each process as a delta. The value \expression{-5580} means there were 5580 fewer refc binaries after the call than before.
+%This will show how many individual binaries were held and then freed by each process as a delta. The value \expression{-5580} means there were 5580 fewer refc binaries after the call than before.
+この例では、どれくらいの独立したバイナリが保持された後に開放されているかを差分として表しています。この \expression{-5580} は、この関数が実行される前と後で5580少ないrefcバイナリが存在したことを表しています。
 
-It is normal to have a given amount of them stored at any point in time, and not all numbers are a sign that something is bad. If you see the memory used by the VM go down drastically after running this call, you may have had a lot of idling refc binaries.
+%It is normal to have a given amount of them stored at any point in time, and not all numbers are a sign that something is bad. If you see the memory used by the VM go down drastically after running this call, you may have had a lot of idling refc binaries.
+これが常時一定量あることを示しているのは普通のことですし、すべての数字が何かが悪いことを示しているわけではありません。もしあなたが、VMが使用しているメモリがこの関数の呼び出しよりも後に大幅に減っていることを確認したら、それはアイドル状態のrefcバイナリがあるということかもしれません。
 
-Similarly, if you instead see some processes hold impressively large numbers of them\footnote{We've seen some processes hold hundreds of thousands of them during leak investigations at Heroku!}, that might be a good sign you have a problem.
+%Similarly, if you instead see some processes hold impressively large numbers of them\footnote{We've seen some processes hold hundreds of thousands of them during leak investigations at Heroku!}, that might be a good sign you have a problem.
+同様に、もしそうではなく、あなたがいくつかのプロセスがびっくりするほど大量のrefcバイナリを保持していることを見つけるのであれば\footnote{筆者はHerokuでのメモリリークの調査中に、いくつかのプロセスが10万件ほどのrefcバイナリを保持しているのを見つけました！}、それは問題があるというよい証拠となるかもしれません。
 
-You can further validate the top consumers in total binary memory by using the special \expression{binary\_memory} attribute supported in \otpapp{recon}:
+%You can further validate the top consumers in total binary memory by using the special \expression{binary\_memory} attribute supported in \otpapp{recon}:
+さらに、あなたは \otpapp{recon} でサポートされている特別な \expression{binary\_memory} 属性を使うことによって、バイナリメモリの合計中最もメモリを消費しているものを検証することができます:
 
 \begin{VerbatimEshell}
 1> recon:proc_count(binary_memory, 3).
@@ -205,7 +217,8 @@ You can further validate the top consumers in total binary memory by using the s
    {initial_call,{proc_lib,init_p,5}}]}]
 \end{VerbatimEshell}
 
-This will return the \var{N} top processes sorted by the amount of memory the refc binaries reference to hold, and can help point to specific processes that hold a few large binaries, instead of their raw amount. You may want to try running this function \emph{before} \function{recon:bin\_leak/1}, given the latter garbage collects the entire node first.
+%This will return the \var{N} top processes sorted by the amount of memory the refc binaries reference to hold, and can help point to specific processes that hold a few large binaries, instead of their raw amount. You may want to try running this function \emph{before} \function{recon:bin\_leak/1}, given the latter garbage collects the entire node first.
+この関数は \var{N} の、refcバイナリの参照が保持しているメモリ量によって並び替えられた上位のプロセスを返し、バイナリの実際の量を返す代わりに、いくつかの大きなバイナリを保持する特定のプロセスを示してくれます。
 
 \subsection{Fixing Leaks}
 
