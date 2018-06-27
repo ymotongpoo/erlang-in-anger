@@ -24,7 +24,7 @@ ErlangノードのCPU使用率を適切に分析し、問題となる特定の�
 \label{sec:cpu-profiling}
 
 % To pin issues to specific pieces of Erlang code, as mentioned earlier, there are two main approaches. One will be to do the old standard profiling routine, likely using one of the following applications:\footnote{All of these profilers work using Erlang tracing functionality with almost no restraint. They will have an impact on the run-time performance of the application, and shouldn't be used in production.}
-前述したとおり、Erlangコード内の問題箇所を特定するアプローチは主に二つあります。一つは、古い標準のプロファイリングルーチンで、次に示すアプリケーションを利用することがあるでしょう。\footnote{これらのプロファイラは殆ど制限なくErlangのトレース機能を使って動作します。そのため、ランタイム上のアプリケーションのパフォーマンスに影響します。本番環境では使わないほうが良いでしょう。}
+前述したとおり、Erlangコード内の問題箇所を特定するアプローチは主に二つあります。一つは、次に示すアプリケーションを利用するような、古い標準的なプロファイリングの方法です。\footnote{これらのプロファイラは殆ど制限なくErlangのトレース機能を使って動作します。そのため、ランタイム上のアプリケーションのパフォーマンスに影響します。本番環境では使わないほうが良いでしょう。}
 
 \begin{itemize*}
 %	\item \otpapp{eprof},\footnote{\href{http://www.erlang.org/doc/man/eprof.html}{http://www.erlang.org/doc/man/eprof.html}} the oldest Erlang profiler around. It will give general percentage values and will mostly report in terms of time taken.
