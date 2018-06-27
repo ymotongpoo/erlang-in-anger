@@ -12,8 +12,9 @@ Erlang開発者は、そういった問題に直面したとき水平スケー�
 
 % It is generally difficult to properly analyze the CPU usage of an Erlang node to pin problems to a specific piece of code. With everything concurrent and in a virtual machine, there is no guarantee you will find out if a specific process, driver, your own Erlang code, NIFs you may have installed, or some third-party library is eating up all your processing power.
 ErlangノードのCPU使用率を適切に分析し、問題となる特定のコードを見つけ出すのは難しいとされています。
-ある特定のプロセス、ドライバー、自前のErlangコード、組み込まれたNIF、あるいはサードパーティのライブラリーといった
-あらゆるものが並行する仮想マシンの中では、どれが処理能力を食い尽くしてるかを見つけ出せる保証はありません。
+あらゆるものが並行して仮想マシンの中にあるため、
+処理能力を食い尽くしているのが、ある特定のプロセス、ドライバー、自前のErlangコード、組み込まれたNIF、あるいはサードパーティのライブラリーなのかを
+見つけ出せる保証はありません。
 
 % The existing approaches are often limited to profiling and reduction-counting if it's in your code, and to monitoring the scheduler's work if it might be anywhere else (but also your code).
 既存のアプローチは大体限られており、コード内にある場合はプロファイリングとリダクションカウント\footnote{プロセスごとにリダクションというカウンタがあり、このカウンターは通常一つの各関数呼び出しでインクリメントされます。このリダクション回数が最大値に達した時、コンテキストスイッチが発生します。例えば、 Erlang/OTP R12B ではリダクションの最大値は2000です。}を確認する二つのアプローチ、そして、どこか他の場所（コード内も含む）にある場合はスケジューラの動作をモニタリングするアプローチがあります。
