@@ -65,7 +65,7 @@ eprofのよりも強力なプロファイラです。完全な並行性をサポ
 この関数の興味深いところは、既にシステムがビジー状態のとき、\footnote{\ref{subsec:global-cpu}を参照してください}比較的短い間隔で試してみることです。繰り返し何度も実行して、上手くいけば、同じプロセス（あるいは同じ\emph{種類}のプロセス）が常に上位に現れるパターンを確認できるはずです。
 
 %Using the code locations\footnote{Call \expression{recon:info(PidTerm, location)} or \expression{process\_info(Pid, current\_stacktrace)} to get this information.} and current functions being run, you should be able to identify what kind of code hogs all your schedulers.
-実行中のコードの位置\footnote{コードの位置は\expression{recon:info(PidTerm, location)}または\expression{process\_info(Pid, current\_stacktrace)}で取得してください。}や現在の関数を使って、どの種類のコードが全スケジューラをリソースを独占しているか特定できるはずです。
+実行中のコードの位置\footnote{コードの位置は\expression{recon:info(PidTerm, location)}または\expression{process\_info(Pid, current\_stacktrace)}で取得してください。}や現在の関数を使って、どの種類のコードが全スケジューラのリソースを独占しているか特定できるはずです。
 
 \section{System Monitors}
 \label{sec:cpu-system-monitors}
