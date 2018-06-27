@@ -272,79 +272,115 @@ Whenever some 'in the large' view (or logging, maybe) has pointed you towards a 
 
 Outside of memory leaks, which often need their own specific techniques and are discussed in Chapter \ref{chap:memory-leaks}, the most common tasks are related to processes, and ports (file descriptors and sockets).
 
-\subsection{Processes}
+%\subsection{Processes}
+\subsection{プロセス}
 \label{subsec:digging-procs}
 
-By all means, processes are an important part of a running Erlang system. And because they're so central to everything that goes on, there's a lot to want to know about them. Fortunately, the VM makes a lot of information available, some of which is safe to use, and some of which is unsafe to use in production (because they can return data sets large enough that the amount of memory copied to the shell process and used to print it can kill the node).
+%By all means, processes are an important part of a running Erlang system. And because they're so central to everything that goes on, there's a lot to want to know about them. Fortunately, the VM makes a lot of information available, some of which is safe to use, and some of which is unsafe to use in production (because they can return data sets large enough that the amount of memory copied to the shell process and used to print it can kill the node).
+よろしいでしょうか、プロセスは実行中のErlangシステムの重要な部分です。そして、プロセスは動作中のすべてのものの中心にあるので、プロセスについて知りたい事が沢山あります。幸いにも、VMは多くの情報を取得でき、そのうちのいくつかは安全に使用できますが、一部は安全ではありません(シェルプロセスにコピーされ表示するのに使用するメモリ量が、ノードを強制終了させる程大きいデータセットを返す事ができるからです)。
 
-All the values can be obtained by calling \expression{process\_info(Pid, Key)} or \newline \expression{process\_info(Pid, [Keys])}\footnote{In cases where processes contain sensitive information, data can be forced to be kept private by calling \expression{process\_flag(sensitive, true)}}. Here are the commonly used keys\footnote{For \emph{all} options, look at \href{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}}:
+%All the values can be obtained by calling \expression{process\_info(Pid, Key)} or \newline \expression{process\_info(Pid, [Keys])}\footnote{In cases where processes contain sensitive information, data can be forced to be kept private by calling \expression{process\_flag(sensitive, true)}}. Here are the commonly used keys\footnote{For \emph{all} options, look at \href{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}}:
+全ての値は、\expression{process\_info(Pid, Key)}か\newline \expression{process\_info(Pid, [Keys])}を呼び出して取得する事ができます\footnote{プロセスに機密情報が含まれている場合、\expression{process\_flag(sensitive, true)}を呼び出す事でデータを非公開にする事ができます}。よく使われるキーはこちらになります\footnote{\emph{全ての}オプションは \href{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}{http://www.erlang.org/doc/man/erlang.html\#process\_info-2}を参照してください}}:
 
 \begin{description*}
 	\item[Meta] \hfill
 		\begin{description}		
-			\item[\expression{dictionary}] returns all the entries in the process dictionary\footnote{See \href{http://www.erlang.org/course/advanced.html\#dict}{http://www.erlang.org/course/advanced.html\#dict} and \href{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}}. Generally safe to use, because people shouldn't be storing gigabytes of arbitrary data in there.
-			
-			\item[\expression{group\_leader}] the group leader of a process defines where IO (files, output of \function{io:format/1-3}) goes.\footnote{See \href{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour}{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour} and \href{http://erlang.org/doc/apps/stdlib/io\_protocol.html}{http://erlang.org/doc/apps/stdlib/io\_protocol.html} for more details.}
-			
-			\item[\expression{registered\_name}] if the process has a name (as registered with \function{erlang:register/2}), it is given here.
-			
-			\item[\expression{status}] the nature of the process as seen by the scheduler. The possible values are:
+%			\item[\expression{dictionary}] returns all the entries in the process dictionary\footnote{See \href{http://www.erlang.org/course/advanced.html\#dict}{http://www.erlang.org/course/advanced.html\#dict} and \href{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}}. Generally safe to use, because people shouldn't be storing gigabytes of arbitrary data in there.
+      \item[\expression{dictionary}] プロセス辞書の全てのエントリを返します\footnote{\href{http://www.erlang.org/course/advanced.html\#dict}{http://www.erlang.org/course/advanced.html\#dict} と \href{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html} 参照}。ギババイトもする任意のデータをそこに格納すべきではないので、一般的には安全です。
+
+%			\item[\expression{group\_leader}] the group leader of a process defines where IO (files, output of \function{io:format/1-3}) goes.\footnote{See \href{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour}{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour} and \href{http://erlang.org/doc/apps/stdlib/io\_protocol.html}{http://erlang.org/doc/apps/stdlib/io\_protocol.html} for more details.}
+			\item[\expression{group\_leader}] プロセスのグループリーダーはIO(ファイル、\function{io:format/1-3}の出力)をどこに向けるかを定義します。\footnote{詳細は\href{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour}{http://learnyousomeerlang.com/building-otp-applications\#the-application-behaviour} と \href{http://erlang.org/doc/apps/stdlib/io\_protocol.html}{http://erlang.org/doc/apps/stdlib/io\_protocol.html} を参照。}
+
+%			\item[\expression{registered\_name}] if the process has a name (as registered with \function{erlang:register/2}), it is given here.
+			\item[\expression{registered\_name}] もしプロセスが名前(\function{erlang:register/2}で登録)を持っているなら、それを取得します。
+
+%			\item[\expression{status}] the nature of the process as seen by the scheduler. The possible values are:
+			\item[\expression{status}] スケジューラーによって参照できるプロセスの特性。取り得る値は以下
+
 				\begin{description*}
-					\item[\expression{exiting}] the process is done, but not fully cleared yet;
-					\item[\expression{waiting}] the process is waiting in a \expression{receive ... end};
-					\item[\expression{running}] self-descriptive;
-					\item[\expression{runnable}] ready to run, but not scheduled yet because another process is running;
-					\item[\expression{garbage\_collecting}] self-descriptive;
-					\item[\expression{suspended}] whenever it is suspended by a BIF, or as a back-pressure mechanism because a socket or port buffer is full. The process only becomes runnable again once the port is no longer busy.
+%					\item[\expression{exiting}] the process is done, but not fully cleared yet;
+					\item[\expression{exiting}] プロセスは完了していますが、まだクリアされていません
+
+%					\item[\expression{waiting}] the process is waiting in a \expression{receive ... end};
+					\item[\expression{waiting}] プロセスは\expression{receive ... end}で待機中です
+
+%					\item[\expression{running}] self-descriptive;
+					\item[\expression{running}] 実行しています
+
+%					\item[\expression{runnable}] ready to run, but not scheduled yet because another process is running;
+					\item[\expression{runnable}] 実行準備は整っていますが、他のプロセスが実行されている為、まだスケジューリングされていません
+
+%					\item[\expression{garbage\_collecting}] self-descriptive;
+					\item[\expression{garbage\_collecting}] GCされている
+
+%					\item[\expression{suspended}] whenever it is suspended by a BIF, or as a back-pressure mechanism because a socket or port buffer is full. The process only becomes runnable again once the port is no longer busy.
+					\item[\expression{suspended}] BIFによる、またはソケットやポートのバッファがいっぱいになる事によるバックプレッシャーのメカニズムによる、あらゆる停止。ポートがビジーでなくなったら、プロセスは再びrunnable状態になります。
+
 				\end{description*}
-			
 		\end{description}
 	\item[Signals] \hfill
 		\begin{description}
-			\item[\expression{links}] will show a list of all the links a process has towards other processes and also ports (sockets, file descriptors). Generally safe to call, but to be used with care on large supervisors that may return thousands and thousands of entries.
-			
-			\item[\expression{monitored\_by}] gives a list of processes that are monitoring the current process (through the use of \function{erlang:monitor/2}).
-			
-			\item[\expression{monitors}] kind of the opposite of \expression{monitored\_by}; it gives a list of all the processes being monitored by the one polled here.
-					
-			\item[\expression{trap\_exit}] has the value \expression{true} if the process is trapping exits, \expression{false} otherwise.
+%			\item[\expression{links}] will show a list of all the links a process has towards other processes and also ports (sockets, file descriptors). Generally safe to call, but to be used with care on large supervisors that may return thousands and thousands of entries.
+			\item[\expression{links}] は他のプロセスや他のポート(ソケット、ファイルディスクリプタ)に対する全てのリンクのリストを表示します。
+
+%			\item[\expression{monitored\_by}] gives a list of processes that are monitoring the current process (through the use of \function{erlang:monitor/2}).
+			\item[\expression{monitored\_by}] は(\function{erlang:monitor/2}を使って)現在のプロセスをモニタしているプロセスのリストを表示します。
+
+%			\item[\expression{monitors}] kind of the opposite of \expression{monitored\_by}; it gives a list of all the processes being monitored by the one polled here.
+			\item[\expression{monitors}] \expression{monitored\_by}の反対、モニタされている全てのプロセスのリストを取得します。
+
+%			\item[\expression{trap\_exit}] has the value \expression{true} if the process is trapping exits, \expression{false} otherwise.
+			\item[\expression{trap\_exit}] プロセスが終了(exits)メッセージをトラップする場合は \expression{true} 、そうでなければ \expression{false} となります。
+
 		\end{description}		
-		
 	\item[Location] \hfill
 		\begin{description}
-			\item[\expression{current\_function}] displays the current running function, as a tuple of the form \expression{\{Mod, Fun, Arity\}}.
+%			\item[\expression{current\_function}] displays the current running function, as a tuple of the form \expression{\{Mod, Fun, Arity\}}.
+			\item[\expression{current\_function}] \expression{\{Mod, Fun, Arity\}}の形式のタプルで、現在実行中の関数を表示します。
 
-			\item[\expression{current\_location}] displays the current location within a module, as a tuple of the form \expression{\{Mod, Fun, Arity, [\{File, FileName\}, \{line, Num\}]\}}.
-			
-			\item[\expression{current\_stacktrace}] more verbose form of the preceding option; displays the current stacktrace as a list of 'current locations'.
-			
-			\item[\expression{initial\_call}] shows the function that the process was running when spawned, of the form \expression{\{Mod, Fun, Arity\}}. This may help identify what the process was spawned as, rather than what it's running right now.
-			
+%			\item[\expression{current\_location}] displays the current location within a module, as a tuple of the form \expression{\{Mod, Fun, Arity, [\{File, FileName\}, \{line, Num\}]\}}.
+			\item[\expression{current\_location}] \expression{\{Mod, Fun, Arity, [\{File, FileName\}, \{line, Num\}]\}}の形式のタプルで、モジュールの現在のロケーションを表示します。
+
+%			\item[\expression{current\_stacktrace}] more verbose form of the preceding option; displays the current stacktrace as a list of 'current locations'.
+			\item[\expression{current\_stacktrace}] 前述のオプションよりも詳細な形式、'current location'のリストとして現在のスタックトレースを表示します。
+
+%			\item[\expression{initial\_call}] shows the function that the process was running when spawned, of the form \expression{\{Mod, Fun, Arity\}}. This may help identify what the process was spawned as, rather than what it's running right now.
+			\item[\expression{initial\_call}] プロセスが生成された時に実行されていた関数を\expression{\{Mod, Fun, Arity\}}形式で表示します。これは現在実行中のプロセスがどうなのかではなく、プロセスがどう生成されたかの特定に役立ちます。
 		\end{description}
 	\item[Memory Used] \hfill
 		\begin{description}
-			\item[\expression{binary}] Displays the all the references to refc binaries\footnote{See Section \ref{sec:binaries}} along with their size. Can be unsafe to use if a process has a lot of them allocated.
-			
-			\item[\expression{garbage\_collection}] contains information regarding garbage collection in the process. The content is documented as 'subject to change' and should be treated as such. The information tends to contains entries such as the number of garbage collections the process has went through, options for full-sweep garbage collections, and heap sizes.
-			
-			\item[\expression{heap\_size}] A typical Erlang process contains an 'old' heap and a 'new' heap, and goes through generational garbage collection. This entry shows the process' heap size for the newest generation, and it usually includes the stack size. The value returned is in \emph{words}.
-			
-			\item[\expression{memory}] Returns, in \emph{bytes}, the size of the process, including the call stack, the heaps, and internal structures used by the VM that are part of a process.
-			
-			\item[\expression{message\_queue\_len}] Tells you how many messages are waiting in the mailbox of a process.
-			
-			\item[\expression{messages}] Returns all of the messages in a process' mailbox. This attribute is \emph{extremely} dangerous to request in production because mailboxes can hold millions of messages if you're debugging a process that managed to get locked up. \emph{Always} call for the \expression{message\_queue\_len} first to make sure it's safe to use.
-			
-			\item[\expression{total\_heap\_size}] Similar to \expression{heap\_size}, but also contains all other fragments of the heap, including the old one. The value returned is in \emph{words}.
-			
+%			\item[\expression{binary}] Displays the all the references to refc binaries\footnote{See Section \ref{sec:binaries}} along with their size. Can be unsafe to use if a process has a lot of them allocated.
+			\item[\expression{binary}] Refcバイナリ\footnote{Section \ref{sec:binaries} 参照}への参照をそのサイズと一緒に表示します。プロセスへの割り当てサイズが大きい場合、使用するのは危険です。
+
+%			\item[\expression{garbage\_collection}] contains information regarding garbage collection in the process. The content is documented as 'subject to change' and should be treated as such. The information tends to contains entries such as the number of garbage collections the process has went through, options for full-sweep garbage collections, and heap sizes.
+			\item[\expression{garbage\_collection}] プロセス中のガベージコレクションに関する情報が含まれています。
+      内容は'変更対象'として記述され、そう扱われるべきです。
+      この情報は、プロセスが実行したガベージコレクションの回数、フルスワップガベージコレクションのオプション、ヒープサイズといったエントリが含まれている傾向があります。
+
+%			\item[\expression{heap\_size}] A typical Erlang process contains an 'old' heap and a 'new' heap, and goes through generational garbage collection. This entry shows the process' heap size for the newest generation, and it usually includes the stack size. The value returned is in \emph{words}.
+			\item[\expression{heap\_size}] 典型的なErlangプロセスは、'古い'ヒープと'新しい'ヒープを含み、世代別ガベージコレクションが行われます。このエントリは最新世代のプロセスのヒープサイズを示し、通常はスタックサイズが含まれます。値は\emph{words}単位で返します。
+
+%			\item[\expression{memory}] Returns, in \emph{bytes}, the size of the process, including the call stack, the heaps, and internal structures used by the VM that are part of a process.
+			\item[\expression{memory}] プロセスの一部のコールスタック、ヒープ、VMによって使用される内部構造を含むプロセスのサイズを\emph{bytes}単位で返します。
+
+%			\item[\expression{message\_queue\_len}] Tells you how many messages are waiting in the mailbox of a process.
+			\item[\expression{message\_queue\_len}] プロセスのメールボックスで待機中のメッセージ数を返します。
+
+%			\item[\expression{messages}] Returns all of the messages in a process' mailbox. This attribute is \emph{extremely} dangerous to request in production because mailboxes can hold millions of messages if you're debugging a process that managed to get locked up. \emph{Always} call for the \expression{message\_queue\_len} first to make sure it's safe to use.
+			\item[\expression{messages}] プロセスのメールボックス内の全てのメッセージを返します。もしロック状態になっているプロセスをデバッグしているのなら、メールボックスは何百万ものメッセージを保持できるので、この属性を本番環境で取得するのは\emph{非常に}危険です。安全に使用できる事を確認する為、\emph{常に}\expression{message\_queue\_len}を最初に呼び出してください。
+
+%			\item[\expression{total\_heap\_size}] Similar to \expression{heap\_size}, but also contains all other fragments of the heap, including the old one. The value returned is in \emph{words}.
+			\item[\expression{total\_heap\_size}] \expression{heap\_size}と似ていますが、最新世代のヒープだけでなく、それ以外の全ての断片、つまり旧世代のヒープを含みます。値は\emph{words}単位で返されます。
 			\end{description}
 	\item[Work] \hfill
 		\begin{description}
-			\item[\expression{reductions}] The Erlang VM does scheduling based on \emph{reductions}, an arbitrary unit of work that allows rather portable implementations of scheduling (time-based scheduling is usually hard to make work efficiently on as many OSes as Erlang runs on). The higher the reductions, the more work, in terms of CPU and function calls, a process is doing. 
+%			\item[\expression{reductions}] The Erlang VM does scheduling based on \emph{reductions}, an arbitrary unit of work that allows rather portable implementations of scheduling (time-based scheduling is usually hard to make work efficiently on as many OSes as Erlang runs on). The higher the reductions, the more work, in terms of CPU and function calls, a process is doing. 
+			\item[\expression{reductions}] ErlangVMは、スケジューリングの柔軟な実装を可能にする任意の作業単位である\emph{reductions}に基づいてスケジューリングを行います(時間ベースのスケジューリングは通常、Erlangが動作する多くのOSで効率的に実行させるのが難しい)。reductionsが大きいほど、CPUと関数呼び出しの面で、より多くの仕事がされるようプロセスが実行されます。
 		\end{description}
 \end{description*}
 
-Fortunately, for all the common ones that are also safe, recon contains the \expression{recon:info/1} function to help:
+%Fortunately, for all the common ones that are also safe, recon contains the \expression{recon:info/1} function to help:
+幸いなことに、安全な全ての共通の項目を取得するのに、reconが\expression{recon:info/1}関数を内包しています。
 
 \begin{VerbatimEshell}
 1> recon:info("<0.12.0>").
@@ -373,16 +409,19 @@ Fortunately, for all the common ones that are also safe, recon contains the \exp
  {work,[{reductions,35}]}]
 \end{VerbatimEshell}
 
-For the sake of convenience, \expression{recon:info/1} will accept any pid-like first argument and handle it: literal pids, strings (\expression{"<0.12.0>"}), registered atoms, global names (\expression{\{global, Atom\}}), names registered with a third-party registry (e.g. with \otpapp{gproc}: \expression{\{via, gproc, Name\}}), or tuples (\expression{\{0,12,0\}}). The process just needs to be local to the node you're debugging.
+%For the sake of convenience, \expression{recon:info/1} will accept any pid-like first argument and handle it: literal pids, strings (\expression{"<0.12.0>"}), registered atoms, global names (\expression{\{global, Atom\}}), names registered with a third-party registry (e.g. with \otpapp{gproc}: \expression{\{via, gproc, Name\}}), or tuples (\expression{\{0,12,0\}}). The process just needs to be local to the node you're debugging.
+便宜上、\expression{recon:info/1}はプロセスid、文字列\expression{"<0.12.0>"}、名前として登録されたアトム、グローバルネーム\expression{\{global, Atom\}}、サードパーティーのレジストリで登録された名前(例えば\otpapp{gproc}による\expression{\{via, gproc, Name\}})、タプル\expression{\{0,12,0\}}といったpidライクな最初の引数を受け取ってそれを処理します。このプロセスはデバッグ対象のノードがローカルにある必要があります。
 
-If only a category of information is wanted, the category can be used directly:
+%If only a category of information is wanted, the category can be used directly:
+情報のカテゴリのみ必要なのであれば、直接カテゴリを使用できます。
 
 \begin{VerbatimEshell}
 2> recon:info(self(), work).
 {work,[{reductions,11035}]}
 \end{VerbatimEshell}
 
-or can be used in exactly the same way as \function{process\_info/2}:
+%or can be used in exactly the same way as \function{process\_info/2}:
+また、\function{process\_info/2}と全く同じ方法で使用できます。
 
 \begin{VerbatimEshell}
 3> recon:info(self(), [memory, status]).
