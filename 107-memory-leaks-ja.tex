@@ -69,31 +69,45 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 % See Section \ref{sec:binaries}.
 \ref{sec:binaries} 章を参照。
 
-\subsection{Code}
+% \subsection{Code}
+\subsection{コード}
 
-The code on an Erlang node is loaded in memory in its own area, and sits there until it is garbage collected. Only two copies of a module can coexist at one time, so looking for very large modules should be easy-ish.
+% The code on an Erlang node is loaded in memory in its own area, and sits there until it is garbage collected. Only two copies of a module can coexist at one time, so looking for very large modules should be easy-ish.
+Erlangノードのコードはメモリ上の独自の領域に読み込まれ、ガベージコレクションが行われるまでその領域を使い続けます。同じモジュールの異なるバージョンは同時に2つまでしか存在できないので、巨大なモジュールを探すことによってメモリを解放するのは簡単なのではないでしょうか。
+% 若干補いすぎ？
 
-If none of them stand out, look for code compiled with HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}. HiPE code, unlike regular BEAM code, is native code and cannot be garbage collected from the VM when new versions are loaded. Memory can accumulate, usually very slowly, if many or large modules are native-compiled and loaded at run time.
+% If none of them stand out, look for code compiled with HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}. HiPE code, unlike regular BEAM code, is native code and cannot be garbage collected from the VM when new versions are loaded. Memory can accumulate, usually very slowly, if many or large modules are native-compiled and loaded at run time.
+もしどのモジュールも特に目立って大きくないならば、HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}でコンパイルされたコードを探してみましょう。通常のBEAMコードとは違い、HiPEコードはネイティヴコードで、新しいバージョンが読み込まれたときでもVMからガベージコレクションされないという性質があります。たくさんの、または巨大なモジュールが実行時にネイティヴコンパイルされて読み込まれた場合、メモリ使用量は徐々に蓄積されていきます。
 
-Alternatively, you may look for weird modules you didn't load yourself on the node and panic if someone got access to your system!
+% Alternatively, you may look for weird modules you didn't load yourself on the node and panic if someone got access to your system!
+または、自分でロードしたものでない怪しげなモジュールを探して、誰かがシステムへ侵入したとパニックすることもあるでしょう！
 
 \subsection{ETS}
 
-ETS tables are never garbage collected, and will maintain their memory usage as long as records will be left undeleted in a table. Only removing records manually (or deleting the table) will reclaim memory.
+% ETS tables are never garbage collected, and will maintain their memory usage as long as records will be left undeleted in a table. Only removing records manually (or deleting the table) will reclaim memory.
+ETSテーブルはガベージコレクションの対象にならず、レコードがテーブル上から削除されない限りメモリを使い続けます。レコードを手動で削除するかテーブルを削除することでしかメモリを再確保できません。
 
-In the rare cases you're actually leaking ETS data, call the undocumented \function{ets:i()} function in the shell. It will print out information regarding number of entries (\expression{size}) and how much memory they take (\expression{mem}). Figure out if anything is bad.
+% In the rare cases you're actually leaking ETS data, call the undocumented \function{ets:i()} function in the shell. It will print out information regarding number of entries (\expression{size}) and how much memory they take (\expression{mem}). Figure out if anything is bad.
+本当にETSデータでメモリリークをしているという稀なケースでは、ドキュメント化されていない \function{ets:i()} 関数をシェルで呼んでみてください。これはエントリの数 (\expression{size}) とどのくらいメモリを使っているか (\expression{mem}) についての情報を出力します。これを使って何がおかしいかを探ってみましょう。
 
-It's entirely possible all the data there is legit, and you're facing the difficult problem of needing to shard your data set and distribute it over many nodes. This is out of scope for this book, so best of luck to you. You can look into compression of your tables if you need to buy time, however.\footnote{See the \href{http://www.erlang.org/doc/man/ets.html\#new-2}{\expression{compressed} option for \function{ets:new/2}}}
+% It's entirely possible all the data there is legit, and you're facing the difficult problem of needing to shard your data set and distribute it over many nodes. This is out of scope for this book, so best of luck to you. You can look into compression of your tables if you need to buy time, however.\footnote{See the \href{http://www.erlang.org/doc/man/ets.html\#new-2}{\expression{compressed} option for \function{ets:new/2}}}
+ETS上のすべてのデータが正当なもので、データセットを複数のノードにシャーディングして分配するという難しい問題に直面している、という可能性も全くもってありえます。これはこの本の範囲外なので、作業の幸運を祈ります。テーブルの圧縮をすることで時間を稼ぐという選択肢もあります\footnote{\href{http://www.erlang.org/doc/man/ets.html\#new-2}{\function{ets:new/2} の \expression{compressed} オプション} を見てみてください}。
 
-\subsection{Processes}
+% \subsection{Processes}
+\subsection{プロセス}
 
-There are a lot of different ways in which process memory can grow. Most interesting cases will be related to a few common cases: process leaks (as in, you're leaking processes), specific processes leaking their memory, and so on. It's possible there's more than one cause, so multiple metrics are worth investigating. Note that the process count itself is skipped and has been covered before.
+% There are a lot of different ways in which process memory can grow. Most interesting cases will be related to a few common cases: process leaks (as in, you're leaking processes), specific processes leaking their memory, and so on. It's possible there's more than one cause, so multiple metrics are worth investigating. Note that the process count itself is skipped and has been covered before.
+プロセスメモリが増えるには多くの原因があります。最も興味深いケースはいくつかの頻出ケースに関連します。例えば、プロセス自身をリークしている、特定のプロセスがメモリをリークしている、といったケースです。一つ以上の原因に由来している可能性はあるので、複数のメトリクスを調べる価値は高いでしょう。なお、プロセスのカウントについては既出なのでここでは扱いません。
+% as in, の括弧はその次の箇条書きとの訳し分けで含めた
 
-\subsubsection{Links and Monitors}
+% \subsubsection{Links and Monitors}
+\subsubsection{リンクとモニタ}
 
-Is the global process count indicative of a leak? If so, you may need to investigate unlinked processes, or peek inside supervisors' children lists to see what may be weird-looking.
+% Is the global process count indicative of a leak? If so, you may need to investigate unlinked processes, or peek inside supervisors' children lists to see what may be weird-looking.
+グローバルでのプロセス数がプロセスのリークの兆候を示していますか？もしそうであれば、リンクされていないプロセスを調査するか、スーパーバイザの子プロセスリストを見て何かおかしいところがないかを探りましょう。
 
-Finding unlinked (and unmonitored) processes is easy to do with a few basic commands:
+% Finding unlinked (and unmonitored) processes is easy to do with a few basic commands:
+リンクされていない、またはモニタされていないプロセスを探すのは簡単ないくつかのコマンドでできます:
 
 \begin{VerbatimEshell}
 1> [P || P <- processes(),
@@ -101,14 +115,18 @@ Finding unlinked (and unmonitored) processes is easy to do with a few basic comm
          []==Ls, []==Ms].
 \end{VerbatimEshell}
 
-This will return a list of processes with neither. For supervisors, just fetching \newline \expression{supervisor:count\_children(SupervisorPidOrName)} and seeing what looks normal can be a good pointer.
+% This will return a list of processes with neither. For supervisors, just fetching \newline \expression{supervisor:count\_children(SupervisorPidOrName)} and seeing what looks normal can be a good pointer.
+これはリンクもモニタもされていないプロセスのリストを返します。スーパーバイザについては、\expression{supervisor:count\_children(SupervisorPidOrName)} を見て正常な状態がどんなものかを見てみるのがよいでしょう。
 
+% \subsubsection{Memory Used}
+\subsubsection{メモリ使用}
 
-\subsubsection{Memory Used}
+% The per-process memory model is briefly described in Subsection \ref{subsec:memory-process-level}, but generally speaking, you can find which individual processes use the most memory by looking for their \term{memory} attribute. You can look things up either as absolute terms or as a sliding window.
+プロセスごとのメモリモデルについては \ref{subsec:memory-process-level} 節で簡潔に紹介していますが、一般的には、どの個別のプロセスが一番メモリを使っているかはプロセスの \term{memory} 属性を見ることでわかります。この値は絶対値または範囲指定で見ることができます。
+% sliding window -> 範囲指定と訳したけど自信がない
 
-The per-process memory model is briefly described in Subsection \ref{subsec:memory-process-level}, but generally speaking, you can find which individual processes use the most memory by looking for their \term{memory} attribute. You can look things up either as absolute terms or as a sliding window.
-
-For memory leaks, unless you're in a predictable fast increase, absolute values are usually those worth digging into first:
+% For memory leaks, unless you're in a predictable fast increase, absolute values are usually those worth digging into first:
+メモリリークについていえば、急激な上昇が予測可能でない限りにおいて、絶対値から順に見ていくのがよいでしょう:
 
 \begin{VerbatimEshell}
 1> recon:proc_count(memory, 3).
@@ -126,16 +144,21 @@ For memory leaks, unless you're in a predictable fast increase, absolute values 
    {initial_call,{proc_lib,init_p,5}}]}]
 \end{VerbatimEshell}
 
-Attributes that may be interesting to check other than \term{memory} may be any other fields in Subsection \ref{subsec:digging-procs}, including \term{message\_queue\_len}, but \term{memory} will usually encompass all other types.
+% Attributes that may be interesting to check other than \term{memory} may be any other fields in Subsection \ref{subsec:digging-procs}, including \term{message\_queue\_len}, but \term{memory} will usually encompass all other types.
+\term{message\_queue\_len} のような \term{memory} 以外の示唆的な属性は \ref{subsec:digging-procs} 節にて紹介していますが、だいたいの場合 \term{memory} でカバーできるでしょう。
 
-\subsubsection{Garbage Collections}
+% \subsubsection{Garbage Collections}
+\subsubsection{ガベージコレクション}
 \label{subsubsec:leak-gc}
 
-It is very well possible that a process uses lots of memory, but only for short periods of time. For long-lived nodes with a large overhead for operations, this is usually not a problem, but whenever memory starts being scarce, such spiky behaviour might be something you want to get rid of.
+% It is very well possible that a process uses lots of memory, but only for short periods of time. For long-lived nodes with a large overhead for operations, this is usually not a problem, but whenever memory starts being scarce, such spiky behaviour might be something you want to get rid of.
+プロセスがものすごく短期間だけ大量のメモリを使うということは大いにありえます。操作のオーバーヘッドの大きい長命のノードではこれらはだいたいの場合問題ではありませんが、メモリが少なくなってきたときにはこのようなスパイク状の挙動こそが本当に対処したいものかもしれません。
 
-Monitoring all garbage collections in real-time from the shell would be costly. Instead, setting up Erlang's system monitor\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}} might be the best way to go at it.
+% Monitoring all garbage collections in real-time from the shell would be costly. Instead, setting up Erlang's system monitor\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}} might be the best way to go at it.
+リアルタイムですべてのガベージコレクションを監視するのはコストが高いです。代わりに、Erlangのシステムモニタ\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}}を使うのが一番よい方法かもしれません。
 
-Erlang's system monitor will allow you to track information such as long garbage collection periods and large process heaps, among other things. A monitor can temporarily be set up as follows:
+% Erlang's system monitor will allow you to track information such as long garbage collection periods and large process heaps, among other things. A monitor can temporarily be set up as follows:
+Erlangのシステムモニタを使えば特にガベージコレクションの期間や巨大なプロセスヒープなどの情報を追跡できます。モニタは以下のようにして設定できます:
 
 \begin{VerbatimEshell}
 1> erlang:system_monitor().
@@ -157,18 +180,25 @@ Shell got {monitor,<4683.31798.0>,long_gc,
 undefined
 \end{VerbatimEshell}
 
-The first command checks that nothing (or nobody else) is using a system monitor yet — you don't want to take this away from an existing application or coworker.
+% The first command checks that nothing (or nobody else) is using a system monitor yet — you don't want to take this away from an existing application or coworker.
+最初のコマンドは既にシステムモニタを使っていないかどうかをチェックします - 使用中の他のアプリケーションや同僚からシステムモニタを奪いたくはないでしょう。
 
-The second command will be notified every time a garbage collection takes over 500 milliseconds. The result is flushed in the third command. Feel free to also check for \expression{\{large\_heap, NumWords\}} if you want to monitor such sizes.
-Be careful to start with large values at first if you're unsure. You don't want to flood your process' mailbox with a bunch of heaps that are 1-word large or more, for example.
+% The second command will be notified every time a garbage collection takes over 500 milliseconds. The result is flushed in the third command. Feel free to also check for \expression{\{large\_heap, NumWords\}} if you want to monitor such sizes.
+二つ目のコマンドはガベージコレクションに500ミリ秒以上かかったときに通知されます。その結果は3つめのコマンドでフラッシュされます。ヒープサイズを監視したい場合は \expression{\{large\_heap, NumWords\}} を使うとよいでしょう。
+% Be careful to start with large values at first if you're unsure. You don't want to flood your process' mailbox with a bunch of heaps that are 1-word large or more, for example.
+自信がない場合は大きな値でモニタリングを開始しましょう。例えば、1ワード以上のサイズを持つヒープの情報でプロセスのメールボックスを溢れさせたくはないですよね？
 
-Command 5 unsets the system monitor (exiting or killing the monitor process also frees it up), and command 6 validates that everything worked.
+% Command 5 unsets the system monitor (exiting or killing the monitor process also frees it up), and command 6 validates that everything worked.
+五つ目のコマンドはシステムモニタを解除し（モニタプロセスが終了またはkillされるとそのプロセスは解放されます）、その次のコマンドでちゃんと解放されたかを確認できます。
 
-You can then find out if such monitoring messages tend to coincide with the memory increases that seem to result in leaks or overuses, and try to catch culprits before things are too bad. Quickly reacting and digging into the process (possibly with \function{recon:info/1}) may help find out what's wrong with the application.
+% You can then find out if such monitoring messages tend to coincide with the memory increases that seem to result in leaks or overuses, and try to catch culprits before things are too bad. Quickly reacting and digging into the process (possibly with \function{recon:info/1}) may help find out what's wrong with the application.
+これを使って、監視メッセージがリークやメモリの過剰使用に由来していそうなメモリ使用量上昇と重なっていないかを見ることができ、事態が悪化する前に犯人をつきとめることができます。すばやく対応してプロセスの中身を調べる（\function{recon:info/1} などを使います）ことでアプリケーションの問題を発見できるでしょう。
 
-\subsection{Nothing in Particular}
+% \subsection{Nothing in Particular}
+\subsection{特に何もない場合}
 
-If nothing seems to stand out in the preceding material, binary leaks (Section \ref{sec:binaries}) and memory fragmentation (Section \ref{sec:memory-fragmentation}) may be the culprits. If nothing there fits either, it's possible a C driver, NIF, or even the VM itself is leaking. Of course, a possible scenario is that load on the node and memory usage were proportional, and nothing specifically ended up being leaky or modified. The system just needs more resources or nodes.
+% If nothing seems to stand out in the preceding material, binary leaks (Section \ref{sec:binaries}) and memory fragmentation (Section \ref{sec:memory-fragmentation}) may be the culprits. If nothing there fits either, it's possible a C driver, NIF, or even the VM itself is leaking. Of course, a possible scenario is that load on the node and memory usage were proportional, and nothing specifically ended up being leaky or modified. The system just needs more resources or nodes.
+これまでに書かれた内容があてはまらない場合、バイナリリーク (\ref{sec:binaries} 章) やメモリのフラグメンテーション (\ref{sec:memory-fragmentation} 章) が原因である可能性があります。もしそのいずれでもなければ、Cドライバ、NIF、またはVM自身がメモリリークを起こしている可能性があります。もちろん、ノードの負荷とメモリ使用が比例していて特に何もメモリリークを起こしていないという可能性もあります。単にシステムはもっとリソースやノードを必要としているだけなのかもしれません。
 
 %\section{Binaries}
 \section{バイナリ}
