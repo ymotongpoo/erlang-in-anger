@@ -315,7 +315,7 @@ It may sound counter-intuitive to make some requests a lot worse to benefit the 
 どちらも、入力速度が徐々に落ち着き処理が追いつくことが期待できる場合に信頼できる方法です。
 
 %You'll mostly get problems when trying to send so many messages they can't make it all to one process without overloading it. Two approaches are generally good for this case:
-一つのメッセージでは過負荷になってしまうほどの大量メッセージを常に送りたい場合が問題です。
+一つのプロセスに大量のメッセージを送ろうとすると、過負荷になってしまうことがよく問題になります。
 一般的に、この場合には二つのアプローチがあります。
 
 \begin{itemize*}
@@ -378,9 +378,9 @@ In the end, what is acceptable or not to deal with overload tends to depend on t
   %\item What are the two main classes of strategies to handle overload?
   \item 過負荷の対応策の主な戦略を2つ答えてください
   %\item How can long-running operations be made safer?
-  \item 長時間稼働する処理はどのようにして安全にできますか  
+  \item 長時間稼働する処理はどのようにして安全にできますか
   %\item When going synchronous, how should timeouts be chosen?
-  \item 同期処理を行うとき、タイムアウトはどのように設定しますか  
+  \item 同期処理を行うとき、タイムアウトはどのように設定しますか
   %\item What is an alternative to having timeouts?
   \item タイムアウト以外の代替案はなんでしょうか
   %\item When would you pick a queue buffer before a stack buffer?
