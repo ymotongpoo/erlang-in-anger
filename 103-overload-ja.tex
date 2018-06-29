@@ -306,30 +306,55 @@ If you need to react to old events \emph{before} they are too old, then things b
 
 It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
 
-\subsection{Dealing With Constant Overload}
+%\subsection{Dealing With Constant Overload}
+\subsection{コンスタントにかかる負荷の取り扱い}
 
-Being under constant overload may require a new solution. Whereas both queues and buffers will be great for cases where overload happens from time to time (even if it's a rather prolonged period of time), they both work more reliably when you expect the input rate to eventually drop, letting you catch up.
+%Being under constant overload may require a new solution. Whereas both queues and buffers will be great for cases where overload happens from time to time (even if it's a rather prolonged period of time), they both work more reliably when you expect the input rate to eventually drop, letting you catch up.
+コンスタントにかかる負荷に対しては、新しい方法が必要でしょう。
+キューもバッファも、時々(たとえそれが、かなりの長い時間続くものだったとしても)発生する負荷に対しては良い方法ですが、
+どちらも、入力速度が徐々に落ち着き処理が追いつくことが期待できる場合に信頼できる方法です。
 
-You'll mostly get problems when trying to send so many messages they can't make it all to one process without overloading it. Two approaches are generally good for this case:
+%You'll mostly get problems when trying to send so many messages they can't make it all to one process without overloading it. Two approaches are generally good for this case:
+ある一つのプロセスに対し、キューやバッファが処理できないくらい多くのメッセージをコンスタントに送ろうとする場合、問題となるでしょう。 %TODO: 自信なし。they can't make it all, theyをqueues and buffersとみて訳しましたがあってますかね。 without overloadingは「コンスタントに送る」の表現で暗に示したつもりです
+一般的に、この場合には二つのアプローチがあります。
 
 \begin{itemize*}
-	\item Have many processes that act as buffers and load-balance through them (scale horizontally)
-	\item use ETS tables as locks and counters (reduce the input)
+	%\item Have many processes that act as buffers and load-balance through them (scale horizontally)
+  \item バッファとして機能するプロセスをたくさん持ち、それらの間で負荷分散を行う（スケールアウトさせる方法)
+	%\item use ETS tables as locks and counters (reduce the input)
+  \item ロックとカウンタの仕組みとして、ETSテーブルを使う（入力を減らす方法）
 \end{itemize*}
 
-ETS tables are generally able to handle a ton more requests per second than a process, but the operations they support are a lot more basic. A single read, or adding or removing from a counter atomically is as fancy as you should expect things to get for the general case.
+%ETS tables are generally able to handle a ton more requests per second than a process, but the operations they support are a lot more basic. A single read, or adding or removing from a counter atomically is as fancy as you should expect things to get for the general case.
+一般的にETSテーブルは、１秒間にプロセスよりかなりの多くのリクエストを処理できますが、サポートする操作はより基本的なものだけです。
+あなたが期待できる操作はたいてい、単純な読み込み、カウンタへのアトミックな追加と削除くらいでしょう。
 
-ETS tables will be required for both approaches.
+%ETS tables will be required for both approaches.
+どちらのアプローチを取るにしても、ETSテーブルは必要です。
 
-Generally speaking, the first approach could work well with the regular process registry: you take \var{N} processes to divide up the load, give them all a known name, and pick one of them to send the message to. Given you're pretty much going to assume you'll be overloaded, randomly picking a process with an even distribution tends to be reliable: no state communication is required, work will be shared in a roughly equal manner, and it's rather insensitive to failure.
+%Generally speaking, the first approach could work well with the regular process registry: you take \var{N} processes to divide up the load, give them all a known name, and pick one of them to send the message to. Given you're pretty much going to assume you'll be overloaded, randomly picking a process with an even distribution tends to be reliable: no state communication is required, work will be shared in a roughly equal manner, and it's rather insensitive to failure.
+ひとつめのアプローチは、一般論で言えば、プロセスレジストリを使うだけでも動作します。
+負荷を分散するのに\var{N}個のプロセスを用意し、プロセスそれぞれにknown nameをつけ、メッセージを送る際はその中の一つを選択すれば良いのです。
+高負荷がかかることを十分に想定するなら、一様ランダムにプロセスを選択するようにすれば頼もしいですね。
+プロセス同士で状態を教え合う必要はありませんし、負荷はおおよそ等しく分配され、失敗に対しても鈍感です。
 
-In practice, though, we want to avoid atoms generated dynamically, so I tend to prefer to register workers in an ETS table with \expression{read\_concurrency} set to \expression{true}. It's a bit more work, but it gives more flexibility when it comes to updating the number of workers later on.
+%In practice, though, we want to avoid atoms generated dynamically, so I tend to prefer to register workers in an ETS table with \expression{read\_concurrency} set to \expression{true}. It's a bit more work, but it gives more flexibility when it comes to updating the number of workers later on.
+実際にはしかし、プロセス名のためにatomを動的に生成するのは避けたいので、\expression{read\_concurrency}を\expression{true}に設定したETSテーブルにワーカーを保存することをおすすめします。
+ひと手間かかりますが、後々ワーカー数の更新が柔軟に行えるでしょう。
 
-An approach similar to this one is used in the \module{lhttpc}\footnote{The \href{https://github.com/ferd/lhttpc/blob/master/src/lhttpc\_lb.erl}{lhttpc\_lb} module in this library implements it.} library mentioned earlier, to split load balancers on a per-domain basis.
+%An approach similar to this one is used in the \module{lhttpc}\footnote{The \href{https://github.com/ferd/lhttpc/blob/master/src/lhttpc\_lb.erl}{lhttpc\_lb} module in this library implements it.} library mentioned earlier, to split load balancers on a per-domain basis.
+これに似たアプローチは、本書で以前に出てきた \module{lhttpc}\footnote{このライブラリの中で実装されている\href{https://github.com/ferd/lhttpc/blob/master/src/lhttpc\_lb.erl}{lhttpc\_lb}モジュール} ライブラリでも、ドメインごとの負荷を分けるために使われています。
 
-For the second approach, using counters and locks, the same basic structure still remains (pick one of many options, send it a message), but before actually sending a message, you must atomically update an ETS counter\footnote{By using \function{ets:update\_counter/3}.}. There is a known limit shared across all clients (either through their supervisor, or any other config or ETS value) and each request that can be made to a process needs to clear this limit first.
+%For the second approach, using counters and locks, the same basic structure still remains (pick one of many options, send it a message), but before actually sending a message, you must atomically update an ETS counter\footnote{By using \function{ets:update\_counter/3}.}. There is a known limit shared across all clients (either through their supervisor, or any other config or ETS value) and each request that can be made to a process needs to clear this limit first.
+ふたつめのアプローチ、つまりはカウンタとロックを使う方法でも、たくさんの選択肢から一つを選んでメッセージを送るという基本構造は変わりません。
+しかし、実際にメッセージを送る前に、ETSカウンタをアトミックに更新\footnote{\function{ets:update\_counter/3}を使いましょう}しなければなりません。
+全クライアントで共有できる量は限界があり（スーパバイザを介しても、configやETSの値を使うにしても、です）、プロセスに対するリクエストはまずはじめにクリアする必要があります。
+%TODO: 最後の文章若干自信ないです。
 
-This approach has been used in \module{dispcount}\footnote{\href{https://github.com/ferd/dispcount}{https://github.com/ferd/dispcount}} to avoid message queues, and to guarantee low-latency responses to any message that won't be handled so that you do not need to wait to know your request was denied. It is then up to the user of the library whether to give up as soon as possible, or to keep retrying with different workers.
+%This approach has been used in \module{dispcount}\footnote{\href{https://github.com/ferd/dispcount}{https://github.com/ferd/dispcount}} to avoid message queues, and to guarantee low-latency responses to any message that won't be handled so that you do not need to wait to know your request was denied. It is then up to the user of the library whether to give up as soon as possible, or to keep retrying with different workers.
+このアプローチは\module{dispcount}\footnote{\href{https://github.com/ferd/dispcount}{https://github.com/ferd/dispcount}}モジュールで使われていて、
+メッセージキューを避け、任意のメッセージに対して(処理されないかもしれませんが)低レイテンシを保証することで、リクエストが拒否されたことを知るまでに待たずに済むようになっています。
+他のワーカをつかって処理を続けるか、可能な限りすぐに諦めるかは、利用する側にまかせています。
 
 \subsection{How Do You Drop}
 
