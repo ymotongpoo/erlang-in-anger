@@ -252,24 +252,35 @@ This can give place to interesting optimizations where the working process or a 
 
 Similar techniques could also be used to implement different drop ratios for different message priorities, rather than trying to sort it all out at the consumer level.
 
-\subsection{Queue Buffers}
+%\subsection{Queue Buffers}
+\subsection{キューバッファ}
 
-Queue buffers are a good alternative when you want more control over the messages you get rid of than with random drops, particularly when you expect overload to be coming in bursts rather than a constant stream in need of thinning.
+%Queue buffers are a good alternative when you want more control over the messages you get rid of than with random drops, particularly when you expect overload to be coming in bursts rather than a constant stream in need of thinning.
+キューバッファはメッセージを捨てる時に、ランダムではなく、より制御された方法で行いたい時の代替手段となります。ある程度の量を捨てる必要がある(量の変動が少ない)ストリームではなく、負荷がバーストすることが予想されているときには、特にそうです。
 
-Even though the regular mailbox for a process has the form of a queue, you'll generally want to pull \emph{all} the messages out of it as soon as possible. A queue buffer will need two processes to be safe:
+%Even though the regular mailbox for a process has the form of a queue, you'll generally want to pull \emph{all} the messages out of it as soon as possible. A queue buffer will need two processes to be safe:
+プロセスの通常のメールボックスには一定量のキューがありますが、一般的には出来るだけ早く \emph{全ての}メッセージを取り出す必要があるでしょう。安全のためには、キューバッファには２種類のプロセスが必要です。
+
 
 \begin{itemize*}
-	\item The regular process you'd work with (likely a \module{gen\_server});
-	\item A new process that will do nothing but buffer the messages. Messages from the outside should go to this process.
+	%\item The regular process you'd work with (likely a \module{gen\_server});
+	\item 通常のプロセス(例えば \module{gen\_server})
+	%\item A new process that will do nothing but buffer the messages. Messages from the outside should go to this process.
+	\item メッセージをバッファする以外は何もしない新しいプロセス。外部からのメッセージはこのプロセスに送ります。
 \end{itemize*}
 
-To make things work, the buffer process only has to remove all the messages it can from its mail box and put them in a queue data structure\footnote{The \module{queue} module in Erlang provides a purely functional queue data structure that can work fine for such a buffer.} it manages on its own. Whenever the server is ready to do more work, it can ask the buffer process to send it a given number of messages that it can work on. The buffer process picks them from its queue, forwards them to the server, and goes back to accumulating data.
+%To make things work, the buffer process only has to remove all the messages it can from its mail box and put them in a queue data structure\footnote{The \module{queue} module in Erlang provides a purely functional queue data structure that can work fine for such a buffer.} it manages on its own. Whenever the server is ready to do more work, it can ask the buffer process to send it a given number of messages that it can work on. The buffer process picks them from its queue, forwards them to the server, and goes back to accumulating data.
+バッファするプロセスが、自身のメールボックスから取り出せる全てのメッセージを取り除き、自身で管理できるキュー用のデータ構造\footnote{Erlangの\module{queue}モジュールは、このような用途のバッファに適した、完全に関数型のキューデータ構造です}の中に入れることで、これを実現できます。サーバがさらに処理を行うことができるときには、バッファプロセスに対していつでも、処理可能な量だけのメッセージを送るよう要求することができます。バッファプロセスはキューからメッセージを取り出してサーバに送り、またメッセージを集める処理に戻ります。
 
-Whenever the queue grows beyond a certain size\footnote{To calculate the length of a queue, it is preferable to use a counter that gets incremented and decremented on each message sent or received, rather than iterating over the queue every time. It takes slightly more memory, but will tend to distribute the load of counting more evenly, helping predictability and avoiding more sudden build-ups in the buffer's mailbox} and you receive a new message, you can then pop the oldest one and push the new one in there, dropping the oldest elements as you go.\footnote{You can alternatively make a queue that pops the newest message and queues up the oldest ones if you feel previous data is more important to keep.}
+%Whenever the queue grows beyond a certain size\footnote{To calculate the length of a queue, it is preferable to use a counter that gets incremented and decremented on each message sent or received, rather than iterating over the queue every time. It takes slightly more memory, but will tend to distribute the load of counting more evenly, helping predictability and avoiding more sudden build-ups in the buffer's mailbox} and you receive a new message, you can then pop the oldest one and push the new one in there, dropping the oldest elements as you go.\footnote{You can alternatively make a queue that pops the newest message and queues up the oldest ones if you feel previous data is more important to keep.}
+キューが一定のサイズ\footnote{キューのサイズを計算する場合、キューを毎回イテレートするよりも、メッセージの送受信の度に加算・減算されるカウンターを使うことが望ましいです。多少のメモリが必要になりますが、カウントの負荷を分散させられますし、バッファのメールボックスが突然あふれるのを防いだりあるいは予測するのに役立ちます}よりも大きくなり新しいメッセージを受け取ったときにはいつでも、最も古いメッセージを取り出し、新しいメッセージをキューに入れ、古いメッセージを消していくことができます\footnote{この他にも、古いメッセージが重要だと思えるときには、最も新しいメッセージを取り出して、最も古いメッセージをキューに残すようなキューを作成することができます}。
 
-This should keep the entire number of messages received to a rather stable size and provide a good amount of resistance to overload, somewhat similar to the functional version of a ring buffer.
+%This should keep the entire number of messages received to a rather stable size and provide a good amount of resistance to overload, somewhat similar to the functional version of a ring buffer.
+これにより、受信したメッセージの総数を適切なサイズに保ち、ある程度高負荷にも耐えるリングバッファに似たような機能を提供できます。
 
-The \emph{PO Box}\footnote{Available at: \href{https://github.com/ferd/pobox}{https://github.com/ferd/pobox}, the library has been used in production for a long time in large scale products at Heroku and is considered mature} library implements such a queue buffer.
+%The \emph{PO Box}\footnote{Available at: \href{https://github.com/ferd/pobox}{https://github.com/ferd/pobox}, the library has been used in production for a long time in large scale products at Heroku and is considered mature} library implements such a queue buffer.
+\emph{PO Box}\footnote{\href{https://github.com/ferd/pobox}{https://github.com/ferd/pobox} にあります。このライブラリはHerokuの大規模な本番環境で長い間使われてきており、成熟していると考えられています}ライブラリはこのようなキューバッファを提供しています。
+
 
 \subsection{Stack Buffers}
 
