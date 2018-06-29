@@ -300,11 +300,18 @@ Whenever you see the stack grow beyond a certain size or notice that an element 
 
 A major downside of stack buffers is that messages are not necessarily going to be processed in the order they were submitted — they're nicer for independent tasks, but will ruin your day if you expect a sequence of events to be respected.
 
-\subsection{Time-Sensitive Buffers}
+%\subsection{Time-Sensitive Buffers}
+\subsection{時間に敏感なバッファ}
 
-If you need to react to old events \emph{before} they are too old, then things become more complex, as you can't know about it without looking deep in the stack each time, and dropping from the bottom of the stack in a constant manner gets to be inefficient. An interesting approach could be done with buckets, where multiple stacks are used, with each of them containing a given time slice. When requests get too old for the QoS constraints, drop an entire bucket, but not the entire buffer.
+%If you need to react to old events \emph{before} they are too old, then things become more complex, as you can't know about it without looking deep in the stack each time, and dropping from the bottom of the stack in a constant manner gets to be inefficient. An interesting approach could be done with buckets, where multiple stacks are used, with each of them containing a given time slice. When requests get too old for the QoS constraints, drop an entire bucket, but not the entire buffer.
+もし、古いイベントに対して、古くなりすぎる\emph{前に}反応する必要があるのなら、物事はより複雑になります。
+イベントが古いかどうかは、スタックの奥深くまで毎回確認しなければわかりませんし、スタックを底からものをイベントを取り出すのは普通、非効率です。
+この場合、バケツ --- それぞれが担当時間帯を持っている、複数のスタック --- を使った面白いアプローチが使えます。
+リクエストがQoS制約として古くなりすぎたら、その時間帯のバケツ一つをまるごと削除します。バッファすべては削除しません。
 
-It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
+%It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
+多数の利益のために一部リクエストを非常に悪くする--- 中央値は良いが、下位1\%がひどいことになっている --- というのは直感に反するかもしれませんが、
+これはとにかくメッセージを捨たいという状態で起こるもので、低レイテンシを求めないのでなら、望ましい方法です。
 
 \subsection{Dealing With Constant Overload}
 
