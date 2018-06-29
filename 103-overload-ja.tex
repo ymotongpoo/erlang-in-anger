@@ -307,15 +307,15 @@ If you need to react to old events \emph{before} they are too old, then things b
 It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
 
 %\subsection{Dealing With Constant Overload}
-\subsection{コンスタントにかかる負荷の取り扱い}
+\subsection{定量負荷の取り扱い}
 
 %Being under constant overload may require a new solution. Whereas both queues and buffers will be great for cases where overload happens from time to time (even if it's a rather prolonged period of time), they both work more reliably when you expect the input rate to eventually drop, letting you catch up.
-コンスタントにかかる負荷に対しては、新しい方法が必要でしょう。
+定量負荷に対しては、新しい方法が必要でしょう。
 キューもバッファも、時々(たとえそれが、かなりの長い時間続くものだったとしても)発生する負荷に対しては良い方法ですが、
 どちらも、入力速度が徐々に落ち着き処理が追いつくことが期待できる場合に信頼できる方法です。
 
 %You'll mostly get problems when trying to send so many messages they can't make it all to one process without overloading it. Two approaches are generally good for this case:
-ある一つのプロセスに対し、キューやバッファが処理できないくらい多くのメッセージをコンスタントに送ろうとする場合、問題となるでしょう。 %TODO: 自信なし。they can't make it all, theyをqueues and buffersとみて訳しましたがあってますかね。 without overloadingは「コンスタントに送る」の表現で暗に示したつもりです
+一つのメッセージでは過負荷になってしまうほどの大量メッセージを常に送りたい場合が問題です。
 一般的に、この場合には二つのアプローチがあります。
 
 \begin{itemize*}
@@ -349,7 +349,6 @@ It may sound counter-intuitive to make some requests a lot worse to benefit the 
 ふたつめのアプローチ、つまりはカウンタとロックを使う方法でも、たくさんの選択肢から一つを選んでメッセージを送るという基本構造は変わりません。
 しかし、実際にメッセージを送る前に、ETSカウンタをアトミックに更新\footnote{\function{ets:update\_counter/3}を使いましょう}しなければなりません。
 全クライアントで共有できる量は限界があり（スーパバイザを介しても、configやETSの値を使うにしても、です）、プロセスに対するリクエストはまずはじめにクリアする必要があります。
-%TODO: 最後の文章若干自信ないです。
 
 %This approach has been used in \module{dispcount}\footnote{\href{https://github.com/ferd/dispcount}{https://github.com/ferd/dispcount}} to avoid message queues, and to guarantee low-latency responses to any message that won't be handled so that you do not need to wait to know your request was denied. It is then up to the user of the library whether to give up as soon as possible, or to keep retrying with different workers.
 このアプローチは\module{dispcount}\footnote{\href{https://github.com/ferd/dispcount}{https://github.com/ferd/dispcount}}モジュールで使われていて、
