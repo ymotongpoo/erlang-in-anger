@@ -232,25 +232,34 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 %If you don't have the option of limiting how much data you receive, you then have to drop messages to avoid crashing.
 受信するデータ量を制限する選択肢がない場合は、クラッシュを避けるためにメッセージをドロップする必要があります。
 
-\subsection{Random Drop}
+%\subsection{Random Drop}
+\subsection{ランダムドロップ}
 
-Randomly dropping messages is the easiest way to do such a thing, and might also be the most robust implementation, due to its simplicity.
+%Randomly dropping messages is the easiest way to do such a thing, and might also be the most robust implementation, due to its simplicity.
+ランダムにメッセージをドロップすることは、これらの対処を行う最も簡単な方法であり、シンプルがゆえに最も強力な実装でもあります。
 
-The trick is to define some threshold value between 0.0 and 1.0 and to fetch a random number in that range:
+%The trick is to define some threshold value between 0.0 and 1.0 and to fetch a random number in that range:
+その中身は、0.0から1.0の間のある閾値を定義し、その範囲の乱数を取り出すという仕組みになっています。
 
 \includecode[erlang]{drop.erl}
 
-If you aim to keep 95\% of the messages you send, the authorization could be written by a call to \expression{case drop:random(0.95) of true -> send(); false -> drop() end}, or a shorter \expression{drop:random(0.95) andalso send()} if you don't need to do anything specific when dropping a message.
+%If you aim to keep 95\% of the messages you send, the authorization could be written by a call to \expression{case drop:random(0.95) of true -> send(); false -> drop() end}, or a shorter \expression{drop:random(0.95) andalso send()} if you don't need to do anything specific when dropping a message.
+送信するメッセージの95％を保持することを目指す場合、 \expression{case drop:random(0.95) of true -> send(); false -> drop() end} の呼び出しによって承認できます。メッセージをドロップする際に特別な処理を行う必要がない場合、より短く \expression{drop:random(0.95) andalso send()} で書けます。
 
-The \function{maybe\_seed()} function will check that a valid seed is present in the process dictionary and use it rather than a crappy one, but only if it has not been defined before, in order to avoid calling \function{now()} (a monotonic function that requires a global lock) too often.
+%The \function{maybe\_seed()} function will check that a valid seed is present in the process dictionary and use it rather than a crappy one, but only if it has not been defined before, in order to avoid calling \function{now()} (a monotonic function that requires a global lock) too often.
+\function{maybe\_seed()}関数は、\function{now()} (グローバルロックを要求する単調関数) を高頻度で呼び出すことを避けるため、過去に呼び出されていない場合、有効なシードがプロセスディクショナリに存在していることをチェックし、それを有用なものとして使用します。
 
-There is one `gotcha' to this method, though: the random drop must ideally be done at the producer level rather than at the queue (the receiver) level. The best way to avoid overloading a queue is to not send data its way in the first place. Because there are no bounded mailboxes in Erlang, dropping in the receiving process only guarantees that this process will be spinning wildly, trying to get rid of messages, and fighting the schedulers to do actual work.
+%There is one `gotcha' to this method, though: the random drop must ideally be done at the producer level rather than at the queue (the receiver) level. The best way to avoid overloading a queue is to not send data its way in the first place. Because there are no bounded mailboxes in Erlang, dropping in the receiving process only guarantees that this process will be spinning wildly, trying to get rid of messages, and fighting the schedulers to do actual work.
+しかし、この方法には1つの「落とし穴」があります。ランダムドロップは、キュー（レシーバ）レイヤではなくプロデューサレイヤで行うのが理想的なのです。キューの過負荷を避ける最善の方法は、そもそもデータを送信しないことです。Erlangには制限付きのバッファがないため、受信プロセスのメッセージドロップしか唯一、プロセスの高速動作、メッセージ除去への試み、処理を行うためにスケジューラに追いつくこと、などを保証しません。
 
-On the other hand, dropping at the producer level is guaranteed to distribute the work equally across all processes.
+%On the other hand, dropping at the producer level is guaranteed to distribute the work equally across all processes.
+その一方で、プロデューサレベルでのメッセージドロップは、すべてのプロセス間で均等に分散されることを保証します。
 
-This can give place to interesting optimizations where the working process or a given monitor process\footnote{Any process tasked with checking the load of specific processes using heuristics such as \expression{process\_info(Pid, message\_queue\_len)} could be a monitor} uses values in an ETS table or \function{application:set\_env/3} to dynamically increase and decrease the threshold to be used with the random number. This allows control over how many messages are dropped based on overload, and the configuration data can be fetched by any process rather efficiently by using \function{application:get\_env/2}.
+%This can give place to interesting optimizations where the working process or a given monitor process\footnote{Any process tasked with checking the load of specific processes using heuristics such as \expression{process\_info(Pid, message\_queue\_len)} could be a monitor} uses values in an ETS table or \function{application:set\_env/3} to dynamically increase and decrease the threshold to be used with the random number. This allows control over how many messages are dropped based on overload, and the configuration data can be fetched by any process rather efficiently by using \function{application:get\_env/2}.
+これは、処理するプロセスまたは特定のモニタプロセス\footnote{\expression{process\_info(Pid, message\_queue\_len)}のような、ヒューリスティックスを使用して特定のプロセスの負荷をチェックするどんなプロセスも、モニタにすることができます。}がETSテーブルまたは \function{application:set\_env/3} の値を使用して、乱数とともに使用されるしきい値を動的に増減させる、という面白い最適化を提供します。これにより、負荷に基づいてドロップされるメッセージの数を制御したり、\function{application:get\_env/2}を使用すれば、どんなプロセスでも効率的に構成データを取得できます。
 
-Similar techniques could also be used to implement different drop ratios for different message priorities, rather than trying to sort it all out at the consumer level.
+%Similar techniques could also be used to implement different drop ratios for different message priorities, rather than trying to sort it all out at the consumer level.
+同様の技術を使用すれば、処理する側ですべてを並べ替えるのではなく、メッセージに別々の優先順位をつけて異なるドロップ比率を実装することもできます。
 
 %\subsection{Queue Buffers}
 \subsection{キューバッファ}
