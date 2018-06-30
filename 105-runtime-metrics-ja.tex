@@ -295,42 +295,42 @@ Outside of memory leaks, which often need their own specific techniques and are 
 			\item[\expression{registered\_name}] もしプロセスが名前(\function{erlang:register/2}で登録)を持っているなら、それを取得します。
 
 %			\item[\expression{status}] the nature of the process as seen by the scheduler. The possible values are:
-			\item[\expression{status}] スケジューラーによって参照できるプロセスの特性。取り得る値は以下
+			\item[\expression{status}] スケジューラーによって参照できるプロセスの特性。取りうる値は以下となります。
 
 				\begin{description*}
 %					\item[\expression{exiting}] the process is done, but not fully cleared yet;
-					\item[\expression{exiting}] プロセスは完了していますが、まだクリアされていません
+					\item[\expression{exiting}] プロセスは終了していますが、まだクリアされていません
 
 %					\item[\expression{waiting}] the process is waiting in a \expression{receive ... end};
-					\item[\expression{waiting}] プロセスは\expression{receive ... end}で待機中です
+					\item[\expression{waiting}] プロセスは\expression{receive ... end}によって待機中です
 
 %					\item[\expression{running}] self-descriptive;
-					\item[\expression{running}] 実行しています
+					\item[\expression{running}] 実行中
 
 %					\item[\expression{runnable}] ready to run, but not scheduled yet because another process is running;
-					\item[\expression{runnable}] 実行準備は整っていますが、他のプロセスが実行されている為、まだスケジューリングされていません
+					\item[\expression{runnable}] 実行の準備は整っていますが、他のプロセスが実行中の為、まだスケジューリングされていません
 
 %					\item[\expression{garbage\_collecting}] self-descriptive;
-					\item[\expression{garbage\_collecting}] GCされている
+					\item[\expression{garbage\_collecting}] GC中
 
 %					\item[\expression{suspended}] whenever it is suspended by a BIF, or as a back-pressure mechanism because a socket or port buffer is full. The process only becomes runnable again once the port is no longer busy.
-					\item[\expression{suspended}] BIFによる、またはソケットやポートのバッファがいっぱいになる事によるバックプレッシャーのメカニズムによる、あらゆる停止。ポートがビジーでなくなったら、プロセスは再びrunnable状態になります。
+					\item[\expression{suspended}] BIF、またソケットやポートのバッファがいっぱいになる事によるバックプレッシャーのメカニズムによって停止された時はいつでも。ポートがビジーでなくなったら、プロセスは再びrunnableになります。
 
 				\end{description*}
 		\end{description}
 	\item[Signals] \hfill
 		\begin{description}
 %			\item[\expression{links}] will show a list of all the links a process has towards other processes and also ports (sockets, file descriptors). Generally safe to call, but to be used with care on large supervisors that may return thousands and thousands of entries.
-			\item[\expression{links}] は他のプロセスや他のポート(ソケット、ファイルディスクリプタ)に対する全てのリンクのリストを表示します。
+			\item[\expression{links}] 他のプロセスやポート(ソケット、ファイルディスクリプタ)に対する全てのリンクのリストを表示します。
 
 %			\item[\expression{monitored\_by}] gives a list of processes that are monitoring the current process (through the use of \function{erlang:monitor/2}).
-			\item[\expression{monitored\_by}] は(\function{erlang:monitor/2}を使って)現在のプロセスをモニタしているプロセスのリストを表示します。
+			\item[\expression{monitored\_by}] (\function{erlang:monitor/2}を使って)現プロセスをモニタしているプロセスのリストを表示します。
 
 %			\item[\expression{monitors}] kind of the opposite of \expression{monitored\_by}; it gives a list of all the processes being monitored by the one polled here.
-			\item[\expression{monitors}] \expression{monitored\_by}の反対、モニタされている全てのプロセスのリストを取得します。
+			\item[\expression{monitors}] \expression{monitored\_by}の反対。モニタされている全てのプロセスのリストを取得します。
 
 %			\item[\expression{trap\_exit}] has the value \expression{true} if the process is trapping exits, \expression{false} otherwise.
-			\item[\expression{trap\_exit}] プロセスが終了(exits)メッセージをトラップする場合は \expression{true} 、そうでなければ \expression{false} となります。
+			\item[\expression{trap\_exit}] プロセスが終了(exits)メッセージを補足する場合は \expression{true} 、そうでなければ \expression{false} となります。
 
 		\end{description}		
 	\item[Location] \hfill
@@ -342,10 +342,10 @@ Outside of memory leaks, which often need their own specific techniques and are 
 			\item[\expression{current\_location}] \expression{\{Mod, Fun, Arity, [\{File, FileName\}, \{line, Num\}]\}}の形式のタプルで、モジュールの現在のロケーションを表示します。
 
 %			\item[\expression{current\_stacktrace}] more verbose form of the preceding option; displays the current stacktrace as a list of 'current locations'.
-			\item[\expression{current\_stacktrace}] 前述のオプションよりも詳細な形式、'current location'のリストとして現在のスタックトレースを表示します。
+			\item[\expression{current\_stacktrace}] 前述のオプションよりも詳細な形式、'current location'のリストで現在のスタックトレースを表示します。
 
 %			\item[\expression{initial\_call}] shows the function that the process was running when spawned, of the form \expression{\{Mod, Fun, Arity\}}. This may help identify what the process was spawned as, rather than what it's running right now.
-			\item[\expression{initial\_call}] プロセスが生成された時に実行されていた関数を\expression{\{Mod, Fun, Arity\}}形式で表示します。これは現在実行中のプロセスがどうなのかではなく、プロセスがどう生成されたかの特定に役立ちます。
+			\item[\expression{initial\_call}] プロセス生成時に実行されていた関数を\expression{\{Mod, Fun, Arity\}}形式で表示します。これは現在実行中のプロセスが何かというより、プロセスがどう生成されたかの特定に役立ちます。
 		\end{description}
 	\item[Memory Used] \hfill
 		\begin{description}
@@ -353,9 +353,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 			\item[\expression{binary}] Refcバイナリ\footnote{Section \ref{sec:binaries} 参照}への参照をそのサイズと一緒に表示します。プロセスへの割り当てサイズが大きい場合、使用するのは危険です。
 
 %			\item[\expression{garbage\_collection}] contains information regarding garbage collection in the process. The content is documented as 'subject to change' and should be treated as such. The information tends to contains entries such as the number of garbage collections the process has went through, options for full-sweep garbage collections, and heap sizes.
-			\item[\expression{garbage\_collection}] プロセス中のガベージコレクションに関する情報が含まれています。
-      内容は'変更対象'として記述され、そう扱われるべきです。
-      この情報は、プロセスが実行したガベージコレクションの回数、フルスワップガベージコレクションのオプション、ヒープサイズといったエントリが含まれている傾向があります。
+			\item[\expression{garbage\_collection}] プロセスのガベージコレクションに関する情報が含まれています。その内容は'変更対象'として記述され、そう扱われるべきです。この情報は、プロセスが実行したガベージコレクションの回数、フルスワップガベージコレクションのオプション、ヒープサイズといったエントリが含みます。
 
 %			\item[\expression{heap\_size}] A typical Erlang process contains an 'old' heap and a 'new' heap, and goes through generational garbage collection. This entry shows the process' heap size for the newest generation, and it usually includes the stack size. The value returned is in \emph{words}.
 			\item[\expression{heap\_size}] 典型的なErlangプロセスは、'古い'ヒープと'新しい'ヒープを含み、世代別ガベージコレクションが行われます。このエントリは最新世代のプロセスのヒープサイズを示し、通常はスタックサイズが含まれます。値は\emph{words}単位で返します。
@@ -475,7 +473,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 いくつかのプロセスは\var{w}と\var{x}で死ぬまでの間、いくつかは\var{y}と\var{z}の間、またいくつかは\var{x}と\var{y}の間に存在します。これらのサンプルは不完全なので、さほど重要ではありません。
 
 %If the majority of your processes run between a time interval \var{x} to \var{y} (in absolute terms), you should make sure that your sampling time is smaller than this so that for many processes, their lifetime spans the equivalent of \var{w} and \var{z}. Not doing this can skew the results: long-lived processes that have 10 times the time to accumulate data (say reductions) will look like huge consumers when they're not one.\footnote{Warning: this function depends on data gathered at two snapshots, and then building a dictionary with entries to differentiate them. This can take a heavy toll on memory when you have many tens of thousands of processes, and a little bit of time.}
-プロセスの大半が(絶対値で)\var{x}から\var{y}までの時間間隔の間に実行される場合、多くのプロセスの生存時間が\var{w}と\var{z}の間にわたるので、サンプリング時間をこれより短くする必要があります。こうしないと、結果を歪める可能性があります。データを蓄積する時間(reductionsとも言います)の10倍の長寿命のプロセスは、巨大な消費者のように見えます。\footnote{注意: この関数は、2つのスナップショットで収集されたデータに依存し、それらを区別するためのエントリを持つ辞書データを構築します。何万ものプロセスがある時、これは大きなメモリと少しの時間の負担をかけることになります。}
+プロセスの大半が(絶対値で)\var{x}から\var{y}までの時間間隔の間に実行される場合、多くのプロセスの生存時間が\var{w}と\var{z}の間にわたるので、サンプリング時間をこれより短くする必要があります。こうしないと、結果を歪める可能性があります。データを蓄積する時間(reductionsとも言います)の10倍の長寿命のプロセスは、巨大な消費者のように見えます。\footnote{注意: この関数は、2つのスナップショットで収集されたデータに依存し、それらを区別するためのエントリを持つ辞書を構築します。何万ものプロセスがある時、これは大きなメモリと少しの時間の負担をかけることになります。}
 
 %The function, once running gives results like follows:
 この関数が実行されると、次の様な結果が得られます。
