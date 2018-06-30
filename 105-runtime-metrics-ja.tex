@@ -265,12 +265,15 @@ Erlangにおいて一般的に良い方法となるのは、真に同時実行�
 %Again, tracking these can be useful to assess load or usage of a system, detect leaks, and so on.
 繰り返しになりますが、これらの値を監視することはシステム使用率や負荷を見たり、リークを見たり、その他いろいろなことに役立ちます。
 
-\section{Digging In}
+%\section{Digging In}
+\section{内部分析}
 \label{sec:digging-in}
 
-Whenever some 'in the large' view (or logging, maybe) has pointed you towards a potential cause for an issue you're having, it starts being interesting to dig around with a purpose. Is a process in a weird state? Maybe it needs tracing\footnote{See Chapter \ref{chap:tracing}}! Tracing is great whenever you have a specific function call or input or output to watch for, but often, before getting there, a lot more digging is required.
+%Whenever some 'in the large' view (or logging, maybe) has pointed you towards a potential cause for an issue you're having, it starts being interesting to dig around with a purpose. Is a process in a weird state? Maybe it needs tracing\footnote{See Chapter \ref{chap:tracing}}! Tracing is great whenever you have a specific function call or input or output to watch for, but often, before getting there, a lot more digging is required.
+大規模なビュー(または、ロギング)が問題の潜在的な原因を示す時は大抵、目的を持って内部状態を分析する事が面白くなってきます。プロセスの状態はおかしいですか？ 多分トレーシングが必要になるでしょう\footnote{Chapter \ref{chap:tracing} 参照}! 特定の関数の呼び出しや入出力を監視する時はいつでも、トレーシングが有効ですが、多くの場合、監視前に多くの内部分析が必要になります。
 
-Outside of memory leaks, which often need their own specific techniques and are discussed in Chapter \ref{chap:memory-leaks}, the most common tasks are related to processes, and ports (file descriptors and sockets).
+%Outside of memory leaks, which often need their own specific techniques and are discussed in Chapter \ref{chap:memory-leaks}, the most common tasks are related to processes, and ports (file descriptors and sockets).
+Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必要なメモリリークを除けば、最も共通するタスクはプロセスとポート(ファイルディスクリプタとソケット)に関連しています。
 
 \subsection{Processes}
 \label{subsec:digging-procs}
