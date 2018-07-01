@@ -256,7 +256,7 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 その一方で、プロデューサ側でのメッセージドロップは、すべてのプロセス間で均等に分散されることを保証します。
 
 %This can give place to interesting optimizations where the working process or a given monitor process\footnote{Any process tasked with checking the load of specific processes using heuristics such as \expression{process\_info(Pid, message\_queue\_len)} could be a monitor} uses values in an ETS table or \function{application:set\_env/3} to dynamically increase and decrease the threshold to be used with the random number. This allows control over how many messages are dropped based on overload, and the configuration data can be fetched by any process rather efficiently by using \function{application:get\_env/2}.
-これは、処理するプロセスまたは特定のモニタプロセス\footnote{\expression{process\_info(Pid, message\_queue\_len)}のような、ヒューリスティックスを使用して特定のプロセスの負荷をチェックするどんなプロセスも、モニタにすることができます。}がETSテーブルまたは \function{application:set\_env/3} の値を使用して、乱数とともに使用されるしきい値を動的に増減させる、という面白い最適化を提供します。これにより、負荷に基づいてドロップされるメッセージの数を制御したり、\function{application:get\_env/2}を使用すれば、どんなプロセスでも効率的に構成データを取得できます。
+これは、処理するプロセスまたは特定のモニタプロセス\footnote{\expression{process\_info(Pid, message\_queue\_len)}のような、ヒューリスティックスを使用して特定のプロセスの負荷をチェックするプロセスは、どんなものでもモニタにすることができます。}がETSテーブルまたは \function{application:set\_env/3} の値を使用して、乱数とともに使用されるしきい値を動的に増減させる、という面白い最適化を提供します。これにより、負荷に基づいてドロップされるメッセージの数を制御したり、\function{application:get\_env/2}を使用すれば、どんなプロセスでも効率的に構成データを取得できます。
 
 %Similar techniques could also be used to implement different drop ratios for different message priorities, rather than trying to sort it all out at the consumer level.
 同様の技術を使用すれば、処理する側ですべてを選別するのではなく、メッセージに別々の優先順位をつけて異なるドロップ比率を実装することもできます。
