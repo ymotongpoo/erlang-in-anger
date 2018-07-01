@@ -250,10 +250,10 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 \function{maybe\_seed()}関数は、\function{now()} (グローバルロックを要求する単調関数) を高頻度で呼び出すことを避けるため、過去に呼び出されていない場合、有効なシードがプロセスディクショナリに存在していることをチェックし、それを有用なものとして使用します。
 
 %There is one `gotcha' to this method, though: the random drop must ideally be done at the producer level rather than at the queue (the receiver) level. The best way to avoid overloading a queue is to not send data its way in the first place. Because there are no bounded mailboxes in Erlang, dropping in the receiving process only guarantees that this process will be spinning wildly, trying to get rid of messages, and fighting the schedulers to do actual work.
-しかし、この方法には1つの「落とし穴」があります。ランダムドロップは、キュー（レシーバ）レイヤではなくプロデューサレイヤで行うのが理想的なのです。キューの過負荷を避ける最善の方法は、そもそもデータを送信しないことです。Erlangには制限付きのメールボックスがないため、受信プロセスのメッセージドロップしか唯一、プロセスの高速動作、メッセージ除去への試み、処理を行うためにスケジューラに追いつくこと、などを保証しません。
+しかし、この方法には1つの「落とし穴」があります。ランダムドロップは、キュー（レシーバ）側ではなくプロデューサ側で行うのが理想的なのです。キューの過負荷を避ける最善の方法は、そもそもデータを送信しないことです。Erlangには制限付きのメールボックスがないため、受信プロセスのメッセージドロップしか唯一、プロセスの高速動作、メッセージ除去への試み、処理を行うためにスケジューラに追いつくこと、などを保証しません。
 
 %On the other hand, dropping at the producer level is guaranteed to distribute the work equally across all processes.
-その一方で、プロデューサレベルでのメッセージドロップは、すべてのプロセス間で均等に分散されることを保証します。
+その一方で、プロデューサ側でのメッセージドロップは、すべてのプロセス間で均等に分散されることを保証します。
 
 %This can give place to interesting optimizations where the working process or a given monitor process\footnote{Any process tasked with checking the load of specific processes using heuristics such as \expression{process\_info(Pid, message\_queue\_len)} could be a monitor} uses values in an ETS table or \function{application:set\_env/3} to dynamically increase and decrease the threshold to be used with the random number. This allows control over how many messages are dropped based on overload, and the configuration data can be fetched by any process rather efficiently by using \function{application:get\_env/2}.
 これは、処理するプロセスまたは特定のモニタプロセス\footnote{\expression{process\_info(Pid, message\_queue\_len)}のような、ヒューリスティックスを使用して特定のプロセスの負荷をチェックするどんなプロセスも、モニタにすることができます。}がETSテーブルまたは \function{application:set\_env/3} の値を使用して、乱数とともに使用されるしきい値を動的に増減させる、という面白い最適化を提供します。これにより、負荷に基づいてドロップされるメッセージの数を制御したり、\function{application:get\_env/2}を使用すれば、どんなプロセスでも効率的に構成データを取得できます。
