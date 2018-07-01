@@ -244,7 +244,7 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 \includecode[erlang]{drop.erl}
 
 %If you aim to keep 95\% of the messages you send, the authorization could be written by a call to \expression{case drop:random(0.95) of true -> send(); false -> drop() end}, or a shorter \expression{drop:random(0.95) andalso send()} if you don't need to do anything specific when dropping a message.
-送信するメッセージの95％を保持することを目指す場合、 \expression{case drop:random(0.95) of true -> send(); false -> drop() end} の呼び出しによって承認できます。メッセージをドロップする際に特別な処理を行う必要がない場合、より短く \expression{drop:random(0.95) andalso send()} で書けます。
+送信するメッセージの95％を保持することを目指す場合、 \expression{case drop:random(0.95) of true -> send(); false -> drop() end} の呼び出しによって承認できます。メッセージをドロップする際に特別な処理を行う必要がない場合、より短く \expression{drop:random(0.95) andalso send()} で書けます。\footnote{random moduleはOTP18で代替のrand moduleが追加されOTP19以降では非推奨になっているため、OTP19以降はrandを使った方が良いでしょう。}
 
 %The \function{maybe\_seed()} function will check that a valid seed is present in the process dictionary and use it rather than a crappy one, but only if it has not been defined before, in order to avoid calling \function{now()} (a monotonic function that requires a global lock) too often.
 \function{maybe\_seed()}関数は、\function{now()} (グローバルロックを要求する単調関数) を高頻度で呼び出すことを避けるため、過去に呼び出されていない場合、有効なシードがプロセスディクショナリに存在していることをチェックし、それを有用なものとして使用します。
