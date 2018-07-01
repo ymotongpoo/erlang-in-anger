@@ -85,7 +85,7 @@ monitor=long_schedule pid=<0.54.0> info=[{timeout,1102},
 \label{subsec:port-system-monitors}
 
 %An interesting part of system monitors that didn't fit anywhere but may have to do with scheduling is regarding ports. When a process sends too many message to a port and the port's internal queue gets full, the Erlang schedulers will forcibly de-schedule the sender until space is freed. This may end up surprising a few users who didn't expect that implicit back-pressure from the VM.
-これまでのどの文にもあてはまらなかったけれどスケジューリングに関係のある、システムモニターのおもしろいところはポートに関するところです。あるプロセスが沢山のメッセージをポートに送りポートの内部キューが一杯になったとき、スペースに空きがでるまでErlangのスケジューラーは強制的に送り側のスケジュールを解除します。これはVMから暗黙のバックプレッシャーを予想していなかった少数のユーザーを驚かせることになるかもしれません。
+これまでのどの文にもあてはまらなかったけれどスケジューリングに関係のある、システムモニターのおもしろいところはポートに関するところです。あるプロセスが沢山のメッセージをポートに送りポートの内部キューが一杯になったとき、スペースに空きがでるまでErlangのスケジューラーは強制的に送り側のスケジュールを解除します。これはVMから暗黙のバックプレッシャーを予想していなかったいくばくかのユーザーを驚かせることになるかもしれません。
 
 %This kind of event can be monitored by passing in the atom \term{busy\_port} to the system monitor. Specifically for clustered nodes, the atom \term{busy\_dist\_port} can be used to find when a local process gets de-scheduled when contacting a process on a remote node whose inter-node communication was handled by a busy port.
 こういったイベントは \term{busy\_port} アトムをシステムモニターへ送ることでモニターできます。特にクラスタ化されたノードで、ノード間の通信がビジーポートによって処理されていた場合、リモートノード上のプロセスと通信しているローカルプロセスがスケジュール解除されるため、それを発見するのに \term{busy\_dist\_port} アトムが使われます。
