@@ -61,9 +61,9 @@ $ docker-compose up
 - [x] 101: How to Dive into a Code Base
 - [x] 102: Building Open Source Erlang Software
 - [ ] 103: Planning for Overload
-- [ ] 104: Connecting to Remote Nodes
+- [x] 104: Connecting to Remote Nodes
 - [ ] 105: Runtime Metrics
-- [ ] 106: Reading Crash Dumps
+- [x] 106: Reading Crash Dumps
 - [ ] 107: Memory Leaks
 - [ ] 108: CPU and Scheduler Hogs
 - [x] 109: Tracing
