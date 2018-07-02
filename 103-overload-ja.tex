@@ -291,23 +291,31 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 \emph{PO Box}\footnote{\href{https://github.com/ferd/pobox}{https://github.com/ferd/pobox} にあります。このライブラリはHerokuの大規模な本番環境で長い間使われてきており、成熟していると考えられています}ライブラリはこのようなキューバッファを提供しています。
 
 
-\subsection{Stack Buffers}
+%\subsection{Stack Buffers}
+\subsection{スタックバッファ}
 
-Stack buffers are ideal when you want the amount of control offered by queue buffers, but you have an important requirement for low latency.
+%Stack buffers are ideal when you want the amount of control offered by queue buffers, but you have an important requirement for low latency.
+キューバッファのような制御も欲しいが、低レイテンシのための重要な要件があるときには、スタックバッファが理想的です。
 
-To use a stack as a buffer, you'll need two processes, just like you would with queue buffers, but a list\footnote{Erlang lists \emph{are} stacks, for all we care. They provide push and pop operations that take O(1) complexity and are very fast} will be used instead of a queue data structure.
+%To use a stack as a buffer, you'll need two processes, just like you would with queue buffers, but a list\footnote{Erlang lists \emph{are} stacks, for all we care. They provide push and pop operations that take O(1) complexity and are very fast} will be used instead of a queue data structure.
+スタックをバッファとして利用するには、キューバッファの時のように二つのプロセスが必要となりますが、キュー構造の代わりにリスト\footnote{どうでも良いことですが、Erlangではリスト\emph{が}スタックです。ErlangリストはO(1)の計算量でpushとpop操作を提供していて、非常に速いです。}が使われます。
 
-The reason the stack buffer is particularly good for low latency is related to issues similar to bufferbloat\footnote{\href{http://queue.acm.org/detail.cfm?id=2071893}{http://queue.acm.org/detail.cfm?id=2071893 }}. If you get behind on a few messages being buffered in a queue, all the messages in the queue get to be slowed down and acquire milliseconds of wait time. Eventually, they all get to be too old and the entire buffer needs to be discarded.
+%The reason the stack buffer is particularly good for low latency is related to issues similar to bufferbloat\footnote{\href{http://queue.acm.org/detail.cfm?id=2071893}{http://queue.acm.org/detail.cfm?id=2071893 }}. If you get behind on a few messages being buffered in a queue, all the messages in the queue get to be slowed down and acquire milliseconds of wait time. Eventually, they all get to be too old and the entire buffer needs to be discarded.
+低レイテンシのためにスタックバッファが特に優れている理由は、バッファブロート\footnote{\href{http://queue.acm.org/detail.cfm?id=2071893}{http://queue.acm.org/detail.cfm?id=2071893 }}に似た問題と関係しています。キューバッファにあるメッセージの処理が遅れると、それがほんの少量のメッセージだったとしても、キューの中にあるすべてのメッセージにミリ秒単位の待ち時間が発生します。しだいにメッセージは古くなりすぎて、すべてのバッファを削除する必要が出てくるでしょう。
 
-%% Image of queue taking long from RTB article. Maybe side image or side explanation?
+%% Image of queue taking long from RTB article. Maybe side image or side explanation? %% ここは最初からコメントアウトされています
 
-On the other hand, a stack will make it so only a restricted number of elements are kept waiting while the newer ones keep making it to the server to be processed in a timely manner.
+%%On the other hand, a stack will make it so only a restricted number of elements are kept waiting while the newer ones keep making it to the server to be processed in a timely manner.
+その一方で、スタックはある一定数の要素だけが待たされて、新しい方からタイムリーにサーバで処理されます。% TODO: 要はLIFOってことを言いたいだけだと思うんですが、stackでもqueueでも一定数の制限を設けることはできるよなぁ…と思い、前半の文意を少し捉えかねています
 
-%% image of queue taking a short time from RTB article.
+%% image of queue taking a short time from RTB article. %%ここも最初からコメントアウトされています
 
-Whenever you see the stack grow beyond a certain size or notice that an element in it is too old for your QoS requirements you can just drop the rest of the stack and keep going from there. \emph{PO Box} also offers such a buffer implementation.
+%Whenever you see the stack grow beyond a certain size or notice that an element in it is too old for your QoS requirements you can just drop the rest of the stack and keep going from there. \emph{PO Box} also offers such a buffer implementation.
+スタックが一定サイズを超えて成長した場合や、その中の要素がQoS要求を満たすには遅すぎると気づいた時は、ただスタックの残りを破棄して、続きを始めれば良いです。
+\emph{PO Box}もこのようなバッファ実装を行っていますね。
 
-A major downside of stack buffers is that messages are not necessarily going to be processed in the order they were submitted — they're nicer for independent tasks, but will ruin your day if you expect a sequence of events to be respected.
+%A major downside of stack buffers is that messages are not necessarily going to be processed in the order they were submitted — they're nicer for independent tasks, but will ruin your day if you expect a sequence of events to be respected.
+スタックバッファの主な欠点はメッセージが必ずしも投稿された順番どおりに行われないことです --- 独立したタスクには向きますが、イベントが順番通りだと期待するなら、一日を無駄にすることでしょう。
 
 \subsection{Time-Sensitive Buffers}
 
