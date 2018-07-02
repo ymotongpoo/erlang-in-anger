@@ -311,7 +311,7 @@ A major downside of stack buffers is that messages are not necessarily going to 
 
 %It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
 多数の利益のために一部リクエストを非常に悪くする--- 中央値は良いが、下位1\%がひどいことになっている --- というのは直感に反するかもしれませんが、
-これはとにかくメッセージを捨たいという状態で起こるもので、低レイテンシを求めないのでなら、望ましい方法です。
+これはとにかくメッセージを捨たいという状態で起こるもので、低レイテンシがどうしても求められる場合には、望ましい方法です。
 
 \subsection{Dealing With Constant Overload}
 
