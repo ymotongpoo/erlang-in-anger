@@ -143,7 +143,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 \subsection{タイムアウトはどれくらいの長さであるべきか}
 
 %What's particularly tricky about applying back-pressure to handle overload via synchronous calls is having to determine what the typical operation should be taking in terms of time, or rather, at what point the system should time out.
-過負荷に対処するために同期呼び出しによるバックプレッシャーを適用することにおいて特に扱いづらいのは、システムがどのタイミングでタイムアウトするべきかよりも、処理は通常どれくらいの時間がかかるのかを決定しなければならないことです。
+過負荷に対処するために同期呼び出しによるバックプレッシャーを適用することにおいて特に扱いづらいのは、処理は通常どれくらいの時間がかかるのかを決定しなければならないこと、より正確に言えばシステムがどのタイミングでタイムアウトするべきかを決める必要があることです。
 
 %The best way to express the problem is that the first timer to be started will be at the edge of the system, but the critical operations will be happening deep within it. This means that the timer at the edge of the system will need to have a longer wait time that those within, unless you plan on having operations reported as timing out at the edge even though they succeeded internally.
 この問題を最もうまく表現しようと思うと、最初のタイマーがシステムの周辺部で開始されるけれども、致命的な処理はシステムの深層部で起きているというような具合です。
