@@ -444,7 +444,7 @@ When that happens, over 80\% of the time, the only thing that happens is that th
   %\item What could be to blame if no specific data type seems to be the source of a leak?
   \item どの特定のデータ型もリークの原因でないように思われる場合、何が原因になりうるでしょうか。
   %\item If you find the node died with a process having a lot of memory, what could you do to find out which one it was?
-  \item 多くのメモリを保持したプロセスとともにノードが死んだとき、どのノードが死んだかをどうやって見つけられるでしょうか。
+  \item 多くのメモリを保持したプロセスとともにノードが死んだとき、どのプロセスが死んだかをどうやって見つけられるでしょうか。
   %\item How could code itself cause a leak?
   \item コードはどうやってリークを起こせるでしょうか。
   %\item How can you find out if garbage collections are taking too long to run?
@@ -464,7 +464,7 @@ When that happens, over 80\% of the time, the only thing that happens is that th
   %\item What steps should you go through to find out that a node is likely suffering from fragmentation? How could you disprove the idea that is could be due to a NIF or driver leaking memory?
   \item ノードがフラグメンテーションで苦労しそうかを検出するためにどのような手順を踏めばよいでしょうか。またそれがNIFやドライバーがメモリリークの原因であろうという意見にどう反論できるでしょうか。
   %\item How could you find out if a process with a large mailbox (from reading \term{message\_queue\_len}) seems to be leaking data from there, or never handling new messages?
-  \item （\term{message\_queue\_len}の値を見ることで）メールボックスが大きくなっているプロセスがデータをリークさせている、あるいは新規メッセージをまったく処理できていなさそううかを、どうやって検出できるでしょうか。
+  \item （\term{message\_queue\_len}の値を見ることで）メールボックスが大きくなっているプロセスがデータをリークさせている、あるいは新規メッセージをまったく処理できていなさそうかを、どうやって検出できるでしょうか。
   %\item A process with a large memory footprint seems to be rarely running garbage collections. What could explain this?
   \item 大きなメモリフットプリントのプロセスがガベージコレクションをほとんど実行していなさそうに見えます。これはどう説明できるでしょうか。
   %\item When should you alter the allocation strategies on your nodes? Should you prefer to tweak this, or the way you wrote code?
