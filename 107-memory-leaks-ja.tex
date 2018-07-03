@@ -37,7 +37,7 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 これらの質問ですべてメモリリークを指し示すような回答を得たならば、\ref{chap:runtime-metrics} 章にて説明されているメトリクスライブラリまたは \otpapp{recon} をインストールし、データを探索する準備をしましょう。\footnote{動作しているノードに接続する必要がある場合は \ref{chap:connecting} 章を参照。}
 
 % The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
-どのようなケースでも、最初に見るべきはデータの傾向です。\expression{erlang:memory()} またはライブラリやメモリシステムにあるこれのヴァリアントを使ってすべてのメモリのタイプについて調べましょう。以下の点を調べるとよいです:
+どのようなケースでも、最初に見るべきはデータの傾向です。\expression{erlang:memory()} またはライブラリやメモリシステムにある類似のものを使ってすべてのメモリのタイプについて調べましょう。以下の点を調べるとよいです:
 
 \begin{itemize*}
 	% \item Is any type of memory growing faster than others?
@@ -55,7 +55,7 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 \subsection{アトム}
 
 % \emph{Don't use dynamic atoms!} Atoms go in a global table and are cached forever. Look for places where you call \function{erlang:binary\_to\_term/1} and \function{erlang:list\_to\_atom/1}, and consider switching to safer variants (\expression{erlang:binary\_to\_term(Bin, [safe])} and\newline \function{erlang:list\_to\_existing\_atom/1}).
-\emph{動的にアトムを生成してはいけません！}アトムはグローバルなテーブルに保存され永久にキャッシュされるためです。\function{erlang:binary\_to\_term/1} や \function{erlang:list\_to\_atom/1} を呼んでいるや場所を探し、\expression{erlang:binary\_to\_term(Bin, [safe])} や \function{erlang:list\_to\_existing\_atom/1} のようなより安全なヴァリアントを用いるようにしましょう。
+\emph{動的にアトムを生成してはいけません！}アトムはグローバルなテーブルに保存され永久にキャッシュされるためです。\function{erlang:binary\_to\_term/1} や \function{erlang:list\_to\_atom/1} を呼んでいるや場所を探し、\expression{erlang:binary\_to\_term(Bin, [safe])} や \function{erlang:list\_to\_existing\_atom/1} のような同様の機能でより安全なものを用いるようにしましょう。
 
 % If you use the \otpapp{xmerl} library that ships with Erlang, consider open source alternatives\footnote{I don't dislike \href{https://github.com/paulgray/exml}{exml} or \href{https://github.com/willemdj/erlsom}{erlsom}} or figuring the way to add your own SAX parser that can be safe\footnote{See Ulf Wiger at \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}}.
 もしErlangに同梱されている \otpapp{xmerl} ライブラリを使っているのならば、オープンソースの代替品を使うか\footnote{\href{https://github.com/paulgray/exml}{exml} や \href{https://github.com/willemdj/erlsom}{erlsom} などは悪くないでしょう}、自分で安全なSAXパーサーを追加するか\footnote{Ulf Wiger の以下の記事を参照:  \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}} を検討してみてください。
