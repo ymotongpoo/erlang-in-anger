@@ -126,7 +126,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 一方で、ユーザーにとっては本当にひどい体験となります。
 
 %The most common way to restrict data input is to make calls to a process whose queue would grow in uncontrollable ways synchronously. By requiring a response before moving on to the next request, you will generally ensure that the direct source of the problem will be slowed down.
-データの入力を制限する最もよく知られた方法は、無制限に同期的に成長する可能性があるキューを持ったプロセスを呼び出すことです。
+データの入力を制限する最もよく知られた方法は、無制限に成長する可能性があるキューを持ったプロセスを同期的に呼び出すことです。
 次のリクエストに移る前にレスポンスを求めるようにすれば、一般的に問題の直接の原因は確実に軽減されるでしょう。
 
 %The difficult part for this approach is that the bottleneck causing the queue to grow is usually not at the edge of the system, but deep inside it, which you find after optimizing nearly everything that came before. Such bottlenecks will often be database operations, disk operations, or some service over the network.
@@ -143,7 +143,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 \subsection{タイムアウトはどれくらいの長さであるべきか}
 
 %What's particularly tricky about applying back-pressure to handle overload via synchronous calls is having to determine what the typical operation should be taking in terms of time, or rather, at what point the system should time out.
-同期呼び出しによる過負荷に対処するためにバックプレッシャーを適用することにおいて特に扱いづらいのは、システムがどのタイミングでタイムアウトするべきかよりも、処理は通常どれくらいの時間がかかるのかを決定しなければならないことです。
+過負荷に対処するために同期呼び出しによるバックプレッシャーを適用することにおいて特に扱いづらいのは、システムがどのタイミングでタイムアウトするべきかよりも、処理は通常どれくらいの時間がかかるのかを決定しなければならないことです。
 
 %The best way to express the problem is that the first timer to be started will be at the edge of the system, but the critical operations will be happening deep within it. This means that the timer at the edge of the system will need to have a longer wait time that those within, unless you plan on having operations reported as timing out at the edge even though they succeeded internally.
 この問題を最もうまく表現しようと思うと、最初のタイマーがシステムの周辺部で開始されるけれども、致命的な処理はシステムの深層部で起きているというような具合です。
