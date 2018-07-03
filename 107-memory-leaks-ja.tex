@@ -73,7 +73,7 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 \subsection{コード}
 
 % The code on an Erlang node is loaded in memory in its own area, and sits there until it is garbage collected. Only two copies of a module can coexist at one time, so looking for very large modules should be easy-ish.
-Erlangノードのコードはメモリ上の独自の領域に読み込まれ、ガベージコレクションが行われるまでその領域を使い続けます。同じモジュールの異なるバージョンは同時に2つまでしか存在できないので、巨大なモジュールを探すことによってメモリを解放するのは簡単なのではないでしょうか。
+Erlangノードのコードはメモリ上の独自の領域に読み込まれ、ガベージコレクションが行われるまでその領域を使い続けます。同じモジュールの異なるバージョンは同時に2つまでしか存在できないので、巨大なモジュールを探すことによって問題のある箇所を見つけるのは簡単なのではないでしょうか。
 % 若干補いすぎ？
 
 % If none of them stand out, look for code compiled with HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}. HiPE code, unlike regular BEAM code, is native code and cannot be garbage collected from the VM when new versions are loaded. Memory can accumulate, usually very slowly, if many or large modules are native-compiled and loaded at run time.
