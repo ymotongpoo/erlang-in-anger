@@ -158,7 +158,7 @@ ETS上のすべてのデータが正当なもので、データセットを複�
 リアルタイムですべてのガベージコレクションを監視するのはコストが高いです。代わりに、Erlangのシステムモニタ\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}}を使うのが一番よい方法かもしれません。
 
 % Erlang's system monitor will allow you to track information such as long garbage collection periods and large process heaps, among other things. A monitor can temporarily be set up as follows:
-Erlangのシステムモニタを使えば特にガベージコレクションの期間や巨大なプロセスヒープなどの情報を追跡できます。モニタは以下のようにして設定できます:
+Erlangのシステムモニタを使えば例えば長いガベージコレクションの期間や巨大なプロセスヒープなどの情報を追跡できます。モニタは以下のようにして設定できます:
 
 \begin{VerbatimEshell}
 1> erlang:system_monitor().
