@@ -85,7 +85,7 @@ Erlangノードのコードはメモリ上の独自の領域に読み込まれ�
 \subsection{ETS}
 
 % ETS tables are never garbage collected, and will maintain their memory usage as long as records will be left undeleted in a table. Only removing records manually (or deleting the table) will reclaim memory.
-ETSテーブルはガベージコレクションの対象にならず、レコードがテーブル上から削除されない限りメモリを使い続けます。レコードを手動で削除するかテーブルを削除することでしかメモリを再確保できません。
+ETSテーブルはガベージコレクションの対象にならず、レコードがテーブル上から削除されない限りメモリを使い続けます。レコードを手動で削除するかテーブルを削除することでしか空きメモリを取り戻すことができません。
 
 % In the rare cases you're actually leaking ETS data, call the undocumented \function{ets:i()} function in the shell. It will print out information regarding number of entries (\expression{size}) and how much memory they take (\expression{mem}). Figure out if anything is bad.
 本当にETSデータでメモリリークをしているという稀なケースでは、ドキュメント化されていない \function{ets:i()} 関数をシェルで呼んでみてください。これはエントリの数 (\expression{size}) とどのくらいメモリを使っているか (\expression{mem}) についての情報を出力します。これを使って何がおかしいかを探ってみましょう。
