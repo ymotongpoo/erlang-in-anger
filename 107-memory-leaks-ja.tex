@@ -91,7 +91,7 @@ ETSテーブルはガベージコレクションの対象にならず、レコ�
 本当にETSデータでメモリリークをしているという稀なケースでは、ドキュメント化されていない \function{ets:i()} 関数をシェルで呼んでみてください。これはエントリの数 (\expression{size}) とどのくらいメモリを使っているか (\expression{mem}) についての情報を出力します。これを使って何がおかしいかを探ってみましょう。
 
 % It's entirely possible all the data there is legit, and you're facing the difficult problem of needing to shard your data set and distribute it over many nodes. This is out of scope for this book, so best of luck to you. You can look into compression of your tables if you need to buy time, however.\footnote{See the \href{http://www.erlang.org/doc/man/ets.html\#new-2}{\expression{compressed} option for \function{ets:new/2}}}
-ETS上のすべてのデータが正当なもので、データセットを複数のノードにシャーディングして分配するという難しい問題に直面している、という可能性も全くもってありえます。これはこの本の範囲外なので、作業の幸運を祈ります。テーブルの圧縮をすることで時間を稼ぐという選択肢もあります\footnote{\href{http://www.erlang.org/doc/man/ets.html\#new-2}{\function{ets:new/2} の \expression{compressed} オプション} を見てみてください}。
+ETS上のすべてのデータが正当なもので、データセットを複数のノードにシャーディングして分配するという難しい問題に直面している、という可能性も全くもってありえます。これはこの本の範囲外なので、あなたの幸運を祈ります。テーブルの圧縮をすることで時間を稼ぐという選択肢もあります\footnote{\href{http://www.erlang.org/doc/man/ets.html\#new-2}{\function{ets:new/2} の \expression{compressed} オプション} を見てみてください}。
 
 % \subsection{Processes}
 \subsection{プロセス}
