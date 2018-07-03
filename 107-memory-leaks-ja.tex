@@ -34,7 +34,7 @@ Erlangノードがメモリを垂れ流す原因は山ほどあります。そ�
 \end{itemize*}
 
 % If all of this seems to point towards a memory leak, install one of the metrics libraries mentioned in Chapter \ref{chap:runtime-metrics} and/or \otpapp{recon} and get ready to dive in.\footnote{See Chapter \ref{chap:connecting} if you need help to connect to a running node}
-これらの質問ですべてメモリリークを指し示すような回答を得たならば、\ref{chap:runtime-metrics} 章にて説明されているメトリクスライブラリまたは \otpapp{recon} をインストールし、データを探索する準備をしましょう。\footnote{動作しているノードに接続する必要がある場合は \ref{chap:connecting} 章を参照。}
+これらの質問ですべてメモリリークを指し示すような回答を得たならば、\ref{chap:runtime-metrics} 章にて説明されているメトリクスライブラリまたは \otpapp{recon} をインストールし、データを探索する準備をしましょう。\footnote{動作しているノードへの接続に手助けが必要な場合は \ref{chap:connecting} 章を参照。}
 
 % The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
 どのようなケースでも、最初に見るべきはデータの傾向です。\expression{erlang:memory()} またはライブラリやメモリシステムにある類似のものを使ってすべてのメモリのタイプについて調べましょう。以下の点を調べるとよいです:
