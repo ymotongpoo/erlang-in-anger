@@ -189,7 +189,7 @@ undefined
 自信がない場合は大きな値でモニタリングを開始しましょう。例えば、1ワード以上のサイズを持つヒープの情報でプロセスのメールボックスを溢れさせたくはないですよね？
 
 % Command 5 unsets the system monitor (exiting or killing the monitor process also frees it up), and command 6 validates that everything worked.
-五つ目のコマンドはシステムモニタを解除し（モニタプロセスが終了またはkillされるとそのプロセスは解放されます）、その次のコマンドでちゃんと解放されたかを確認できます。
+五つ目のコマンドはシステムモニタを解除し（モニタプロセスが終了またはkillされるとシステムモニタは同様に解除されます）、その次のコマンドでちゃんと解除されたかどうかを確認できます。
 
 % You can then find out if such monitoring messages tend to coincide with the memory increases that seem to result in leaks or overuses, and try to catch culprits before things are too bad. Quickly reacting and digging into the process (possibly with \function{recon:info/1}) may help find out what's wrong with the application.
 これを使って、監視メッセージがリークやメモリの過剰使用に由来していそうなメモリ使用量上昇と重なっていないかを見ることができ、事態が悪化する前に犯人をつきとめることができます。すばやく対応してプロセスの中身を調べる（\function{recon:info/1} などを使います）ことでアプリケーションの問題を発見できるでしょう。
