@@ -184,7 +184,7 @@ undefined
 最初のコマンドは既にシステムモニタを使っていないかどうかをチェックします---使用中の他のアプリケーションや同僚からシステムモニタを奪いたくはないでしょう。
 
 % The second command will be notified every time a garbage collection takes over 500 milliseconds. The result is flushed in the third command. Feel free to also check for \expression{\{large\_heap, NumWords\}} if you want to monitor such sizes.
-二つ目のコマンドはガベージコレクションに500ミリ秒以上かかったときに通知されます。その結果は3つめのコマンドでフラッシュされます。ヒープサイズを監視したい場合は \expression{\{large\_heap, NumWords\}} を使うとよいでしょう。
+二つ目のコマンドはガベージコレクションに500ミリ秒以上かかったときに通知されます。その結果は三つ目のコマンドでフラッシュされます。ヒープサイズを監視したい場合は \expression{\{large\_heap, NumWords\}} を使うとよいでしょう。
 % Be careful to start with large values at first if you're unsure. You don't want to flood your process' mailbox with a bunch of heaps that are 1-word large or more, for example.
 自信がない場合は大きな値でモニタリングを開始しましょう。例えば、1ワード以上のサイズを持つヒープの情報でプロセスのメールボックスを溢れさせたくはないですよね？
 
