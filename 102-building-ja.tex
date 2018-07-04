@@ -22,9 +22,9 @@
 \label{sec:project-structure}
 
 %The structures of OTP applications and of OTP releases are different. An OTP application can be expected to have one top-level supervisor (if any) and possibly a bunch of dependencies that sit below it. An OTP release will usually be composed of multiple OTP applications, which may or may not depend on each other. This will lead to two major ways to lay out applications.
-OTPアプリケーションとOTPリリースのプロジェクト構造は異なります。OTPアプリケーションは（あるとすれば）トップレベルスーパーバイザーを1つ持っていると想定できます。そしておそらく依存しているものがその下に固まってぶら下がっていると想定できます。
+OTPアプリケーションとOTPリリースではプロジェクトの構造が異なります。OTPアプリケーションは（あるとすれば）トップレベルスーパーバイザーを1つ持っていると想定できます。そしておそらく依存しているものがその下に固まってぶら下がっていると想定できます。
 OTPリリースは通常複数のOTPアプリケーションから成り、それらがお互いに依存していることもあればそうでないこともあります。
-これらの事実からアプリケーションの構成をする際に主に2つの方法に落ち着きます。
+アプリケーションの主な構成方法はこのように2種類あります。
 
 %\subsection{OTP Applications}
 \subsection{OTPアプリケーション}
@@ -49,8 +49,8 @@ rebar.lock
 これらは\app{rebar3}によって自動的に生成されます。\footnote{人によっては\app{rebar3}をアプリケーション内に直接パッケージします。これはrebar3やその前身を使ったことがない人がライブラリやプロジェクトとブートストラップできるようになされていたものです。自分のシステムのグローバルにrebar3をインストールして問題ありません。自分のシステムをビルドするのに特定のバージョンが必要であればローカルにコピーを持っておいても良いでしょう。}
 
 %This is the directory where \app{rebar3} places all build artifacts for a project, including local copies of libraries and packages required for it to work. No mainstream Erlang tool installs packages globally\footnote{Except as a local cache of unbuilt packages.}, preferring to instead keep everything project-local to avoid inter-project conflicts.
-このディレクトリに\app{rebar3}がプロジェクトのすべてのビルドアーティファクトを置きます。動作させるのに必要なライブラリやパッケージのローカルコピーなどもそこに含まれます。
-主要なErlangツールはパッケージをグローバルにはインストールせず、\footnote{まだビルドされていないパッケージのローカルキャッシュは除きます。}かわりにプロジェクト間での衝突を避けるためにすべてをプロジェクトローカルに保存します。
+このディレクトリに\app{rebar3}がプロジェクトのすべてのビルド成果物を置きます。動作させるのに必要なライブラリやパッケージのローカルコピーなどもそこに含まれます。
+主要なErlangツールはパッケージをグローバルにはインストールせず、\footnote{まだビルドされていないパッケージのローカルキャッシュは除きます。}代わりにプロジェクト間での衝突を避けるためにすべてをプロジェクトの中に保存します。
 
 %Such dependencies can be specified for \app{rebar3} by adding a few config lines to \filename{rebar.config}:
 このような依存関係は\filename{rebar.config}に数行設定を追加するだけで\app{rebar3}に指定できます。
@@ -68,15 +68,15 @@ rebar.lock
 \end{VerbatimText}
 
 %Dependencies are fetched directly from a \app{git} (or \app{hg}) source or as a package from \href{https://hex.pm}{\app{hex.pm}} in a level-order traversal. They can then be compiled, and specific compile options can be added with the \expression{\{erl\_opts, List\}.} option in the config file\footnote{More details on \href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}.
-依存するものは\app{git}（または\app{hg}）のソースあるいは\href{https://hex.pm}{\app{hex.pm}}からレベル順の幅優先探索で直接取得されます。
-その後コンパイルされて、特定のコンパイルオプションが設定ファイルの\expression{\{erl\_opts, List\}.}オプションとともに追加されます。\footnote{より詳しい話はこちらを参照してください。\href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}
+\app{git}（または\app{hg}）を使ってソースコードを、あるいは\href{https://hex.pm}{\app{hex.pm}}からパッケージを、幅優先探索で取得し、依存しているソフトウェアを集めます。
+続いて、ソースコードをコンパイルします。このとき、設定ファイルの\expression{\{erl\_opts, List\}.}項目で追加のコンパイルオプションを指定できます。\footnote{より詳しい話はこちらを参照してください。\href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}
 
 %You can call \command{rebar3 compile}, which will download all dependencies, and then build them and your app at once.
-\command{rebar3 compile}を呼んで、すべての依存物をダウンロードし、一度にそれらとあなたのアプリをビルドします。
+\command{rebar3 compile}を呼んで、すべての依存しているソフトウェアをダウンロードし、あなたのアプリとダウンロードしたソフトウェアとをまとめてビルドします。
 
 %When making your application's source code public to the world, distribute it \emph{without} the \filename{\_build/} directory. It's quite possible that other developers' applications depend on the same applications yours do, and it's no use shipping them all multiple times. The build system in place (in this case, \app{rebar3}) should be able to figure out duplicated entries and fetch everything necessary only once.
-あなたのアプリケーションのコードを公開するときは、\filename{\_build/}ディレクトリを\emph{含まずに}配布しましょう。
-他の開発社があなたのアプリケーションと同じものに依存している可能性は高く、何度もそれを配布するのは意味がありません。
+あなたのアプリケーションのコードを公開するときは、\filename{\_build/}ディレクトリを\emph{含めずに}配布しましょう。
+他の開発者のアプリケーションとあなたのアプリケーションが共通の依存先を持つことはよくあり、何度もそれを配布するのは意味がありません。
 その場にあるビルドシステム（この場合は\app{rebar3}）が重複した項目を見つけ出して、必要なものは1度だけしか取得しないようにしてくれるでしょう。
 
 %\subsection{OTP Releases}
@@ -272,7 +272,7 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item \term{transient}: if the app terminates for reason \term{normal}, that's ok. Any other reason for termination shuts down the entire system.
   \item \term{transient}: アプリケーションが\term{normal}が原因で終了した場合は問題ありません。他の理由で終了した場合はシステム全体を終了させます。
   %\item \term{temporary}: the application is allowed to stop for any reason. It will be reported, but nothing bad will happen.
-  \item \term{temporary}: アプリケーションはいかなる理由でも停止できます。停止したことは報告されますが、何も悪いことは起きません。  
+  \item \term{temporary}: アプリケーションはいかなる理由でも停止できます。停止したことは報告されますが、何も悪いことは起きません。
 \end{itemize*}
 
 %It is also possible to start an application as an \emph{included application}, which starts it under your own OTP supervisor with its own strategy to restart it.
@@ -288,11 +288,11 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item Are Erlang supervision trees started depth-first? breadth-first? Synchronously or asynchronously?
   \item Erlangの監視ツリーは深さ優先で起動されますか。それとも幅優先ですか。同期的ですか、非同期ですか。
   %\item What are the three application strategies? What do they do?
-  \item 3つのアプリケーション戦略はなんでしょうか。それぞれ何をするものでしょう。  
+  \item 3つのアプリケーション戦略はなんでしょうか。それぞれ何をするものでしょう。
   %\item What are the main differences between the directory structure of an app and a release?
-  \item アプリケーションとリリースのディレクトリ構造の主な違いはなんでしょうか。  
+  \item アプリケーションとリリースのディレクトリ構造の主な違いはなんでしょうか。
   %\item When should you use a release?
-  \item リリースを使うべき場面はいつでしょう。  
+  \item リリースを使うべき場面はいつでしょう。
   %\item Give two examples of the type of state that can go in a process' init function, and two examples of the type of state that shouldn't go in a process' init function
   \item プロセスのinit関数に含まれるべき状態の例を2つ挙げてください。また含まれるべきでない状態の例も2つ挙げてください。
 \end{enumerate}
@@ -309,6 +309,6 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item Host the application somewhere (Github, Bitbucket, local server), and build a release with that application as a dependency.
   \item アプリケーションをどこかにホストしてください。(GitHub、Bitbukect、ローカルサーバーなど)そしてそのアプリケーションに依存するリリースをビルドしてください。
   %\item The main application's workers (\module{council\_member}) starts a server and connects to it in its \function{init/1} function. Can you make this connection happen outside of the init function's? Is there a benefit to doing so in this specific case?
-  \item mainアプリケーションのワーカー(\module{council\_member})はサーバーの起動とそこへの接続を自身の\function{init/1}関数で行っています。この接続をinit関数の外で行なえますか。このアプリの用途においてそうすることの利点はあるでしょうか。 
+  \item mainアプリケーションのワーカー(\module{council\_member})はサーバーの起動とそこへの接続を自身の\function{init/1}関数で行っています。この接続をinit関数の外で行なえますか。このアプリの用途においてそうすることの利点はあるでしょうか。
 \end{enumerate}
 
