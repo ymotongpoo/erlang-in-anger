@@ -91,7 +91,7 @@ monitor=long_schedule pid=<0.54.0> info=[{timeout,1102},
 こういったイベントは \term{busy\_port} アトムをシステムモニターへ送ることでモニターできます。特にクラスタ化されたノードで、ノード間の通信がビジーポートによって処理されていた場合、リモートノード上のプロセスと通信しているローカルプロセスがスケジュール解除されるため、それを発見するのに \term{busy\_dist\_port} アトムが使われます。
 
 %If you find out you're having problems with these, try replacing your sending functions where in critical paths with \function{erlang:port\_command(Port, Data, [nosuspend])} for ports, and \function{erlang:send(Pid, Msg, [nosuspend])} for messages to distributed processes. They will then tell you when the message could not be sent and you would therefore have been descheduled.
-もしそういった問題を抱えていることを発見した場合、クリティカルパスにある送信の関数をポートに送る場合は \function{erlang:port\_command(Port, Data, [nosuspend])}、分散したプロセスの場合は \function{erlang:send(Pid, Msg, [nosuspend])} へと置き換えてみてください。それらはメッセージを送れないためスケジュール解除されるときに知らせてくれます。
+もしそういった問題を抱えていることを発見した場合、クリティカルパスにある送信の関数をポートに送る場合は \function{erlang:port\_command(Port, Data, [nosuspend])}、分散したプロセスの場合は \function{erlang:send(Pid, Msg, [nosuspend])} へと置き換えてみてください。メッセージを送れないことでスケジュール解除される場合すぐに知らせてくれます。
 
 %\section{Exercises}
 \section{演習}
