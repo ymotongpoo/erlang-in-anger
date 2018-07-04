@@ -16,7 +16,7 @@
 \end{figure}
 
 %When an Erlang node dies because of a queue overflowing, figuring out who to blame is crucial. Did someone put too much water in the sink? Are the sewer systems backing up? Did you just design too small a pipe?
-キューがオーバーフローしてErlangノードが死んでしまった場合、誰の責任かを解明できます。誰かがシンクに水を入れすぎましたか？ 下水道が渋滞していますか？ あまりにも小さなパイプを設計しましたか？
+キューがオーバーフローしてErlangノードが死んでしまった場合、誰の責任か解明することが充用です。誰かがシンクに水を入れすぎましたか？ 下水道が渋滞していますか？ あまりにも小さなパイプを設計しましたか？
 
 %Determining what queue blew up is not necessarily hard. This is information that can be found in a crash dump. Finding out why it blew up is trickier. Based on the role of the process or run-time inspection, it's possible to figure out whether causes include fast flooding, blocked processes that won't process messages fast enough, and so on.
 どのキューが爆発したかを判断することは必ずしも困難ではありません。これはクラッシュダンプから見つけられる情報です。ただし爆破原因の解明は少し複雑です。プロセスやruntimeの調査に基づいて、高速にキューが溢れたのか、ブロックされたプロセスがメッセージを十分高速に処理できないか、などの原因を把握することができます。
@@ -28,7 +28,7 @@
 そうこうしたところで、もはや浴室の範囲内では事象を改善できないこともあります。あまりにも多くのログが送信されるため、一貫性を必要とするデータベースにボトルネックがあったり、または単に事象を解決するための組織内の知識や人材が不足していることもあります。
 
 %By finding that point, we identified what the \emph{true bottleneck} of the system was, and all the prior optimization was nice (and likely expensive), but it was more or less in vain.
-こういった点を見つけることで、システムの \emph{真のボトルネック} が何であるかを特定し、過去の全ての良いと思っていた（そして対応コストが高いかもしれない）最適化は、多かれ少なかれは無駄であることも特定できます。
+こういった点を見つけることで、システムの \emph{真のボトルネック} が何であるかを特定し、過去の全ての良いと思っていた（そして対応コストが高いかもしれない）最適化は、多かれ少なかれ無駄であることも特定できます。
 
 %We need to be more clever, and so things are moved back up a level. We try to massage the information going in the system to make it either lighter (whether it is through compression, better algorithms and data representation, caching, and so on).
 私たちはより賢くなる必要があります。そして、世もレベルアップしています。私たちは、システムに入る情報をより軽いもの(圧縮、より良いアルゴリズムとデータ表現、キャッシングなど)に変換しようとします。
@@ -61,7 +61,7 @@
 たった数行のメッセージでもメモリを大量に増やす原因となりますし、もしそれがノードをOut Of Memory (OOM)にさせるに至らなくても、追加のメッセージの書き込み速度を下げるには十分です。
 
 %The best solution for this at the time of writing is to use \href{https://github.com/basho/lager}{\otpapp{lager}} as a substitute logging library.
-これに対する現行執筆時点での最適解は\href{https://github.com/basho/lager}{\otpapp{lager}}を代替のログライブラリとして使うことです。
+これに対する現行執筆時点での最適解は\href{https://github.com/basho/lager}{\otpapp{lager}}を代替のログライブラリとして使うことです\footnote{訳注: 現在 lager はコミュニティーにより \href{https://github.com/erlang-lager/lager}{https://github.com/erlang-lager/lager} として開発、メンテナンスされています}。
 
 %While \otpapp{lager} will not solve all your problems, it will truncate voluminous log messages, optionally drop OTP-generated error messages when they go over a certain threshold, and will automatically switch between asynchronous and synchronous modes for user-submitted messages in order to self-regulate.
 \otpapp{lager}がすべての問題を解決するわけではない一方で、分量が多いログメッセージを切り詰めて、補足的にある閾値を超えたときにはOTPが生成したエラーメッセージを破棄して、ユーザーが送ったメッセージ用に自主規制のために自動的に非同期モードと同期モードを切り替えます。
@@ -86,10 +86,10 @@
 数週間完璧に稼働したあとに、リモートサーバーの一つが落ちたときにHTTPクライアントプールが供給できない状態になりました。
 
 %The reason behind this degradation was that when the remote server would go down, all of a sudden, all connecting operations would take at least 10 milliseconds, the time before which the connection attempt is given up on. With around 9,000 messages per second to the central process, each usually taking under 5 milliseconds, the impact became similar to roughly 18,000 messages a second and things got out of hand.
-このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになりました。この10ミリ秒は接続試行がまだ断念されるよりも短い時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで、このあたりで手に負えなくなりました。
+このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになりました。この10ミリ秒は接続試行が断念されるまでの時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで手に負えなくなりました。
 
 %The solution we came up with was to leave the task of connecting to the caller process, and enforce the limits as if the manager had done it on its own. The blocking operations were now distributed to all users of the library, and even less work was required to be done by the manager, now free to accept more requests.
-私達がいたった解決策は呼び出し元のプロセスに接続のタスクを譲って、プールマネージャーが自動で制限したかのように制限を強制することにしました。
+私達がいたった解決策は呼び出し元のプロセスに接続のタスクを譲って、プールマネージャー自体で制限したかのように制限を強制することにしました。
 これでブロック操作はライブラリの全ユーザーに分散され、プールマネージャーによって行われるべき仕事はずっと少なくなり、より多くのリクエストを受け付けられるようになりました。
 
 %When there is \emph{any} point of your program that ends up being a central hub for receiving messages, lengthy tasks should be moved out of there if possible. Handling predictable overload\footnote{Something you know for a fact gets overloaded in production} situations by adding more processes — which either handle the blocking operations or instead act as a buffer while the "main" process blocks — is often a good idea.
@@ -126,7 +126,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 一方で、ユーザーにとっては本当にひどい体験となります。
 
 %The most common way to restrict data input is to make calls to a process whose queue would grow in uncontrollable ways synchronously. By requiring a response before moving on to the next request, you will generally ensure that the direct source of the problem will be slowed down.
-データの入力を制限する最もよく知られた方法は、無制限に同期的に成長する可能性があるキューを持ったプロセスを呼び出すことです。
+データの入力を制限する最もよく知られた方法は、無制限に成長する可能性があるキューを持ったプロセスを同期的に呼び出すことです。
 次のリクエストに移る前にレスポンスを求めるようにすれば、一般的に問題の直接の原因は確実に軽減されるでしょう。
 
 %The difficult part for this approach is that the bottleneck causing the queue to grow is usually not at the edge of the system, but deep inside it, which you find after optimizing nearly everything that came before. Such bottlenecks will often be database operations, disk operations, or some service over the network.
@@ -143,7 +143,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 \subsection{タイムアウトはどれくらいの長さであるべきか}
 
 %What's particularly tricky about applying back-pressure to handle overload via synchronous calls is having to determine what the typical operation should be taking in terms of time, or rather, at what point the system should time out.
-同期呼び出しによる過負荷に対処するためにバックプレッシャーを適用することにおいて特に扱いづらいのは、システムがどのタイミングでタイムアウトするべきかよりも、処理は通常どれくらいの時間がかかるのかを決定しなければならないことです。
+過負荷に対処するために同期呼び出しによるバックプレッシャーを適用することにおいて特に扱いづらいのは、処理は通常どれくらいの時間がかかるのかを決定しなければならないこと、より正確に言えばシステムがどのタイミングでタイムアウトするべきかを決める必要があることです。
 
 %The best way to express the problem is that the first timer to be started will be at the edge of the system, but the critical operations will be happening deep within it. This means that the timer at the edge of the system will need to have a longer wait time that those within, unless you plan on having operations reported as timing out at the edge even though they succeeded internally.
 この問題を最もうまく表現しようと思うと、最初のタイマーがシステムの周辺部で開始されるけれども、致命的な処理はシステムの深層部で起きているというような具合です。
