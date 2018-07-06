@@ -274,29 +274,42 @@ Erlangのバイナリは2つの主な型から成ります： ProcBinとrefcバ�
 %This will return the \var{N} top processes sorted by the amount of memory the refc binaries reference to hold, and can help point to specific processes that hold a few large binaries, instead of their raw amount. You may want to try running this function \emph{before} \function{recon:bin\_leak/1}, given the latter garbage collects the entire node first.
 この関数は \var{N} の、refcバイナリの参照が保持しているメモリ量によって並び替えられた上位のプロセスを返し、バイナリの実際の量を返す代わりに、いくつかの大きなバイナリを保持する特定のプロセスを示してくれます。
 
-\subsection{Fixing Leaks}
+%\subsection{Fixing Leaks}
+\subsection{リークを修正する}
 
-Once you've established you've got a binary memory leak using \function{recon:bin\_leak(Max)}, it should be simple enough to look at the top processes and see what they are and what kind of work they do.
+%Once you've established you've got a binary memory leak using \function{recon:bin\_leak(Max)}, it should be simple enough to look at the top processes and see what they are and what kind of work they do.
+\function{recon:bin\_leak(Max)} を使ってバイナリメモリリークを見つけることができたなら、そのトップのプロセスを見てそれがなにか、そしてどんな種類の仕事をしているものかを見つけることは十分にシンプルでしょう。
 
-Generally, refc binaries memory leaks can be solved in a few different ways, depending on the source:
+%Generally, refc binaries memory leaks can be solved in a few different ways, depending on the source:
+一般的に、 refcバイナリのメモリリークはいくつかの手段によって解決でき、それは原因によって異なります:
 
 \begin{itemize*}
-	\item call garbage collection manually at given intervals (icky, but somewhat efficient);
-	\item stop using binaries (often not desirable);
-	\item use \function{binary:copy/1-2}\footnote{\href{http://www.erlang.org/doc/man/binary.html\#copy-1}{http://www.erlang.org/doc/man/binary.html\#copy-1}} if keeping only a small fragment (usually less than 64 bytes) of a larger binary;\footnote{It might be worth copying even a larger fragment of a refc binary. For example, copying 10 megabytes off a 2 gigabytes binary should be worth the short-term overhead if it allows the 2 gigabytes binary to be garbage-collected while keeping the smaller fragment longer.}
-	\item move work that involves larger binaries to temporary one-off processes that will die when they're done (a lesser form of manual GC!);
-	\item or add hibernation calls when appropriate (possibly the cleanest solution for inactive processes).
+	%\item call garbage collection manually at given intervals (icky, but somewhat efficient);
+	\item ガベージコレクションを一定の間隔で手動で実行します（これはうずうずしますが、ある程度効果的です）
+	%\item stop using binaries (often not desirable);
+	\item バイナリを使うことをやめる（望ましいということはめったにありません）
+	%\item use \function{binary:copy/1-2}\footnote{\href{http://www.erlang.org/doc/man/binary.html\#copy-1}{http://www.erlang.org/doc/man/binary.html\#copy-1}} if keeping only a small fragment (usually less than 64 bytes) of a larger binary;\footnote{It might be worth copying even a larger fragment of a refc binary. For example, copying 10 megabytes off a 2 gigabytes binary should be worth the short-term overhead if it allows the 2 gigabytes binary to be garbage-collected while keeping the smaller fragment longer.}
+  \item もし大きなバイナリのうち小さな一部分（たいていの場合64バイト未満）のみを保持しているのであれば\footnote{refcバイナリよりも大きな領域をコピーするのに値するかもしれません。例えば、2ギガバイトのバイナリがその小さな一部分を保持し続けている間にガベージコレクトされるのであれば、2ギガバイトのバイナリのうち10メガバイトをコピーすることは小さなオーバーヘッドに値します。}、\function{binary:copy/1-2}\footnote{\href{http://www.erlang.org/doc/man/binary.html\#copy-1}{http://www.erlang.org/doc/man/binary.html\#copy-1}}を使います。
+	%\item move work that involves larger binaries to temporary one-off processes that will die when they're done (a lesser form of manual GC!);
+  \item 大きなバイナリを含むものを一時的な一度限りのプロセスに移します。このプロセスは実行を終えると死にます(手動のGCの簡単な方法です！）。
+	%\item or add hibernation calls when appropriate (possibly the cleanest solution for inactive processes).
+	\item もしくは適切なタイミングでハイバネーション呼び出しを追加します（アクティブではないプロセスに対する最もきれいな解決法かもしれません）。
 \end{itemize*}
 
-The first two options are frankly not agreeable and should not be attempted before all else failed. The last three options are usually the best ones to be used.
+%The first two options are frankly not agreeable and should not be attempted before all else failed. The last three options are usually the best ones to be used.
+最初の2つの操作は正直に言って同意できるものではなく、その他の方法が失敗する前に試すべきではありません。後の3つの選択肢は通常、実施するのに最もよいものでしょう。
 
-\subsubsection{Routing Binaries}
+%\subsubsection{Routing Binaries}
+\subsubsection{ルーティングバイナリ}
 
-There's a specific solution for a specific use case some Erlang users have reported. The problematic use case is usually having a middleman process routing binaries from one process to another one. That middleman process will therefore acquire a reference to every binary passing through it and risks being a common major source of refc binaries leaks.
+%There's a specific solution for a specific use case some Erlang users have reported. The problematic use case is usually having a middleman process routing binaries from one process to another one. That middleman process will therefore acquire a reference to every binary passing through it and risks being a common major source of refc binaries leaks.
+何人かの Erlang ユーザが報告した、ある特定のユースケースに対する解決方法があります。問題のあるユースケースは、たいてい、あるプロセスから他のプロセスへバイナリをルーティングする中間プロセスを持っているというものです。したがって、この中間プロセスはそれを通るすべてのバイナリに対する参照を獲得し、 refc バイナリリークのよくある主要な原因になる危険があります。
 
-The solution to this pattern is to have the router process return the pid to route to and let the original caller move the binary around. This will make it so that only processes that do \emph{need} to touch the binaries will do so.
+%The solution to this pattern is to have the router process return the pid to route to and let the original caller move the binary around. This will make it so that only processes that do \emph{need} to touch the binaries will do so.
+このパターンに対する解決方法は、ルータプロセスにルーティング先の pid を返却させ、呼び出し元にバイナリを移動させることです。バイナリに触る必要があるプロセスのみがバイナリに触ることになるため、これは効果があるでしょう。
 
-A fix for this can be implemented transparently in the router's API functions, without any visible change required by the callers.
+%A fix for this can be implemented transparently in the router's API functions, without any visible change required by the callers.
+この問題に対する修正はルータの API 関数において、呼び出し側の目に見える変更が必要とされることなしにわかりやすく実装することができるでしょう。
 
 %\section{Memory Fragmentation}
 \section{メモリフラグメンテーション}
