@@ -122,7 +122,7 @@ ETS上のすべてのデータが正当なもので、データセットを複�
 \subsubsection{メモリ使用}
 
 % The per-process memory model is briefly described in Subsection \ref{subsec:memory-process-level}, but generally speaking, you can find which individual processes use the most memory by looking for their \term{memory} attribute. You can look things up either as absolute terms or as a sliding window.
-プロセスごとのメモリモデルについては \ref{subsec:memory-process-level} 節で簡潔に紹介していますが、一般的には、どの個別のプロセスが一番メモリを使っているかはプロセスの \term{memory} 属性を見ることでわかります。この値は絶対値または範囲指定で見ることができます。
+プロセスごとのメモリモデルについては \ref{subsec:memory-process-level} 節で簡潔に紹介していますが、一般的には、どの個別のプロセスが一番メモリを使っているかはプロセスの \term{memory} 属性を見ることでわかります。この値は、メモリ使用量の絶対値として、または区間を指定してその中での変化率として見ることができます。
 % sliding window -> 範囲指定と訳したけど自信がない
 
 % For memory leaks, unless you're in a predictable fast increase, absolute values are usually those worth digging into first:
