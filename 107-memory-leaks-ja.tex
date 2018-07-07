@@ -1,75 +1,113 @@
-\chapter{Memory Leaks}
+%\chapter{Memory Leaks}
+\chapter{メモリリーク}
 \label{chap:memory-leaks}
 
-There are truckloads of ways for an Erlang node to bleed memory. They go from extremely simple to astonishingly hard to figure out (fortunately, the latter type is also rarer), and it's possible you'll never encounter any problem with them.
+% There are truckloads of ways for an Erlang node to bleed memory. They go from extremely simple to astonishingly hard to figure out (fortunately, the latter type is also rarer), and it's possible you'll never encounter any problem with them.
+Erlangノードがメモリを垂れ流す原因は山ほどあります。それらは非常に簡単に見つけられるものから驚くほど見つけにくいものまであり（幸いにして、後者は稀です）、場合によってはそれらのメモリリークが何の問題も引き起こさないこともあります。
 
-You will find out about memory leaks in two ways:
+% You will find out about memory leaks in two ways:
+メモリリークについては以下の2通りの方法で知ることができます:
 
 \begin{enumerate*}
-	\item A crash dump (see Chapter \ref{chap:crash-dumps});
-	\item By finding a worrisome trend in the data you are monitoring. 
+	% \item A crash dump (see Chapter \ref{chap:crash-dumps});
+	\item クラッシュダンプ（\ref{chap:crash-dumps}を参照）
+	% \item By finding a worrisome trend in the data you are monitoring.
+	\item モニタリングしているデータにやっかいな傾向を見つける
 \end{enumerate*}
 
-This chapter will mostly focus on the latter kind of leak, because they're easier to investigate and see grow in real time. We will focus on finding what is growing on the node and common remediation options, handling binary leaks (they're a special case), and detecting memory fragmentation. 
-\section{Common Sources of Leaks}
+% This chapter will mostly focus on the latter kind of leak, because they're easier to investigate and see grow in real time. We will focus on finding what is growing on the node and common remediation options, handling binary leaks (they're a special case), and detecting memory fragmentation.
+この章では主に後者のようなリークに焦点を当てます。その理由は、こちらのほうが調査しやすく、増加がリアルタイムで見えるためです。ここでは、ノード上で何の数値が伸びているか、一般的な対処の選択肢、（特別なケースである）バイナリリーク、メモリの断片化の発見方法を扱います。
 
-Whenever someone calls for help saying "oh no, my nodes are crashing", the first step is always to ask for data. Interesting questions to ask and pieces of data to consider are:
+% \section{Common Sources of Leaks}
+\section{よくあるリークの原因}
 
-\begin{itemize*}
-	\item Do you have a crash dump and is it complaining about memory specifically? If not, the issue may be unrelated. If so, go dig into it, it's full of data.
-	\item Are the crashes cyclical? How predictable are they? What else tends to happen at around the same time and could it be related?
-	\item Do crashes coincide with peaks in load on your systems, or do they seem to happen at more or less any time? Crashes that happen especially \emph{during} peak times are often due to bad overload management (see Chapter \ref{chap:overload}). Crashes that happen at any time, even when load goes down following a peak are more likely to be actual memory issues.
-\end{itemize*}
-
-If all of this seems to point towards a memory leak, install one of the metrics libraries mentioned in Chapter \ref{chap:runtime-metrics} and/or \otpapp{recon} and get ready to dive in.\footnote{See Chapter \ref{chap:connecting} if you need help to connect to a running node}
-
-The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
+% Whenever someone calls for help saying "oh no, my nodes are crashing", the first step is always to ask for data. Interesting questions to ask and pieces of data to consider are:
+誰かが「助けて！ノードがクラッシュしているの！」と助けを求めてきたとき、最初にするべきことは常にデータを求めることです。ここで重要な質問やデータには以下のようなものがあります:
 
 \begin{itemize*}
-	\item Is any type of memory growing faster than others?
-	\item Is there any type of memory that's taking the majority of the space available?
-	\item Is there any type of memory that never seems to go down, and always up (other than atoms)?
+	% \item Do you have a crash dump and is it complaining about memory specifically? If not, the issue may be unrelated. If so, go dig into it, it's full of data.
+	\item クラッシュダンプはありますか、そしてそれは特にメモリについて文句を言っていますか？もし違うのならば、この問題はメモリとは関係がない可能性があります。もしそうであるならば、クラッシュダンプを掘り返しましょう。データが山のようにあります。
+	% \item Are the crashes cyclical? How predictable are they? What else tends to happen at around the same time and could it be related?
+	\item クラッシュは周期的に起こりますか？どのくらい予測可能ですか？クラッシュと同じくらいの時間にはほかに何が起こる傾向があり、関連していそうですか？
+	% \item Do crashes coincide with peaks in load on your systems, or do they seem to happen at more or less any time? Crashes that happen especially \emph{during} peak times are often due to bad overload management (see Chapter \ref{chap:overload}). Crashes that happen at any time, even when load goes down following a peak are more likely to be actual memory issues.
+	\item クラッシュは負荷のピークと同じくして起こりますか、それともほぼ無関係にどんなときでも起こりますか？特にピーク\emph{中に}起こるクラッシュはしばしば負荷のマネジメントの失敗から来ます（\ref{chap:overload}を参照）。どんな状況でも起こるクラッシュ、特にピーク後に負荷が減っても起こるようなクラッシュは本当にメモリに起因する問題である可能性が高いです。
 \end{itemize*}
 
-Many options are available depending on the type of memory that's growing.
+% If all of this seems to point towards a memory leak, install one of the metrics libraries mentioned in Chapter \ref{chap:runtime-metrics} and/or \otpapp{recon} and get ready to dive in.\footnote{See Chapter \ref{chap:connecting} if you need help to connect to a running node}
+これらの質問ですべてメモリリークを指し示すような回答を得たならば、\ref{chap:runtime-metrics} 章にて説明されているメトリクスライブラリまたは \otpapp{recon} をインストールし、データを探索する準備をしましょう。\footnote{動作しているノードへの接続に手助けが必要な場合は \ref{chap:connecting} 章を参照。}
 
-\subsection{Atom}
+% The first thing to look at in any of these cases is trends. Check for all types of memory using \expression{erlang:memory()} or some variant of it you have in a library or metrics system. Check for the following points:
+どのようなケースでも、最初に見るべきはデータの傾向です。\expression{erlang:memory()} またはライブラリやメモリシステムにある類似のものを使ってすべてのメモリの種類について調べましょう。以下の点を調べるとよいです:
 
-\emph{Don't use dynamic atoms!} Atoms go in a global table and are cached forever. Look for places where you call \function{erlang:binary\_to\_term/1} and \function{erlang:list\_to\_atom/1}, and consider switching to safer variants (\expression{erlang:binary\_to\_term(Bin, [safe])} and\newline \function{erlang:list\_to\_existing\_atom/1}).
+\begin{itemize*}
+	% \item Is any type of memory growing faster than others?
+	\item ある種類のメモリ使用量が他のタイプのメモリ使用量よりも速く伸びていますか？
+	% \item Is there any type of memory that's taking the majority of the space available?
+	\item ある種類のメモリが利用可能なメモリ空間の大部分を占めていませんか？
+	% \item Is there any type of memory that never seems to go down, and always up (other than atoms)?
+	\item ある種類（アトムを除く）のメモリ使用量が全く減りそうになく、常に増えていませんか？
+\end{itemize*}
 
-If you use the \otpapp{xmerl} library that ships with Erlang, consider open source alternatives\footnote{I don't dislike \href{https://github.com/paulgray/exml}{exml} or \href{https://github.com/willemdj/erlsom}{erlsom}} or figuring the way to add your own SAX parser that can be safe\footnote{See Ulf Wiger at \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}}. 
+% Many options are available depending on the type of memory that's growing.
+増えているメモリ使用の種類に応じて使える選択肢は様々です。
 
-If you do none of this, consider what you do to interact with the node. One specific case that bit me in production was that some of our common tools used random names to connect to nodes remotely, or generated nodes with random names that connected to each other from a central server.\footnote{This is a common approach to figuring out how to connect nodes together: have one or two central nodes with fixed names, and have every other one log to them. Connections will then propagate automatically.} Erlang node names are converted to atoms, so just having this was enough to slowly but surely exhaust space on atom tables. Make sure you generate them from a fixed set, or slowly enough that it won't be a problem in the long run.
+% \subsection{Atom}
+\subsection{アトム}
 
-\subsection{Binary}
+% \emph{Don't use dynamic atoms!} Atoms go in a global table and are cached forever. Look for places where you call \function{erlang:binary\_to\_term/1} and \function{erlang:list\_to\_atom/1}, and consider switching to safer variants (\expression{erlang:binary\_to\_term(Bin, [safe])} and\newline \function{erlang:list\_to\_existing\_atom/1}).
+\emph{動的にアトムを生成してはいけません！}アトムはグローバルなテーブルに保存され永久にキャッシュされるためです。\function{erlang:binary\_to\_term/1} や \function{erlang:list\_to\_atom/1} を呼んでいる場所を探し、\expression{erlang:binary\_to\_term(Bin, [safe])} や \function{erlang:list\_to\_existing\_atom/1} のような同様の機能でより安全なものを用いるようにしましょう\footnote{訳注: \function{erlang:binary\_to\_atom/2} も同様に注意が必要です。これは \function{binary\_to\_existing\_atom/2} で代用できます。}。
 
-See Section \ref{sec:binaries}.
+% If you use the \otpapp{xmerl} library that ships with Erlang, consider open source alternatives\footnote{I don't dislike \href{https://github.com/paulgray/exml}{exml} or \href{https://github.com/willemdj/erlsom}{erlsom}} or figuring the way to add your own SAX parser that can be safe\footnote{See Ulf Wiger at \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}}.
+もしErlangに同梱されている \otpapp{xmerl} ライブラリを使っているのならば、オープンソースの代替品を使うか\footnote{\href{https://github.com/paulgray/exml}{exml} や \href{https://github.com/willemdj/erlsom}{erlsom} などは悪くないでしょう}、自分で安全なSAXパーサーを追加するか\footnote{Ulf Wiger の以下の記事を参照:  \href{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}{http://erlang.org/pipermail/erlang-questions/2013-July/074901.html}} を検討してみてください。
 
-\subsection{Code}
+% If you do none of this, consider what you do to interact with the node. One specific case that bit me in production was that some of our common tools used random names to connect to nodes remotely, or generated nodes with random names that connected to each other from a central server.\footnote{This is a common approach to figuring out how to connect nodes together: have one or two central nodes with fixed names, and have every other one log to them. Connections will then propagate automatically.} Erlang node names are converted to atoms, so just having this was enough to slowly but surely exhaust space on atom tables. Make sure you generate them from a fixed set, or slowly enough that it won't be a problem in the long run.
+これらのことをしていない場合、ノードとどのようにインタラクションを行っているかを調査してみてください。実運用で問題を起こした一つの例として、我々の使っていたいくつかの共通ツールが外部のノードに接続するときにランダムな名前を使っていたり、中央サーバーを介してお互いにつながっている\footnote{これはノード同士をどのようにつなげるかという問題を解決するためによく使われるアプローチです。一つか二つの名前の固定された中央ノードを用意し、他のノードはそれらに接続するようにします。そうすると、自ずと接続は伝搬します。}ランダムな名前のノードを生成していました。Erlangノード名はアトムに変換されるため、このような仕組みがあるだけでゆっくりとしかし確実にアトムテーブルの空間を埋め尽くしていくのでした。固定された範囲の中で生成するか、長期的に問題にならないくらい遅いペースで生成するように気をつけましょう。
 
-The code on an Erlang node is loaded in memory in its own area, and sits there until it is garbage collected. Only two copies of a module can coexist at one time, so looking for very large modules should be easy-ish.
+% \subsection{Binary}
+\subsection{バイナリ}
 
-If none of them stand out, look for code compiled with HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}. HiPE code, unlike regular BEAM code, is native code and cannot be garbage collected from the VM when new versions are loaded. Memory can accumulate, usually very slowly, if many or large modules are native-compiled and loaded at run time.
+% See Section \ref{sec:binaries}.
+\ref{sec:binaries} 章を参照。
 
-Alternatively, you may look for weird modules you didn't load yourself on the node and panic if someone got access to your system!
+% \subsection{Code}
+\subsection{コード}
+
+% The code on an Erlang node is loaded in memory in its own area, and sits there until it is garbage collected. Only two copies of a module can coexist at one time, so looking for very large modules should be easy-ish.
+Erlangノードのコードはメモリ上の独自の領域に読み込まれ、ガベージコレクションが行われるまでその領域を使い続けます。同じモジュールの異なるバージョンは同時に2つまでしか存在できないので、巨大なモジュールを探すことによって問題のある箇所を見つけるのは簡単なのではないでしょうか。
+% 若干補いすぎ？
+
+% If none of them stand out, look for code compiled with HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}. HiPE code, unlike regular BEAM code, is native code and cannot be garbage collected from the VM when new versions are loaded. Memory can accumulate, usually very slowly, if many or large modules are native-compiled and loaded at run time.
+もしどのモジュールも特に目立って大きくないならば、HiPE\footnote{\href{http://www.erlang.org/doc/man/HiPE\_app.html}{http://www.erlang.org/doc/man/HiPE\_app.html}}でコンパイルされたコードを探してみましょう。通常のBEAMコードとは違い、HiPEコードはネイティヴコードで、新しいバージョンが読み込まれたときでもVMからガベージコレクションされないという性質があります。たくさんの、または巨大なモジュールが実行時にネイティヴコンパイルされて読み込まれた場合、メモリ使用量は徐々に蓄積されていきます。
+
+% Alternatively, you may look for weird modules you didn't load yourself on the node and panic if someone got access to your system!
+または、自分でロードしたものでない怪しげなモジュールを探して、誰かがシステムへ侵入したとパニックすることもあるでしょう！
 
 \subsection{ETS}
 
-ETS tables are never garbage collected, and will maintain their memory usage as long as records will be left undeleted in a table. Only removing records manually (or deleting the table) will reclaim memory.
+% ETS tables are never garbage collected, and will maintain their memory usage as long as records will be left undeleted in a table. Only removing records manually (or deleting the table) will reclaim memory.
+ETSテーブルはガベージコレクションの対象にならず、レコードがテーブル上から削除されない限りメモリを使い続けます。レコードを手動で削除するかテーブルを削除することでしか空きメモリを取り戻すことができません。
 
-In the rare cases you're actually leaking ETS data, call the undocumented \function{ets:i()} function in the shell. It will print out information regarding number of entries (\expression{size}) and how much memory they take (\expression{mem}). Figure out if anything is bad.
+% In the rare cases you're actually leaking ETS data, call the undocumented \function{ets:i()} function in the shell. It will print out information regarding number of entries (\expression{size}) and how much memory they take (\expression{mem}). Figure out if anything is bad.
+本当にETSデータでメモリリークをしているという稀なケースでは、ドキュメント化されていない \function{ets:i()} 関数をシェルで呼んでみてください。これはエントリの数 (\expression{size}) とどのくらいメモリを使っているか (\expression{mem}) についての情報を出力します。これを使って何がおかしいかを探ってみましょう。
 
-It's entirely possible all the data there is legit, and you're facing the difficult problem of needing to shard your data set and distribute it over many nodes. This is out of scope for this book, so best of luck to you. You can look into compression of your tables if you need to buy time, however.\footnote{See the \href{http://www.erlang.org/doc/man/ets.html\#new-2}{\expression{compressed} option for \function{ets:new/2}}}
+% It's entirely possible all the data there is legit, and you're facing the difficult problem of needing to shard your data set and distribute it over many nodes. This is out of scope for this book, so best of luck to you. You can look into compression of your tables if you need to buy time, however.\footnote{See the \href{http://www.erlang.org/doc/man/ets.html\#new-2}{\expression{compressed} option for \function{ets:new/2}}}
+ETS上のすべてのデータが正当なもので、データセットを複数のノードにシャーディングして分配するという難しい問題に直面している、という可能性も全くもってありえます。これはこの本の範囲外なので、あなたの幸運を祈ります。テーブルの圧縮をすることで時間を稼ぐという選択肢もあります\footnote{\href{http://www.erlang.org/doc/man/ets.html\#new-2}{\function{ets:new/2} の \expression{compressed} オプション} を見てみてください}。
 
-\subsection{Processes}
+% \subsection{Processes}
+\subsection{プロセス}
 
-There are a lot of different ways in which process memory can grow. Most interesting cases will be related to a few common cases: process leaks (as in, you're leaking processes), specific processes leaking their memory, and so on. It's possible there's more than one cause, so multiple metrics are worth investigating. Note that the process count itself is skipped and has been covered before.
+% There are a lot of different ways in which process memory can grow. Most interesting cases will be related to a few common cases: process leaks (as in, you're leaking processes), specific processes leaking their memory, and so on. It's possible there's more than one cause, so multiple metrics are worth investigating. Note that the process count itself is skipped and has been covered before.
+プロセスメモリが増えるには多くの原因があります。最も興味深いケースはいくつかの頻出ケースに関連します。例えば、プロセス自身をリークしている、特定のプロセスがメモリをリークしている、といったケースです。複数の原因に由来している可能性はあるので、複数のメトリクスを調べる価値は高いでしょう。なお、プロセスのカウントについては既出なのでここでは扱いません。
+% as in, の括弧はその次の箇条書きとの訳し分けで含めた
 
-\subsubsection{Links and Monitors}
+% \subsubsection{Links and Monitors}
+\subsubsection{リンクとモニタ}
 
-Is the global process count indicative of a leak? If so, you may need to investigate unlinked processes, or peek inside supervisors' children lists to see what may be weird-looking.
+% Is the global process count indicative of a leak? If so, you may need to investigate unlinked processes, or peek inside supervisors' children lists to see what may be weird-looking.
+グローバルでのプロセス数がプロセスのリークの兆候を示していますか？もしそうであれば、リンクされていないプロセスを調査するか、スーパーバイザの子プロセスリストを見て何かおかしいところがないかを探りましょう。
 
-Finding unlinked (and unmonitored) processes is easy to do with a few basic commands:
+% Finding unlinked (and unmonitored) processes is easy to do with a few basic commands:
+リンクされていない、またはモニタされていないプロセスを探すのは簡単ないくつかのコマンドでできます:
 
 \begin{VerbatimEshell}
 1> [P || P <- processes(),
@@ -77,14 +115,18 @@ Finding unlinked (and unmonitored) processes is easy to do with a few basic comm
          []==Ls, []==Ms].
 \end{VerbatimEshell}
 
-This will return a list of processes with neither. For supervisors, just fetching \newline \expression{supervisor:count\_children(SupervisorPidOrName)} and seeing what looks normal can be a good pointer.
+% This will return a list of processes with neither. For supervisors, just fetching \newline \expression{supervisor:count\_children(SupervisorPidOrName)} and seeing what looks normal can be a good pointer.
+これはリンクもモニタもされていないプロセスのリストを返します。スーパーバイザについては、\expression{supervisor:count\_children(SupervisorPidOrName)} を見て正常な状態がどんなものかを見てみるのがよいでしょう。
 
+% \subsubsection{Memory Used}
+\subsubsection{メモリ使用}
 
-\subsubsection{Memory Used}
+% The per-process memory model is briefly described in Subsection \ref{subsec:memory-process-level}, but generally speaking, you can find which individual processes use the most memory by looking for their \term{memory} attribute. You can look things up either as absolute terms or as a sliding window.
+プロセスごとのメモリモデルについては \ref{subsec:memory-process-level} 節で簡潔に紹介していますが、一般的には、どの個別のプロセスが一番メモリを使っているかはプロセスの \term{memory} 属性を見ることでわかります。この値は、メモリ使用量の絶対値として、または区間を指定してその中での変化率として見ることができます。
+% sliding window -> 範囲指定と訳したけど自信がない
 
-The per-process memory model is briefly described in Subsection \ref{subsec:memory-process-level}, but generally speaking, you can find which individual processes use the most memory by looking for their \term{memory} attribute. You can look things up either as absolute terms or as a sliding window.
-
-For memory leaks, unless you're in a predictable fast increase, absolute values are usually those worth digging into first:
+% For memory leaks, unless you're in a predictable fast increase, absolute values are usually those worth digging into first:
+メモリリークについていえば、急激な上昇が予測可能でない限りにおいて、絶対値から順に見ていくのがよいでしょう:
 
 \begin{VerbatimEshell}
 1> recon:proc_count(memory, 3).
@@ -102,16 +144,21 @@ For memory leaks, unless you're in a predictable fast increase, absolute values 
    {initial_call,{proc_lib,init_p,5}}]}]
 \end{VerbatimEshell}
 
-Attributes that may be interesting to check other than \term{memory} may be any other fields in Subsection \ref{subsec:digging-procs}, including \term{message\_queue\_len}, but \term{memory} will usually encompass all other types.
+% Attributes that may be interesting to check other than \term{memory} may be any other fields in Subsection \ref{subsec:digging-procs}, including \term{message\_queue\_len}, but \term{memory} will usually encompass all other types.
+\term{message\_queue\_len} のような \term{memory} 以外の示唆的な属性は \ref{subsec:digging-procs} 節にて紹介していますが、だいたいの場合 \term{memory} でカバーできるでしょう。
 
-\subsubsection{Garbage Collections}
+% \subsubsection{Garbage Collections}
+\subsubsection{ガベージコレクション}
 \label{subsubsec:leak-gc}
 
-It is very well possible that a process uses lots of memory, but only for short periods of time. For long-lived nodes with a large overhead for operations, this is usually not a problem, but whenever memory starts being scarce, such spiky behaviour might be something you want to get rid of.
+% It is very well possible that a process uses lots of memory, but only for short periods of time. For long-lived nodes with a large overhead for operations, this is usually not a problem, but whenever memory starts being scarce, such spiky behaviour might be something you want to get rid of.
+プロセスがものすごく短期間だけ大量のメモリを使うということは大いにありえます。操作のオーバーヘッドの大きい長命のノードではこれらはだいたいの場合問題ではありませんが、メモリが少なくなってきたときにはこのようなスパイク状の挙動こそが本当に対処したいものかもしれません。
 
-Monitoring all garbage collections in real-time from the shell would be costly. Instead, setting up Erlang's system monitor\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}} might be the best way to go at it.
+% Monitoring all garbage collections in real-time from the shell would be costly. Instead, setting up Erlang's system monitor\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}} might be the best way to go at it.
+リアルタイムですべてのガベージコレクションを監視するのはコストが高いです。代わりに、Erlangのシステムモニタ\footnote{\href{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}{http://www.erlang.org/doc/man/erlang.html\#system\_monitor-2}}を使うのが一番よい方法かもしれません。
 
-Erlang's system monitor will allow you to track information such as long garbage collection periods and large process heaps, among other things. A monitor can temporarily be set up as follows:
+% Erlang's system monitor will allow you to track information such as long garbage collection periods and large process heaps, among other things. A monitor can temporarily be set up as follows:
+Erlangのシステムモニタを使えば例えば長いガベージコレクションの期間や巨大なプロセスヒープなどの情報を追跡できます。モニタは以下のようにして設定できます:
 
 \begin{VerbatimEshell}
 1> erlang:system_monitor().
@@ -133,18 +180,25 @@ Shell got {monitor,<4683.31798.0>,long_gc,
 undefined
 \end{VerbatimEshell}
 
-The first command checks that nothing (or nobody else) is using a system monitor yet — you don't want to take this away from an existing application or coworker.
+% The first command checks that nothing (or nobody else) is using a system monitor yet — you don't want to take this away from an existing application or coworker.
+最初のコマンドは既にシステムモニタを使っていないかどうかをチェックします---使用中の他のアプリケーションや同僚からシステムモニタを奪いたくはないでしょう。
 
-The second command will be notified every time a garbage collection takes over 500 milliseconds. The result is flushed in the third command. Feel free to also check for \expression{\{large\_heap, NumWords\}} if you want to monitor such sizes.
-Be careful to start with large values at first if you're unsure. You don't want to flood your process' mailbox with a bunch of heaps that are 1-word large or more, for example.
+% The second command will be notified every time a garbage collection takes over 500 milliseconds. The result is flushed in the third command. Feel free to also check for \expression{\{large\_heap, NumWords\}} if you want to monitor such sizes.
+二つ目のコマンドはガベージコレクションに500ミリ秒以上かかったときに通知されます。その結果は三つ目のコマンドでフラッシュされます。ヒープサイズを監視したい場合は \expression{\{large\_heap, NumWords\}} を使うとよいでしょう。
+% Be careful to start with large values at first if you're unsure. You don't want to flood your process' mailbox with a bunch of heaps that are 1-word large or more, for example.
+自信がない場合は大きな値でモニタリングを開始しましょう。例えば、1ワード以上のサイズを持つヒープの情報でプロセスのメールボックスを溢れさせたくはないですよね？
 
-Command 5 unsets the system monitor (exiting or killing the monitor process also frees it up), and command 6 validates that everything worked.
+% Command 5 unsets the system monitor (exiting or killing the monitor process also frees it up), and command 6 validates that everything worked.
+五つ目のコマンドはシステムモニタを解除し（モニタプロセスが終了またはkillされるとシステムモニタは同様に解除されます）、その次のコマンドでちゃんと解除されたかどうかを確認できます。
 
-You can then find out if such monitoring messages tend to coincide with the memory increases that seem to result in leaks or overuses, and try to catch culprits before things are too bad. Quickly reacting and digging into the process (possibly with \function{recon:info/1}) may help find out what's wrong with the application.
+% You can then find out if such monitoring messages tend to coincide with the memory increases that seem to result in leaks or overuses, and try to catch culprits before things are too bad. Quickly reacting and digging into the process (possibly with \function{recon:info/1}) may help find out what's wrong with the application.
+これを使って、監視メッセージがリークやメモリの過剰使用に由来していそうなメモリ使用量上昇と重なっていないかを見ることができ、事態が悪化する前に犯人をつきとめることができます。すばやく対応してプロセスの中身を調べる（\function{recon:info/1} などを使います）ことでアプリケーションの問題を発見できるでしょう。
 
-\subsection{Nothing in Particular}
+% \subsection{Nothing in Particular}
+\subsection{特に何もない場合}
 
-If nothing seems to stand out in the preceding material, binary leaks (Section \ref{sec:binaries}) and memory fragmentation (Section \ref{sec:memory-fragmentation}) may be the culprits. If nothing there fits either, it's possible a C driver, NIF, or even the VM itself is leaking. Of course, a possible scenario is that load on the node and memory usage were proportional, and nothing specifically ended up being leaky or modified. The system just needs more resources or nodes.
+% If nothing seems to stand out in the preceding material, binary leaks (Section \ref{sec:binaries}) and memory fragmentation (Section \ref{sec:memory-fragmentation}) may be the culprits. If nothing there fits either, it's possible a C driver, NIF, or even the VM itself is leaking. Of course, a possible scenario is that load on the node and memory usage were proportional, and nothing specifically ended up being leaky or modified. The system just needs more resources or nodes.
+これまでに書かれた内容があてはまらない場合、バイナリリーク (\ref{sec:binaries} 章) やメモリのフラグメンテーション (\ref{sec:memory-fragmentation} 章) が原因である可能性があります。もしそのいずれでもなければ、Cドライバ、NIF、またはVM自身がメモリリークを起こしている可能性があります。もちろん、ノードの負荷とメモリ使用が比例していて特に何もメモリリークを起こしていないという可能性もあります。単にシステムはもっとリソースやノードを必要としているだけなのかもしれません。
 
 %\section{Binaries}
 \section{バイナリ}
@@ -383,7 +437,7 @@ For \emph{best fit} (\term{bf}), the VM builds a balanced binary tree of all the
 
 Each of these strategies can be applied individually to every kind of allocator, so that the heap allocator and the binary allocator do not necessarily share the same strategy.
 
-Finally, starting with Erlang version 17.0, each \term{alloc\_util} allocator on each scheduler has what is called a \emph{\term{mbcs} pool}. The \term{mbcs} pool is a feature used to fight against memory fragmentation on the VM. When an allocator gets to have one of its multiblock carriers become mostly empty,\footnote{The threshold is configurable through \href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}} the carrier becomes \emph{abandoned}. 
+Finally, starting with Erlang version 17.0, each \term{alloc\_util} allocator on each scheduler has what is called a \emph{\term{mbcs} pool}. The \term{mbcs} pool is a feature used to fight against memory fragmentation on the VM. When an allocator gets to have one of its multiblock carriers become mostly empty,\footnote{The threshold is configurable through \href{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}{http://www.erlang.org/doc/man/erts\_alloc.html\#M\_acul}} the carrier becomes \emph{abandoned}.
 
 This abandoned carrier will stop being used for new allocations, until new multiblock carriers start being required. When this happens, the carrier will be fetched from the \term{mbcs} pool. This can be done across multiple \term{alloc\_util} allocators of the same type across schedulers. This allows the VM to cache mostly-empty carriers without forcing deallocation of their memory.\footnote{In cases this consumes too much memory, the feature can be disabled with the options \term{+MBacul 0}.} It also enables the migration of carriers across schedulers when they contain little data, according to their needs.
 
@@ -478,4 +532,3 @@ When that happens, over 80\% of the time, the only thing that happens is that th
   %\item Using any system you know or have to maintain in Erlang (including toy systems), can you figure out if there are any binary memory leaks on there?
   \item あなたが知っているあるいは運用しなければならないどんなErlangシステム（トイシステム含む）でもいいので、それを使ってそこにバイナリメモリリークがあるかどうかを判断してください。
 \end{enumerate}
-
