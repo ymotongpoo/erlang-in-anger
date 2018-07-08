@@ -496,7 +496,6 @@ Erlangのバージョン17.0からついにそれぞれのスケジューラの\
 片側の端にはヒープを、その反対側にはスタックを持ちます。
 
 \begin{VerbatimText}
-%[heap |     | stack]
 [ヒープ |     | スタック]
 \end{VerbatimText}
 
@@ -504,7 +503,6 @@ Erlangのバージョン17.0からついにそれぞれのスケジューラの\
 実際にはそこにはもっとたくさんのデータがあります(世代別GCのための古いヒープ、新しいヒープに、プロセスから使われていない特定のサブアロケータにあるリファレンスカウントされたバイナリの領域を考慮した仮想のバイナリヒープも持ちます --- \term{binary\_alloc}対\term{eheap\_alloc})。
 
 \begin{VerbatimText}
-%[heap   ||    stack]
 [ヒープ   ||    スタック]
 \end{VerbatimText}
 
