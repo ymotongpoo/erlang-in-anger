@@ -109,7 +109,7 @@ rebar.lock
 SystoolやReltoolといった他のツールも以前はカバーされていて\footnote{\href{http://learnyousomeerlang.com/release-is-the-word}{http://learnyousomeerlang.com/release-is-the-word} 訳註: 日本語訳版は \href{https://www.ymotongpoo.com/works/lyse-ja/ja/24\_release\_is\_the\_word.html}{https://www.ymotongpoo.com/works/lyse-ja/ja/24\_release\_is\_the\_word.html}}、ユーザーに多くの力を提供します。
 
 %A \app{relx} configuration tuple (within \filename{rebar.config}) for the directory structure above would look like:
-（\filename{rebar.config}内の）上のようなディレクトリ構造の場合の\app{relx}設定タプルは次のようになります。
+上のようなディレクトリ構造の場合、（\filename{rebar.config}内の）\app{relx}設定タプルは次のようになります。
 
 \begin{VerbatimText}
 {relx, [
@@ -122,7 +122,7 @@ SystoolやReltoolといった他のツールも以前はカバーされていて
 
 %Calling \command{rebar3 release} will build a release, to be found in the \filename{\_build/default/rel/} directory. Calling \command{rebar3 tar} will generate a tarball at\\
 %\filename{\_build/default/rel/demo/demo-1.0.0.tar.gz}, ready to be deployed.
-\command{rebar3 release}を呼ぶとリリースをビルドして、\filename{\_build/default/rel/}ディレクトリに置かれます。
+\command{rebar3 release}を呼ぶとリリースをビルドして、その成果物は\filename{\_build/default/rel/}ディレクトリに置かれます。
 \command{rebar3 tar}を呼ぶとtarballを\filename{\_build/default/rel/demo/demo-1.0.0.tar.gz}に配置し、デプロイ可能となります。
 
 %\section{Supervisors and start\_link Semantics}
@@ -131,7 +131,7 @@ SystoolやReltoolといった他のツールも以前はカバーされていて
 
 %In complex production systems, most faults and errors are transient, and retrying an operation is a good way to do things — Jim Gray's paper\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}} quotes \emph{Mean Times Between Failures} (MTBF) of systems handling transient bugs being better by a factor of 4 when doing this. Still, supervisors aren't just about restarting.
 複雑な本番システムでは、多くの障害やエラーは一時的なもので、処理を再実行するのは良いことです---Jim Grayの
-論文\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}}では、一時的なバグを扱う場合、システムの\emph{Mean Times Between Failures（障害間隔平均時間）} (MTBF)で見た時に4倍良くなると引用していました。
+論文\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}}では、一時的なバグが発生したとき処理を再実行すれば、システムの\emph{Mean Times Between Failures（障害間隔平均時間）} (MTBF)は4倍良くなると引用していました。
 そして、スーバーバイザーは再起動を行うだけではありません。
 
 %One very important part of Erlang supervisors and their supervision trees is that \emph{their start phases are synchronous}. Each OTP process has the potential to prevent its siblings and cousins from booting. If the process dies, it's retried again, and again, until it works, or fails too often.
@@ -139,12 +139,12 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 各OTPプロセスは兄弟や従兄弟のプロセスの起動を妨げる可能性があります。もしプロセスが死んだら、起動を何度も何度も繰り返され、最終的に起動できるようになる、さもなければ頻繁に失敗することになります。
 
 %That's where people make a very common mistake. There isn't a backoff or cooldown period before a supervisor restarts a crashed child. When a network-based application tries to set up a connection during its initialization phase and the remote service is down, the application fails to boot after too many fruitless restarts. Then the system may shut down.
-この点が人々がよくある間違いをおかしがちなところです。クラッシュした子プロセスを再起動する前にバックオフやクールダウンの期間はありません。
+この点が人々が間違いをおかしがちなところです。クラッシュした子プロセスを再起動する前にバックオフやクールダウンの期間はありません。
 ネットワーク系アプリケーションが初期化フェーズで接続を確立しようとしてリモートサービスが落ちているとき、アプリケーションは無意味な再起動を多数繰り返した後に失敗します。そしてシステムが停止します。
 
 %Many Erlang developers end up arguing in favor of a supervisor that has a cooldown period. I strongly oppose the sentiment for one simple reason: \emph{it's all about the guarantees}.
 多くのErlang開発者がスーパーバイザーにクールダウン期間を持たせるほうがいいという方向の主張をします。
-私は一つの単純な理由からそれにいは反対です。その理由とは\emph{保証がすべて}ということです。
+私は一つの単純な理由からそれには反対です。その理由とは\emph{保証がすべて}ということです。
 
 %\subsection{It's About the Guarantees}
 \subsection{すべては保証のため}
@@ -175,7 +175,7 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 
 %The reconnection to the database can then be done using whatever cooldown or backoff strategy you believe is optimal, without impacting the stability of the system. It can be attempted in the initialization phase as an optimization, but the process should be able to reconnect later on if anything ever disconnects.
 その上でデータベースへの再接続はクールダウンでもバックオフでも何でもいいですが、とりあえずあなたが最適だと思うそういうものを使って、システムの安定性を損なわずに行えるでしょう。
-最適化の一貫として初期化フェーズに行うこともできるでしょうが、何かが切断された場合にプロセスがあとになっても再接続できるようにすべきです。
+最適化の一環として初期化フェーズに行うこともできるでしょうが、何かが切断された場合にプロセスがあとになっても再接続できるようにすべきです。
 
 %If you expect failure to happen on an external service, do not make its presence a guarantee of your system. We're dealing with the real world here, and failure of external dependencies is always an option.
 外部サービスが落ちることが予想されるのであれば、システムでそのサービスの存在を保証すべきではありません。
@@ -193,7 +193,7 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 %The difference in both initialization and supervision approaches is that the client's callers make the decision about how much failure they can tolerate, not the client itself. That's a very important distinction when it comes to designing fault-tolerant systems. Yes, supervisors are about restarts, but they should be about restarts to a stable known state.
 初期化と監視での手法の違いは、クライアント自身ではなくクライアントの呼び出し側が障害にどの程度耐えられるか決められるという点です。
 障害耐性のあるシステムを設計する場合にこの点は非常に重要な特徴です。
-そうです、スーバーバイザーとは再起動についてですが、それは既知の安定した状態への再起動であるべきです。
+そうです、スーバーバイザーは再起動を行いますが、それは既知の安定した状態への再起動であるべきです。
 
 %\subsection{Example: Initializing without guaranteeing connections}
 \subsection{例: 接続を保証しない初期化}
@@ -250,7 +250,7 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
 私が関わってきた本番システムは両方の手法が混ざったものでした。
 
 %Things like configuration files, access to the file system (say for logging purposes), local resources that can be depended on (opening UDP ports for logs), restoring a stable state from disk or network, and so on, are things I'll put into requirements of a supervisor and may decide to synchronously load no matter how long it takes (some applications may just end up having over 10 minute boot times in rare cases, but that's okay because we're possibly syncing gigabytes that we \emph{need} to work with as a base state if we don't want to serve incorrect information.)
-設定ファイル、ファイルシステムへのアクセス(たとえばログ目的)、依存しているローカルのリソース(ログ用にUDPポートを開ける)、ディスクやネットワークから安定した状態を復元するなどといったものはスーパーバイザーの要件として、どれだけ長時間かかっても同期的に読み込むことに決めるでしょう。(アプリケーションによってはまれに起動に10分以上かかることもあるでしょうが、それはおそらく間違った情報を配信してしないよう、基準の状態として動作するために\emph{必要な}ギガバイト単位のデータを同期しているので構わないのです。)
+設定ファイル、ファイルシステムへのアクセス(たとえばログ目的)、依存しているローカルのリソース(ログ用にUDPポートを開ける)、ディスクやネットワークから安定した状態を復元するなどといったものはスーパーバイザーの要件として、どれだけ長時間かかっても同期的に読み込むことに決めるでしょう。(アプリケーションによってはまれに起動に10分以上かかることもあるでしょう。間違った情報を配信しないように、\emph{必要な}ギガバイト単位のデータを同期し、初期状態を作ろうとしている場合にはこれは正しいやり方です。)
 
 %On the other hand, code that depends on non-local databases and external services will adopt partial startups with quicker supervision tree booting because if the failure is expected to happen often during regular operations, then there's no difference between now and later. You have to handle it the same, and for these parts of the system, far less strict guarantees are often the better solution.
 一方で、ローカルではないデータベースや外部のサービスに依存しているコードは、より素早い監視ツリーのブートとともに部分的な起動を適用させるでしょう。
@@ -264,7 +264,7 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
 %No matter what, a sequence of failures is not a death sentence for the node. Once a system has been divided into various OTP applications, it becomes possible to choose which applications are vital or not to the node. Each OTP application can be started in 3 ways: temporary, transient, permanent, either by doing it manually in \expression{application:start(Name, Type)}, or in the config file for your release:
 何があろうとも、ノードで障害が連続して起きることはノードへの死刑宣告ではありません。
 システムが様々なOTPアプリケーションに分割されてしまえば、ノードにとってどのアプリケーションが致命的でどれがそうでないかを決められるようになります。
-各OTPアプリケーションは3つの方法で起動できます。temporary (一時的)、transient (暫定的)、permanent (永続的)のどれか一つを選択でき、\expression{application:start(Name, Type)}と手動で起動するか、あるいはリリース内の設定ファイルに書くことで可能です。
+各OTPアプリケーションは3つの方法で起動できます。temporary (一時的)、transient (暫定的)、permanent (永続的)のどれか一つを、\expression{application:start(Name, Type)}と手動で起動するときに引数で指定するか、リリース内の設定ファイルに書くことで選択可能です。
 
 \begin{itemize*}
   %\item \term{permanent}: if the app terminates, the entire system is taken down, excluding manual termination of the app with \function{application:stop/1}.
