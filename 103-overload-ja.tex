@@ -31,10 +31,10 @@
 こういった点を見つけることで、システムの \emph{真のボトルネック} が何であるかを特定し、過去の全ての良いと思っていた（そして対応コストが高いかもしれない）最適化は、多かれ少なかれ無駄であることも特定できます。
 
 %We need to be more clever, and so things are moved back up a level. We try to massage the information going in the system to make it either lighter (whether it is through compression, better algorithms and data representation, caching, and so on).
-私たちはより賢くなる必要があります。そして、世もレベルアップしています。私たちは、システムに入る情報をより軽いもの(圧縮、より良いアルゴリズムとデータ表現、キャッシングなど)に変換しようとします。
+私たちはより賢くなる必要があります。そして、世もレベルアップしています。私たちは、システムに入る情報を(圧縮、より良いアルゴリズムとデータ表現、キャッシングなどを使って)軽量化しようとします。
 
 %Even then, there are times where the overload will be too much, and we have to make the hard decisions between restricting the input to the system, discarding it, or accepting that the system will reduce its quality of service up to the point it will crash. These mechanisms fall into two broad strategies: back-pressure and load-shedding.
-それでもあまりの過負荷が来ることがあります、そしてシステムへの入力を制限するか、入力を廃棄するか、システムがクラッシュするサービスレベルを受け入れるか、を決めなければなりません。これらのメカニズムは、2つの幅広いストラテジーに分類されます：バックプレッシャーと負荷分散。
+それでも過負荷が来ることがあります、そしてシステムへの入力を制限するか、入力を廃棄するか、システムがクラッシュするサービスレベルを受け入れるか、を決めなければなりません。これらのメカニズムは、2つの幅広いストラテジーに分類されます：バックプレッシャーと負荷分散。
 
 %We'll explore them in this chapter, along with common events that end up causing Erlang systems to blow up.
 この章では、Erlangシステムの爆発を引き起こす一般的なイベントとともに、それらを追求します。
@@ -56,7 +56,7 @@
 %This is especially true of user-generated log messages (not for errors), and for crashes in large processes. For the former, this is because \module{error\_logger} doesn't really expect arbitrary levels of messages coming in continually. It's for exceptional cases only and doesn't expect lots of traffic. For the latter, it's because the entire state of processes (including their mailboxes) gets copied over to be logged. It only takes a few messages to cause memory to bubble up a lot, and if that's not enough to cause the node to run Out Of Memory (OOM), it may slow the logger enough that additional messages will.
 特に(エラーではなく)ユーザーが生成したログメッセージや大きなプロセスがクラッシュしたときのログではこうしたことが起きます。
 前者に関しては、\module{error\_logger}は任意のレベルのメッセージが継続的にやってくることを想定していないからです。
-例外的な場合のみを想定していて、大量のトラフィックが来る場合は想定していないのです。
+例外的な場合のみを想定していて、大量のトラフィックが来ることは想定していないのです。
 後者に関しては、(プロセスのメールボックスも含めた)プロセス全体の状態がログされるためにコピーされるからです。
 たった数行のメッセージでもメモリを大量に増やす原因となりますし、もしそれがノードをOut Of Memory (OOM)にさせるに至らなくても、追加のメッセージの書き込み速度を下げるには十分です。
 
@@ -82,18 +82,18 @@
 
 %One particularly bad example was in a pool manager for HTTP connections that I had written in a fork of the \href{https://github.com/ferd/lhttpc}{\module{lhttpc}} library. It worked fine in most test cases we had, and we even had a connection timeout set to 10 milliseconds to be sure it never took too long\footnote{10 milliseconds is very short, but was fine for collocated servers used for real-time bidding.}. After a few weeks of perfect uptime, the HTTP client pool caused an outage when one of the remote servers went down.
 特に悪い状況の例が、\href{https://github.com/ferd/lhttpc}{\module{lhttpc}}ライブラリのフォークの中で私が書いたHTTP接続用のプールマネージャー内にありました。
-私達の運用状況においてはたいていはうまく動いていて、さらに接続のタイムアウトも10ミリ秒に設定して、接続待ちが長くなりすぎないようにしていました。\footnote{10ミリ秒は非常に短いですが、リアルタイムビッディングに使われる共用サーバーでは問題ありません。}
+私達のテストケースでは概ねうまく動いていて、さらに接続のタイムアウトも10ミリ秒に設定して、接続待ちが長くなりすぎないようにしていました。\footnote{10ミリ秒は非常に短いですが、リアルタイムビッディングに使われる共用サーバーでは問題ありません。}
 数週間完璧に稼働したあとに、リモートサーバーの一つが落ちたときにHTTPクライアントプールが供給できない状態になりました。
 
 %The reason behind this degradation was that when the remote server would go down, all of a sudden, all connecting operations would take at least 10 milliseconds, the time before which the connection attempt is given up on. With around 9,000 messages per second to the central process, each usually taking under 5 milliseconds, the impact became similar to roughly 18,000 messages a second and things got out of hand.
-このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになりました。この10ミリ秒は接続試行が断念されるまでの時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで手に負えなくなりました。
+このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになったことでした。この10ミリ秒は接続試行が断念されるまでの時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで、このあたりで手に負えなくなりました。
 
 %The solution we came up with was to leave the task of connecting to the caller process, and enforce the limits as if the manager had done it on its own. The blocking operations were now distributed to all users of the library, and even less work was required to be done by the manager, now free to accept more requests.
 私達がいたった解決策は呼び出し元のプロセスに接続のタスクを譲って、プールマネージャー自体で制限したかのように制限を強制することにしました。
 これでブロック操作はライブラリの全ユーザーに分散され、プールマネージャーによって行われるべき仕事はずっと少なくなり、より多くのリクエストを受け付けられるようになりました。
 
 %When there is \emph{any} point of your program that ends up being a central hub for receiving messages, lengthy tasks should be moved out of there if possible. Handling predictable overload\footnote{Something you know for a fact gets overloaded in production} situations by adding more processes — which either handle the blocking operations or instead act as a buffer while the "main" process blocks — is often a good idea.
-プログラム内でメッセージを受信するための中央的なハブになっている場所が\emph{一つでも}あれば、できれば時間がかかるタスクはそこから取り除くべきでしょう。
+プログラム内でメッセージを受信するための中央的なハブになっている場所が\emph{一つでも}あれば、時間がかかるタスクはそこから出来る限り取り除くべきでしょう。
 より多くのプロセスを追加することで予測可能な過負荷\footnote{本番環境で事実に基づいて過負荷になるもの}に対応する---ブロック操作に対処する、またはかわりに''main''プロセスがブロックする間のバッファとして機能する---のは良いアイデアです。
 
 %There will be increased complexity in managing more processes for activities that aren't intrinsically concurrent, so make sure you need them before programming defensively.
@@ -102,7 +102,7 @@
 %Another option is to transform the blocking task into an asynchronous one. If the type of work allows it, start the long-running job and keep a token that identifies it uniquely, along with the original requester you're doing work for. When the resource is available, have it send a message back to the server with the aforementioned token. The server will eventually get the message, match the token to the requester, and answer back, without being blocked by other requests in the mean time.\footnote{The \otpapp{redo} application is an example of a library doing this, in its \href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block} module. The [under-documented] module turns a pipelined connection into a blocking one, but does so while maintaining pipeline aspects to the caller — this allows the caller to know that only one call failed when a timeout occurs, not all of the in-transit ones, without having the server stop accepting requests.}
 他の選択肢としては、ブロッキングタスクを非同期なものに変形させることです。もし処理がそうした変更を受け入れられるものであれば、長時間実行されるジョブを起動して、そのジョブの一意な識別子としてのトークンともともとのリクエスト元を保持します。
 リソースが使えるようになったら、リソースからサーバーに対して先述のトークンと一緒にメッセージを送り返させます。
-結果サーバーはメッセージを受け取り、トークンとリクエスト元を対応させ、その間他のリクエストにブロックされることなく結果を返します。\footnote{\otpapp{redo}アプリケーションはこうした処理を行うライブラリの例です。redoの\href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block}モジュールにその処理があります。このあまりドキュメント化されていないモジュールは、パイプライン接続をブロッキングう接続にしますが、呼び出し元に対してパイプラインの面を維持している間だけそうします。---これによって呼び出し元はタイムアウトが発生したときに、サーバーがリクエストの受け入れを止めることなく、すべての未達の呼び出しが失敗したわけでなく1つの呼び出しだけが失敗したとわかります。}
+結果サーバーはメッセージを受け取り、トークンとリクエスト元を対応させ、その間他のリクエストにブロックされることなく結果を返します。\footnote{\otpapp{redo}アプリケーションはこうした処理を行うライブラリの例です。redoの\href{https://github.com/heroku/redo/blob/master/src/redo\_block.erl}{redo\_block}モジュールにその処理があります。このあまりドキュメント化されていないモジュールは、パイプライン接続をブロッキング接続にしますが、呼び出し元に対してパイプラインの面を維持している間だけそうします。---これによって呼び出し元はタイムアウトが発生したときに、サーバーがリクエストの受け入れを止めることなく、すべての未達の呼び出しが失敗したわけでなく1つの呼び出しだけが失敗したとわかります。}
 
 %This option tends to be more obscure than using many processes and can quickly devolve into callback hell, but may use fewer resources.
 この選択肢は多くのプロセスを使う方法に比べてあいまいなものになりがちで、すぐにコールバック地獄になりえますが、使うリソースは少なくなるでしょう。
@@ -182,7 +182,7 @@ Erlangシステム内のメッセージキューが大きくなるのを管理�
 重要なのは、システムの周辺部（あるいはサブシステム）がデータをブロックして、データを処理する権利を求めるけれども、コード内の致命的なボトルネックは権利が許可されるかどうかを決めるものです。
 
 %The advantage of proceeding that way is that you may just avoid all the tricky stuff about timers and making every single layer of abstraction synchronous. You'll instead put guards at the bottleneck and at a given edge or control point, and everything in between can be expressed in the most readable way possible.
-このように進める利点は、タイマーや抽象化のあらゆる層を同期的にするというような厄介なものを単純すべて避けられることです。
+このように進める利点は、タイマーや抽象化のあらゆる層を同期的にするというような厄介なものをすべて避けられることです。
 かわりに、ボトルネックや周辺部の特定の場所あるいは制御点に見張りを置いて、その間にあるものはすべて最も読みやすい形で表現できます。
 
 %\subsection{What Users See}
@@ -328,7 +328,7 @@ Erlangシステム以外から流入速度を落とせず、かつスケール�
 
 %It may sound counter-intuitive to make some requests a lot worse to benefit the majority — you'll have great medians but poor 99 percentiles — but this happens in a state where you would drop messages anyway, and is preferable in cases where you do need low latency.
 多数の利益のために一部リクエストを非常に悪くする--- 中央値は良いが、下位1\%がひどいことになっている --- というのは直感に反するかもしれませんが、
-これはとにかくメッセージを捨たいという状態で起こるもので、低レイテンシがどうしても求められる場合には、望ましい方法です。
+これはとにかくメッセージを捨てたいという状態で起こるもので、低レイテンシがどうしても求められる場合には、望ましい方法です。
 
 %\subsection{Dealing With Constant Overload}
 \subsection{定量負荷の取り扱い}
