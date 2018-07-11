@@ -350,7 +350,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 	\item[Memory Used] \hfill
 		\begin{description}
 %			\item[\expression{binary}] Displays the all the references to refc binaries\footnote{See Section \ref{sec:binaries}} along with their size. Can be unsafe to use if a process has a lot of them allocated.
-			\item[\expression{binary}] Refcバイナリ\footnote{Section \ref{sec:binaries} 参照}への参照をそのサイズと一緒に表示します。プロセスへの割り当てサイズが大きい場合、使用するのは危険です。
+			\item[\expression{binary}] Refcバイナリ\footnote{Section \ref{sec:binaries} 参照}への参照をそのサイズと一緒に表示します。プロセスへの割り当て数が大きい場合、使用するのは危険です。
 
 %			\item[\expression{garbage\_collection}] contains information regarding garbage collection in the process. The content is documented as 'subject to change' and should be treated as such. The information tends to contains entries such as the number of garbage collections the process has went through, options for full-sweep garbage collections, and heap sizes.
 			\item[\expression{garbage\_collection}] プロセスのガベージコレクションに関する情報が含まれています。その情報は'予告なしに変更がある'内容となるでしょう。この情報は、プロセスが実行したガベージコレクションの回数、フルスワップガベージコレクションのオプション、ヒープサイズといったエントリが含みます。
