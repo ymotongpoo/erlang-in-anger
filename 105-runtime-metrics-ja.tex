@@ -359,7 +359,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 			\item[\expression{heap\_size}] 典型的なErlangプロセスは、'古い'ヒープと'新しい'ヒープを含み、世代別ガベージコレクションが行われます。このエントリは最新世代のプロセスのヒープサイズを示し、通常はスタックサイズが含まれます。値は\emph{words}単位で返します。
 
 %			\item[\expression{memory}] Returns, in \emph{bytes}, the size of the process, including the call stack, the heaps, and internal structures used by the VM that are part of a process.
-			\item[\expression{memory}] プロセスの一部のコールスタック、ヒープ、VMによって使用される内部構造を含むプロセスのサイズを\emph{bytes}単位で返します。
+			\item[\expression{memory}] コールスタック、ヒープ、プロセスの一部であるVMによって使用される内部構造、これらを含むプロセスのサイズを\emph{bytes}単位で返します。
 
 %			\item[\expression{message\_queue\_len}] Tells you how many messages are waiting in the mailbox of a process.
 			\item[\expression{message\_queue\_len}] プロセスのメールボックスで待機中のメッセージ数を返します。
