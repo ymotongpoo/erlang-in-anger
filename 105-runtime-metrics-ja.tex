@@ -373,7 +373,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 	\item[Work] \hfill
 		\begin{description}
 %			\item[\expression{reductions}] The Erlang VM does scheduling based on \emph{reductions}, an arbitrary unit of work that allows rather portable implementations of scheduling (time-based scheduling is usually hard to make work efficiently on as many OSes as Erlang runs on). The higher the reductions, the more work, in terms of CPU and function calls, a process is doing. 
-			\item[\expression{reductions}] ErlangVMは、スケジューリングの柔軟な実装を可能にする、任意の作業単位の\emph{reductions}に基づいてスケジューリングを行います(時間ベースのスケジューリングは通常、Erlangが動作する多くのOSで効率的に実行させるのが難しいです)。reductionsが大きいほど、CPUと関数呼び出しの面で、より多くの仕事をこなしています。
+			\item[\expression{reductions}] ErlangVMは、スケジューリング実装の移植性を高める任意の作業単位である\emph{reductions}に基づいてスケジューリングを行います(時間ベースのスケジューリングは通常、Erlangが動作する多くのOSで効率的に実行させるのが難しいです)。reductionsが大きいほど、CPUと関数呼び出しの面で、より多くの仕事をこなしています。
 		\end{description}
 \end{description*}
 
