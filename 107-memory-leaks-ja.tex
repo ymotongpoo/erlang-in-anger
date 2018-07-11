@@ -356,7 +356,7 @@ A fix for this can be implemented transparently in the router's API functions, w
 \subsubsection{グローバルレベル}
 
 %To understand where memory goes, one must first understand the many allocators being used. Erlang's memory model, for the entire virtual machine, is hierarchical. As shown in Figure \ref{fig:allocators},  there are two main allocators, and a bunch of sub-allocators (numbered 1-9). The sub-allocators are the specific allocators used directly by Erlang code and the VM for most data types:\footnote{The complete list of where each data type lives can be found in \href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
-メモリがどこへ行くのか理解するために、たくさんのメモリアロケータが使われていることを最初に理解しなければならない。VM 全体のためのErlangのメモリモデルは階層的になっています。\ref{fig:allocators}の図にあるように、2つのメインとなるアロケータがあり、他にサブアロケータ(1−9までの番号が付けられた)があります。サブアロケータはErlangコードとVMから使われるほとんどのデータ型用の特定のアロケータです。\footnote{各データ型の完全なリストはこちらで見つけることができます。\href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
+メモリがどこへ行くのか理解するために、たくさんのメモリアロケータが使われていることを最初に理解しなければなりません。VM 全体のためのErlangのメモリモデルは階層的になっています。\ref{fig:allocators}の図にあるように、2つのメインとなるアロケータがあり、他にサブアロケータ(1−9までの番号が付けられた)があります。サブアロケータはErlangコードとVMから使われるほとんどのデータ型用の特定のアロケータです。\footnote{各データ型の完全なリストはこちらで見つけることができます。\href{https://github.com/erlang/otp/blob/maint/erts/emulator/beam/erl\_alloc.types}{erts/emulator/beam/erl\_alloc.types}}
 
 
 \begin{figure}
@@ -382,13 +382,13 @@ A fix for this can be implemented transparently in the router's API functions, w
     %\item \term{ll\_alloc}: long-lived allocations will be in there. Examples include Erlang code itself and the atom table, which stay there.
     \item \term{ll\_alloc}: 長期間生存するアロケーションはここにあります。例えばErlangコード自身やアトムのテーブルが存在します。
     %\item \term{fix\_alloc}: allocator used for frequently used fixed-size blocks of memory. One example of data used there is the internal processes' C struct, used internally by the VM.
-    \item \term{fix\_alloc}: 頻繁に使われる固定サイズのメモリブロックのために使われるアロケータ。ここで使われるデータの1つとしてはVMで内部的に使われている内部プロセスのC構造体があります。
+    \item \term{fix\_alloc}: 頻繁に使われる固定サイズのメモリブロックのために使われるアロケータ。ここで使われるデータの1つとしてはVMで内部的に使われているプロセスのC構造体があります。
     %\item \term{std\_alloc}: catch-all allocator for whatever didn't fit the previous categories. The process registry for named process is there.
     \item \term{std\_alloc}: 上記カテゴリに適合しないものを全てキャッチするアロケータ。名前付きのプロセス用のプロセスレジストリがここにあります。
 \end{enumerate*}
 
 %By default, there will be one instance of each allocator per scheduler (and you should have one scheduler per core), plus one instance to be used by linked-in drivers using async threads. This ends up giving you a structure a bit like in Figure \ref{fig:allocators}, but split it in \var{N} parts at each leaf.
-デフォルトでは、スケジューラごとに各アロケータのインスタンスが1つずつ(そしてコアごとに1つのスケジューラを持つはずです)、加えて非同期のスレッドを使うリンクされたドライバーで使われるインスタンスが一つあります。これは\ref{fig:allocators}の図にあるような構造をあなた与えますが、それぞれの葉で\var{N}個の部分に分かれます。
+デフォルトでは、スケジューラごとに各アロケータのインスタンスが1つずつ(そしてコアごとに1つのスケジューラを持つはずです)、加えて非同期のスレッドを使うlinked-in driversで使われるインスタンスが一つあります。これは\ref{fig:allocators}の図にあるような構造をあなたに与えますが、それぞれの葉で\var{N}個の部分に分かれます。
 
 %Each of these sub-allocators will request memory from \term{mseg\_alloc} and \term{sys\_alloc} depending on the use case, and in two possible ways. The first way is to act as a multiblock carrier (\term{mbcs}), which will fetch chunks of memory that will be used for many Erlang terms at once. For each \term{mbc}, the VM will set aside a given amount of memory (about 8MB by default in our case, which can be configured by tweaking VM options), and each term allocated will be free to go look into the many multiblock carriers to find some decent space in which to reside.
 これらのサブアロケータはユースケースに応じて\term{mseg\_alloc}と\term{sys\_alloc}の2つあるうちのどちらかからメモリを要求します。最初の方法はマルチブロックキャリア(\term{mbcs})として行動します。それは多数のErlang項のために使われるメモリの塊を一度に取得します。それぞれの\term{mbc}のために、VMは与えられたメモリ量(我々の場合はデフォルトでは8MBですが、VMオプションを調整して設定できます)を確保し、それぞれの割り当てられた項は格納されるための十分な空間を探すために、自由にたくさんのマルチブロックキャリアの中を見に行けます。
@@ -408,7 +408,7 @@ A fix for this can be implemented transparently in the router's API functions, w
 \FloatBarrier
 
 %Whenever a multiblock carrier (or the first \term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}} single block carriers) can be reclaimed, \term{mseg\_alloc} will try to keep it in memory for a while so that the next allocation spike that hits your VM can use pre-allocated memory rather than needing to ask the system for more each time.
-マルチブロックキャリア(または最初の\term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}}シングルブロックキャリア)が再利用できる時はいつでも、\term{mseg\_alloc}はVMに届く次のアロケーションスパイクが、毎回もっととシステムに問い合わせる必要はなく、事前に割り当てたメモリを使うことができるように、しばらくの間それをメモリ内に留めようとします。
+マルチブロックキャリア(または最初の\term{mmsbc}\footnote{\href{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}{http://erlang.org/doc/man/erts\_alloc.html\#M\_mmsbc}}シングルブロックキャリア)が再利用できる時はいつでも、\term{mseg\_alloc}はVMに届く次のアロケーションスパイクが、毎回より多くのメモリのためシステムに問い合わせる必要はなく、事前に割り当てたメモリを使うことができるように、しばらくの間それをメモリ内に留めようとします。
 
 %You then need to know the different memory allocation strategies of the Erlang virtual machine:
 次にErlang VMの色々なメモリアロケーション戦略を知る必要があります。
@@ -446,7 +446,7 @@ A fix for this can be implemented transparently in the router's API functions, w
 \emph{best fit}(\term{bf})用に、VMは全てのフリーブロックのサイズで平衡バイナリ木を構築し、データが格納できる最も小さいものを探そうとし、それを割り当てます。\ref{fig:allocation-strategy-1}の図では、3つのブロックを必要とするデータがあるとするとエリア3になるでしょう。
 
 %\emph{Address order best fit} (\term{aobf}) will work similarly, but the tree instead is based on the addresses of the blocks. So the VM will look for the smallest block available that can accommodate the data, but if many of the same size exist, it will favor picking one that has a lower address. If I have a piece of data that requires three blocks, I'll still likely end up in area 3, but if I need two blocks, this strategy will favor the first \term{mbcs} in Figure \ref{fig:allocation-strategy-1} with area 1 (instead of area 5). This could make the VM have a tendency to favor the same carriers for many allocations.
-\emph{Address order best fit}(\term{aobf})は似たように働きますが、代わりに木はブロックのアドレスに基づきます。VMはデータが格納できる利用可能な最も小さなブロックを探しますが、もし同じサイズのものがたくさんある場合は、ブロックのアドレスがより低いものを選びます。3つのブロックを必要とするデータがある場合、またエリア3となりますが、もし2つのブロックが必要な場合は、この戦略では\ref{fig:allocation-strategy-1}の図にある最初の\term{mbcs}のエリア1(エリア5ではなく)になります。これによりVMは多くの割り当てに対し、同じキャリアを優先する傾向を持たせられます。
+\emph{Address order best fit}(\term{aobf})は似たように働きますが、代わりに木はブロックのアドレスに基づきます。VMはデータが格納できる利用可能な最も小さなブロックを探しますが、もし同じサイズのものがたくさんある場合は、ブロックのアドレスがより低いものを選びます。3つのブロックを必要とするデータがある場合、またエリア3となりますが、もし2つのブロックが必要な場合は、この戦略では\ref{fig:allocation-strategy-1}の図にある最初の\term{mbcs}のエリア1(エリア5ではなく)になります。これによりVMは多くの割り当てに対し、同じキャリアを優先する傾向を持つようになります。
 
 %\emph{Address order first fit} (\term{aoff}) will favor the address order for its search, and as soon as a block fits, \term{aoff} uses it. Where \term{aobf} and bf would both have picked area 3 to allocate four blocks in Figure \ref{fig:allocation-strategy-1}, this one will get area 2 as a first priority given its address is lowest. In Figure \ref{fig:allocation-strategy-2}, if we were to allocate four blocks, we'd favor block 1 to block 3 because its address is lower, whereas \term{bf} would have picked either 3 or 4, and \term{aobf} would have picked 3.
 \emph{Address order first fit}(\term{aoff})は検索時にアドレス順を優先し、ブロックに収まるならすぐに\term{aoff}がそれを使います。\ref{fig:allocation-strategy-1}の図で4つのブロックを割りあてるために\term{aobf}とbfの両方共がエリア3を選びますが、これはエリア2をアドレスが最も低いために最優先して取得します。\ref{fig:allocation-strategy-2}の図で、もし4つのブロックを割り当てるなら、この戦略ではアドレスが低いためにブロック3ではなくブロック1を選び、一方\term{bf}は3か4を選び、\term{aobf}は3を選ぶでしょう。
@@ -507,13 +507,13 @@ Erlangのバージョン17.0からついにそれぞれのスケジューラの\
 \end{VerbatimText}
 
 %The space is allocated more and more up until either the stack or the heap can't fit in anymore. This triggers a minor GC. The minor GC moves the data that can be kept into the old heap. It then collects the rest, and may end up reallocating more space.
-その領域はスタックかヒープが何も格納できなくなるまでもっと割り当てられる。これはマイナーGCを引き起こします。マイナーGCはオールド領域のヒープに保持できるデータを動かします。そして残りを集め、さらなる領域を再割り当てするかもしれません。
+その領域はスタックかヒープが何も格納できなくなるまでもっと割り当てられます。これはマイナーGCを引き起こします。マイナーGCはオールド領域のヒープに保持できるデータを動かします。そして残りを回収し、さらなる領域を再割り当てするかもしれません。
 
 %After a given number of minor GCs and/or reallocations, a full-sweep GC is performed, which inspects both the new and old heaps, frees up more space, and so on. When a process dies, both the stack and heap are taken out at once. reference-counted binaries are decreased, and if the counter is at 0, they vanish.
 与えられた回数のマイナーGCや再割り当ての後で、新しいヒープと古いヒープを検査し、より多くの領域を解放するなどフルスイープGCが行われます。プロセスが死んだ時、スタックとヒープの両方は一度に解放されます。リファレンスカウントされたバイナリはカウントが減り、カウンターが0になるとそれらは消滅します。
 
 %When that happens, over 80\% of the time, the only thing that happens is that the memory is marked as available in the sub-allocator and can be taken back by new processes or other ones that may need to be resized. Only after having this memory unused — and the multiblock carrier unused also — is it returned to \term{mseg\_alloc} or \term{sys\_alloc}, which may or may not keep it for a while longer.
-それが起こると時間の80\%以上はメモリはサブアロケータで利用可能とマークされ、リサイズが必要な新しいプロセスまたは他のプロセスによって取り戻せるようになります。このメモリが使われていない --- マルチブロックキャリアもまた使われていない --- 状態になった後でのみ、しばらくの間それが保持されていてもいなくてもよいが\term{mseg\_alloc}または\term{sys\_alloc}へ返されます。
+それが起こると時間の80\%以上はメモリはサブアロケータで利用可能とマークされ、新しいプロセスまたはリサイズが必要な他のプロセスによって取り戻せるようになります。このメモリが使われていない --- マルチブロックキャリアもまた使われていない --- 状態になった後でのみ、それは\term{mseg\_alloc}または\term{sys\_alloc}へ返され、しばらくの間それが保持されたりされなかったりします。
 
 %\subsection{Fixing Memory Fragmentation with a Different Allocation Strategy}
 \subsection{異なるアロケーション戦略でメモリフラグメンテーションを修正する}
