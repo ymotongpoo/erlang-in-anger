@@ -470,7 +470,7 @@ Outside of memory leaks, which often need their own specific techniques and are 
 この関数は\var{ミリ秒}単位で指定する間隔で2つのサンプルをとります。
 
 %Some processes will live between \var{w} and die at \var{x}, some between \var{y} and \var{z}, and some between \var{x} and \var{y}. These samples will not be too significant as they're incomplete.
-いくつかのプロセスは\var{w}から\var{x}の間で、いくつかは\var{y}から\var{z}の間で、またいくつかは\var{x}から\var{y}の間で生存してから死にます。これらのサンプルは不完全であればあるほど、重要でなくなります。
+いくつかのプロセスは\var{w}から\var{x}の間で、いくつかは\var{y}から\var{z}の間で、またいくつかは\var{x}から\var{y}の間で生存してから死にます。これらのサンプルは(どちらか、または両方が欠けていて)不完全なので、重要ではなくなるでしょう。
 
 %If the majority of your processes run between a time interval \var{x} to \var{y} (in absolute terms), you should make sure that your sampling time is smaller than this so that for many processes, their lifetime spans the equivalent of \var{w} and \var{z}. Not doing this can skew the results: long-lived processes that have 10 times the time to accumulate data (say reductions) will look like huge consumers when they're not one.\footnote{Warning: this function depends on data gathered at two snapshots, and then building a dictionary with entries to differentiate them. This can take a heavy toll on memory when you have many tens of thousands of processes, and a little bit of time.}
 プロセスの大半が(絶対値で)\var{x}から\var{y}の間隔の中で実行されるのであれば、それらのプロセスの寿命は\var{w}から\var{z}の時間に相当するので、サンプリング時間をこれより短くする必要があります。でなければ、結果を歪めてしまいます。データを蓄積する時間(reductionsとも言います)の10倍の長寿命のプロセスは、大きなボトルネックのように見えます。\footnote{注意: この関数は、2つのスナップショットで収集されたデータに依存し、それらを区別するためのエントリを持つ辞書を構築します。数十万ものプロセスがある時、短い時間にメモリに大きな負担をかける可能性があります。}
