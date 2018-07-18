@@ -146,7 +146,7 @@ Erlang 開発者にとって残念なことに、CPUの統計データを取る�
 %These factors combine to make it fairly hard to find a good absolute measure of how busy your CPU is actually running Erlang code.
 これらの要素が組み合わさっているため、実行中のErlangコードによるCPU使用量をしっかりと測る方法を見つけるのは大変です。
 %It will be common for Erlang nodes in production to do a moderate amount of work and use a lot of CPU, but to actually fit a lot of work in the remaining place when the workload gets higher.
-Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するようによく見えますが、これは負荷が上がっても残りのCPUリソースで多くのタスクをこなせるよう適合させているのです。
+Erlangノードは実運用において、ほどほどのタスクでもCPUを大量に使用するようによく見えますが、これは負荷が上がっても残りのCPUリソースで多くのタスクをこなせるよう適合させているのです。
 
 %The most accurate representation for this data is the scheduler wall time.
 このデータを最も適切に表現するのは、スケジューラの総経過時間です。
