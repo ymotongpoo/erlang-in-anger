@@ -104,7 +104,7 @@
 \expression{system}の項は残りです。つまり、ETSテーブルや、VMの中で使われるアトムや、refcバイナリ\footnote{リファレンスカウントされたバイナリ(reference-counted binary)。プロセスヒープ外に保持するバイナリオブジェクト(実データ及び参照カウンタ)と、プロセスヒープ内に保持するProcBinオブジェクト(バイナリオブジェクトを参照するオブジェクト)から構成されるバイナリのこと。\ref{sec:binaries}節参照}。先述の通り、instrumentモジュールを使わない限り一部データは失われます。
 
 %If you want the total amount of memory owned by the virtual machine, as in the amount that will trip system limits (\app{ulimit}), this value is more difficult to get from within the VM.
-システム限界(\app{ulimit})を突破する時などに仮想マシンが保有する総メモリ量を知りたいなら、VM内部から取得するのはより困難です。 
+システム限界(\app{ulimit})を突破する時などに仮想マシンが保有する総メモリ量を知りたいなら、VM内部から取得するのはより困難です。
 %If you want the data without calling \app{top} or \app{htop}, you have to dig down into the VM's memory allocators to find things out.\footnote{See Section \ref{subsec:erlang-memory-model}}
 もし\app{top}や\app{htop}を使うことなしにこのデータが欲しければ、あなたはVMのメモリアロケータを深堀して見つけ出すしかありません\footnote{詳しくは\ref{subsec:erlang-memory-model}節を見てください}。
 
@@ -136,20 +136,20 @@ Erlang 開発者にとって残念なことに、CPUの統計データを取る�
 
 \begin{itemize*}
 	%\item The VM does a lot of work unrelated to processes when it comes to scheduling — high scheduling work and high amounts of work done by the Erlang processes are hard to characterize.
-  \item VMはスケジューリングの際にプロセスとは無関係のタスクをたくさん行っています。高度なスケジューリングタスクとErlangプロセスによる大量のタスクは、特徴付けすることが難しいのです。 
+  \item VMはスケジューリングの際にプロセスとは無関係のタスクをたくさん行っています。高度なスケジューリングタスクとErlangプロセスによる大量のタスクは、特徴付けすることが難しいのです。
 	%\item The VM internally uses a model based on \emph{reductions}, which represent an arbitrary number of work actions. Every function call, including BIFs, will increment a process reduction counter. After a given number of reductions, the process gets descheduled.
   \item VMは内部で \emph{リダクション} に基づくモデルを使っています。このモデルは任意の数のタスクで表せます。すべての(BIFを含む)関数呼び出しでプロセスリダクション数がインクリメントされ、所与のリダクション数に到達すると、プロセスがスケジューラ上の実行中から外れます。
 	%\item To avoid going to sleep when work is low, the threads that control the Erlang schedulers will do busy looping. This ensures the lowest latency possible for sudden load spikes. The VM flag \command{+sbwt none|very\_short|short|medium|long|very\_long} can be used to change this value.
-  \item 負荷の低いスケジューラスレッドがすぐスリープ状態にならないように、Erlangスケジューラの扱うスレッドはしばらくビジーウェイト状態になります。これは、突然負荷が上がるケースでも遅延が大きくなり過ぎないための配慮です。この値を変更するには、VMフラグ (\command{+sbwt none|very\_short|short|medium|long|very\_long}) が使えます。 
+  \item 負荷の低いスケジューラスレッドがすぐスリープ状態にならないように、Erlangスケジューラの扱うスレッドはしばらくビジーウェイト状態になります。これは、突然負荷が上がるケースでも遅延が大きくなり過ぎないための配慮です。この値を変更するには、VMフラグ (\command{+sbwt none|very\_short|short|medium|long|very\_long}) が使えます。
 \end{itemize*}
 
 %These factors combine to make it fairly hard to find a good absolute measure of how busy your CPU is actually running Erlang code.
 これらの要素が組み合わさっているため、実行中のErlangコードによるCPU使用量をしっかりと測る方法を見つけるのは大変です。
 %It will be common for Erlang nodes in production to do a moderate amount of work and use a lot of CPU, but to actually fit a lot of work in the remaining place when the workload gets higher.
-Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するようによく見えますが、これは負荷が上がっても残りのCPUリソースで多くのタスクをこなせるよう適合させているのです。 
+Erlangノードは実運用において、ほどほどのタスクもでCPUを大量に使用するようによく見えますが、これは負荷が上がっても残りのCPUリソースで多くのタスクをこなせるよう適合させているのです。
 
 %The most accurate representation for this data is the scheduler wall time.
-このデータを最も適切に表現するのは、スケジューラの総経過時間です。 
+このデータを最も適切に表現するのは、スケジューラの総経過時間です。
 %It's an optional metric that needs to be turned on by hand on a node, and polled at regular intervals.
 これは標準では無効のメトリクスで、ノードごとに手動で有効に設定して一定間隔で取得させる必要があります。
 %It will reveal the time percentage a scheduler has been running processes and normal Erlang code, NIFs, BIFs, garbage collection, and so on, versus the amount of time it has spent idling or trying to schedule processes.
@@ -176,7 +176,7 @@ Erlangノードは実運用において、ほどほどのタスクもでCPUを�
 %In this case, the VM has two very loaded schedulers (at 99.2\% and 93.7\% repectively), and two mostly unused ones at far below 1\%.
 今回の場合は、VMは高負荷なスケジューラが２つ (それぞれ99.2\%と93.7\%)と、1\%にも満たないくらいほとんど使われていないスケジューラが２つありますね。
 %Yet, a tool like \app{htop} would report something closer to this for each core:
-しかし、\app{htop}などのツールはCPUコアごとにこれと似たような値を出力してくれました。 
+しかし、\app{htop}などのツールはCPUコアごとにこれと似たような値を出力してくれました。
 
 \begin{VerbatimText}
 [|||||||||||||||||||||||||     70.4%]
@@ -186,17 +186,17 @@ Erlangノードは実運用において、ほどほどのタスクもでCPUを�
 \end{VerbatimText}
 
 %The result being that there is a decent chunk of CPU usage that would be mostly free for scheduling actual Erlang work (assuming the schedulers are busy waiting more than trying to select tasks to run), but is being reported as busy by the OS.
-結果として、(スケジューラが実行タスクを選択する状態でなく、ビジーウェイト状態だとを想定すると) Erlangのタスクスケジューリングでほとんど使っていないCPU領域があっても、OSからは高い使用率を表示されます。 
+結果として、(スケジューラが実行タスクを選択する状態でなく、ビジーウェイト状態だとを想定すると) Erlangのタスクスケジューリングでほとんど使っていないCPU領域があっても、OSからは高い使用率を表示されます。
 
 %Another interesting behaviour possible is that the scheduler usage may show a higher rate (1.0) than what the OS will report.
 もうひとつの面白い挙動として、スケジューラはOSが示す値よりも高い割合(1.0)を表示することもありえます。
 %Schedulers waiting for os resources are considered utilized as they cannot handle more work.
 スケジューラがOSリソースを待っている場合、それ以上のタスクを扱えないことから使用状態と認識される場合がその一例です。
 %If the OS itself is holding up on non-CPU tasks it is still possible for Erlang's schedulers not to be able to do more work and report a full ratio.
-他にも、OS自身がCPU以外のタスクで詰まっている場合にも、Erlangスケジューラも仕事を行えないことから、1.0の割合が表示されることになります。 
+他にも、OS自身がCPU以外のタスクで詰まっている場合にも、Erlangスケジューラも仕事を行えないことから、1.0の割合が表示されることになります。
 
 %These behaviours may especially be important to consider when doing capacity planning, and can be better indicators of headroom than looking at CPU usage or load.
-これらのふるまいに関する考察は容量計画を行う際には特に大事で、CPU使用率や負荷を見る以上に余力をみる良い指標になるでしょう。 
+これらのふるまいに関する考察は容量計画を行う際には特に大事で、CPU使用率や負荷を見る以上に余力をみる良い指標になるでしょう。
 
 %% 08:37 #erlounge: <+garazdawi> MononcQc: There is a cost when not doing work. The way it works is that when starting/stopping to do work it checks the time, but if the
 %%                              scheduler has something to do the entire time then there is no overhead. So you might see a slight cpu increase if the schedulers run out of
@@ -287,7 +287,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
 
 \begin{description*}
 	\item[Meta] \hfill
-		\begin{description}		
+		\begin{description}
 %			\item[\expression{dictionary}] returns all the entries in the process dictionary\footnote{See \href{http://www.erlang.org/course/advanced.html\#dict}{http://www.erlang.org/course/advanced.html\#dict} and \href{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}}. Generally safe to use, because people shouldn't be storing gigabytes of arbitrary data in there.
       \item[\expression{dictionary}] プロセス辞書の全てのエントリを返します\footnote{\href{http://www.erlang.org/course/advanced.html\#dict}{http://www.erlang.org/course/advanced.html\#dict} と \href{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html}{http://ferd.ca/on-the-use-of-the-process-dictionary-in-erlang.html} 参照}。ギガバイトもする任意のデータをそこに格納する事はまず無いので、一般的には安全です。
 
@@ -335,7 +335,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
 %			\item[\expression{trap\_exit}] has the value \expression{true} if the process is trapping exits, \expression{false} otherwise.
 			\item[\expression{trap\_exit}] プロセスが終了(exits)メッセージを補足する場合は\expression{true} 、そうでない場合は\expression{false} となります。
 
-		\end{description}		
+		\end{description}
 	\item[Location] \hfill
 		\begin{description}
 %			\item[\expression{current\_function}] displays the current running function, as a tuple of the form \expression{\{Mod, Fun, Arity\}}.
@@ -375,7 +375,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
 			\end{description}
 	\item[Work] \hfill
 		\begin{description}
-%			\item[\expression{reductions}] The Erlang VM does scheduling based on \emph{reductions}, an arbitrary unit of work that allows rather portable implementations of scheduling (time-based scheduling is usually hard to make work efficiently on as many OSes as Erlang runs on). The higher the reductions, the more work, in terms of CPU and function calls, a process is doing. 
+%			\item[\expression{reductions}] The Erlang VM does scheduling based on \emph{reductions}, an arbitrary unit of work that allows rather portable implementations of scheduling (time-based scheduling is usually hard to make work efficiently on as many OSes as Erlang runs on). The higher the reductions, the more work, in terms of CPU and function calls, a process is doing.
 			\item[\expression{reductions}] ErlangVMは、スケジューリング実装の移植性を高める任意の作業単位である\emph{reductions}に基づいてスケジューリングを行います(時間ベースのスケジューリングは通常、Erlangが動作する多くのOSで効率的に実行させるのが難しいです)。reductionsが大きいほど、CPUと関数呼び出しの面で、より多くの仕事をこなしています。
 		\end{description}
 \end{description*}
@@ -536,59 +536,59 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
 \begin{description*}
 	%\item[Meta] \hfill
 	\item[メタ情報] \hfill
-		\begin{description}		
+		\begin{description}
 			%\item[\expression{id}] internal index of a port. Of no particular use except to differentiate ports.
 			\item[\expression{id}] ポートの内部インデックス。ポートを区別すること以外に用途はありません。
-			
+
 			%\item[\expression{name}] type of the port — with names such as \expression{"tcp\_inet"}, \expression{"udp\_inet"}, or \expression{"efile"}, for example.
       \item[\expression{name}] ポートのタイプです。例えば、\expression{"tcp\_inet"}、\expression{"udp\_inet"}、\expression{"efile"}などの名前で表します。
-			
+
 			%\item[\expression{os\_pid}] if the port is not an inet socket, but rather represents an external process or program, this value contains the os pid related to the said external program.
 			\item[\expression{os\_pid}] もしもポートがinetソケットではなく、プログラムの外のプロセスを表しているのであれば、このポートの値は先述した外部プログラムに関連するOSのpidを含んでいます。
 		\end{description}
 
 	%\item[Signals] \hfill
 	\item[シグナル] \hfill
-		\begin{description}		
+		\begin{description}
 			%\item[\expression{connected}] Each port has a controlling process in charge of it, and this process' pid is the \expression{connected} one.
 			\item[\expression{connected}] 各ポートは、その責務として controlling process の機能を持っており、このプロセスの pid は \expression{connected} となります。
-			
+
 			%\item[\expression{links}] ports can be linked with processes, much like other processes can be. The list of linked processes is contained here. Unless the process has been owned by or manually linked to a lot of processes, this should be safe to use.
 			\item[\expression{links}] ポートは、他のプロセスと同様にプロセスとリンクできます。この値にリンクされたプロセスのリストが含まれます。このプロセスが獲得されてしまったり、手作業によりプロセスとリンクされない限り、この値の使用は安全です。
-			
+
 			%\item[\expression{monitors}] ports that represent external programs can have these programs end up monitoring Erlang processes. These processes are listed here.
 			\item[\expression{monitors}] 外部プログラムを表すポートは、それらのプログラムの情報を持ち、最終的にErlangのプロセスをモニターします。これらのプロセスはここで列挙されています。
 		\end{description}
-		
+
 	\item[IO] \hfill
-		\begin{description}		
+		\begin{description}
 			%\item[\expression{input}] the number of bytes read from the port.
 			\item[\expression{input}] ポートに読み込まれたバイト数です。
-			
+
 			%\item[\expression{output}] the number of bytes written to the port.
 			\item[\expression{output}] ポートに書き込まれたバイト数です。
 		\end{description}
 
 	%\item[Memory Used] \hfill
 	\item[メモリ使用量] \hfill
-		\begin{description}		
+		\begin{description}
 			%\item[\expression{memory}] this is the memory (in bytes) allocated by the runtime system for the port. This number tends to be small-ish and excludes space allocated by the port itself.
 			\item[\expression{memory}] これは、ポートのランタイムシステムによって割り当てられたメモリ（バイト単位）です。この数値は小さくなる傾向があり、そのポート自身によって割り当てられたスペースは除外しています。
-			
+
 			%\item[\expression{queue\_size}] Port programs have a specific queue, called the driver queue\footnote{The driver queue is available to queue output from the emulator to the driver (data from the driver to the emulator is queued by the emulator in normal Erlang message queues). This can be useful if the driver has to wait for slow devices etc, and wants to yield back to the emulator.}. This return the size of this queue, in bytes.
       \item[\expression{queue\_size}] ポートのプログラムは、ドライバキューと呼ばれる特別なキューを持っています\footnote{ドライバキューはエミュレータからドライバ（ドライバからエミュレータへのデータは通常のErlangのメッセージキューにキューイングされます。）へ出力をキューイングするのに使えます。}。これはドライバが遅いデバイスを待ったり、エミュレータに処理を返却するのに便利です。
 		\end{description}
-		
+
 	%\item[Type-Specific] \hfill
 	\item[タイプ特有の情報] \hfill
-		\begin{description}		
+		\begin{description}
 			%\item[Inet Ports] Returns inet-specific data, including statistics\footnote{\href{http://www.erlang.org/doc/man/inet.html\#getstat-1}{http://www.erlang.org/doc/man/inet.html\#getstat-1}}, the local address and port number for the socket (\expression{sockname}), and the inet options used\footnote{\href{http://www.erlang.org/doc/man/inet.html\#setopts-2}{http://www.erlang.org/doc/man/inet.html\#setopts-2}}
 			\item[inet ポート] inet に関するデータを返却します。このデータは統計情報\footnote{\href{http://www.erlang.org/doc/man/inet.html\#getstat-1}{http://www.erlang.org/doc/man/inet.html\#getstat-1}}、ソケット (\expression{sockname}) のローカルアドレスとポート番号、そして 使われている inet オプション\footnote{\href{http://www.erlang.org/doc/man/inet.html\#setopts-2}{http://www.erlang.org/doc/man/inet.html\#setopts-2}}を含んでいます。
 			%\item[Others] currently no other form than inet ports are supported in recon, and an empty list is returned.
 			\item[その他] 現在のところ、 recon では inet ポート以外の形式はサポートされておらず、空のリストが返却されます。
 		\end{description}
 \end{description*}
-		
+
 %The list can be obtained as follows:
 次のようなリストが取得されます:
 
@@ -614,7 +614,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
                   {delay_send,...},
                   {...}|...]}]}]
 \end{VerbatimEshell}
-		
+
 
 %On top of this, functions to find out specific problematic ports exist the way they do for processes. The gotcha is that so far, recon only supports them for inet ports and with restricted attributes: the number of octets (bytes) sent, received, or both (\expression{send\_oct}, \expression{recv\_oct}, \expression{oct}, respectively), or the number of packets sent, received, or both (\expression{send\_cnt}, \expression{recv\_cnt}, \expression{cnt}, respectively).
 この例の一番上に、特定の、プロセスに関与している問題のあるポートを見つけ出す関数があります。これまででわかることは、 recon は inet ポートと限定された属性についてサポートするのみということです: 送信、受信、そして両者のオクテット（バイト）数（それぞれ\expression{send\_oct}、 \expression{recv\_oct}、\expression{oct}）か、送信、受信、そして両者のパケット数（それぞれ\expression{send\_cnt}、\expression{recv\_cnt}、\expression{cnt}）です。
@@ -673,7 +673,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
   %\item How can you find what code a specific process is running?
   \item 特定のプロセスがどのコードを動かしているかをどうやって見つけられるでしょうか。
   %\item What are the different kinds of memory information available for a specific process?
-  \item 特定のプロセスのメモリ関連の情報にはどのような種類があるでしょうか。 
+  \item 特定のプロセスのメモリ関連の情報にはどのような種類があるでしょうか。
   %\item How can you know if a process is doing a lot of work?
   \item プロセスが大量の処理をしているかどうかをどうやって見極めますか。
   %\item Name a few of the values that are dangerous to fetch when inspecting processes in a production system.
@@ -704,7 +704,7 @@ Chaptere \ref{chap:memory-leaks} で議論する特定のテクニックが必�
       \item メモリ
     \end{enumerate*}
   %\item How can you find information about who is the supervisor of a given process?
-  \item あるプロセスのスーパーバイザーがどれかに関する情報はどうやって見つけますか。  
+  \item あるプロセスのスーパーバイザーがどれかに関する情報はどうやって見つけますか。
   %\item When should you use \function{recon:inet\_count/2}? \function{recon:inet\_window/3}?
   \item  \function{recon:inet\_count/2} や \function{recon:inet\_window/3} はそれぞれいつ使うべきでしょう。
   %\item What could explain the difference in memory reported by the operating system and the memory functions in Erlang?
