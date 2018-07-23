@@ -178,8 +178,8 @@ OTPアプリケーションには通常状態を共有するものはありま�
 
 %OTP releases are not a lot harder to understand than most OTP applications you'll encounter in the wild. A release is a set of OTP applications packaged in a production-ready manner so it boots and shuts down without needing to manually call \function{application:start/2} for any app. Compiled releases may contain their own copy of the Erlang virtual machine with more or less libraries than the default distribution, and can be ready to run standalone. Of course there's a bit more to releases than that, but generally, the same discovery process used for individual OTP applications will be applicable here.
 OTPリリースは世間で見かけるたいていのOTPアプリケーションよりもそれほど難しいものではありません。
-OTPリリースは複数のOTPアプリケーションを本番投入可能な状態でパッケージ化したもので、これによって手動でアプリケーションの\function{application:start/2}を呼び出す必要なく起動と停止行えるようになっています。
-コンパイルされたリリースは、デフォルトのものよりも含まれるライブラリの数は多少違いますが自分専用のErlang VMのコピーを持っていて、単独で起動できるようになっています。
+OTPリリースは複数のOTPアプリケーションを本番投入可能な状態でパッケージ化したもので、その結果、起動する際に手動でアプリケーションの\function{application:start/2}を呼び出さずに済むようになっています。
+コンパイルされたリリースが含むライブラリの数は、デフォルトの配布形式と比べて多少違いますが、自分専用のErlang VMのコピーを持っていて、単独で起動できるようになっています。
 もちろん、リリースに関してはまだ話すことはありますが、一般的にOTPアプリケーションのときと同じようなやり方で中身を確認していきます。
 
 %You'll usually have a file named \filename{relx.config} or a \term{relx} tuple in a \filename{rebar.config} file, which will state which top-level applications are part of the release and some options regarding their packaging. Relx-based releases can be understood by reading the project's wiki\footnote{\href{https://github.com/erlware/relx/wiki}{https://github.com/erlware/relx/wiki}}, or their documentation on the documentation sites of \app{rebar3}\footnote{\href{https://www.rebar3.org/docs/releases}{https://www.rebar3.org/docs/releases}} or \filename{erlang.mk}\footnote{\href{http://erlang.mk/guide/relx.html}{http://erlang.mk/guide/relx.html}}.
@@ -201,7 +201,7 @@ relxを使ったリリースはプロジェクトのWikiページ\footnote{\href
   %\item How do you know if a code base is an application? A release?
   \item コードベースがアプリケーションがリリースかはどうやって確認できますか
   %\item What differentiates an application from a library application?
-  \item ライブラリアプリケーションとアプリケーションはどの点が異なりますか  
+  \item ライブラリアプリケーションとアプリケーションはどの点が異なりますか
   %\item What can be said of processes under a \term{one\_for\_all} scheme for supervision?
   \item 監視において\term{one\_for\_all}戦略で管理されるプロセスとはどういうプロセスですか
   %\item Why would someone use a \module{gen\_fsm} behaviour over a \module{gen\_server}?
@@ -219,14 +219,14 @@ relxを使ったリリースはプロジェクトのWikiページ\footnote{\href
   %\item Is this application meant to be used as a library? A standalone system?
   \item このアプリケーションはライブラリですか。スタンドアロンシステムですか。
   %\item What does it do?
-  \item このアプリは何をしますか。  
+  \item このアプリは何をしますか。
   %\item Does it have any dependencies? What are they?
   \item 依存するものはありますか。あるとすればなんですか。
   %\item The app's \filename{README} mentions being non-deterministic. Can you prove if this is true? How?
-  \item このアプリケーションの\filename{README}では非決定的である。これは真でしょうか。その理由も説明してください。 
+  \item \filename{README}によると、このアプリケーションは非決定的な振る舞いをするらしい。これは真でしょうか。その理由も説明してください。
   %\item Can you express the dependency chain of applications in there? Generate a diagram of them?
   \item このアプリケーションの依存関係の連鎖を表現できますか。ダイヤグラムを生成してください。
   %\item Can you add more processes to the main application than those described in the \filename{README}?
-  \item \filename{README}で説明されているメインアプリケーションにより多くのプロセスを追加できますか。  
+  \item \filename{README}で説明されているメインアプリケーションにより多くのプロセスを追加できますか。
 \end{enumerate}
 
