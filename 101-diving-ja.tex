@@ -178,7 +178,7 @@ OTPアプリケーションには通常状態を共有するものはありま�
 
 %OTP releases are not a lot harder to understand than most OTP applications you'll encounter in the wild. A release is a set of OTP applications packaged in a production-ready manner so it boots and shuts down without needing to manually call \function{application:start/2} for any app. Compiled releases may contain their own copy of the Erlang virtual machine with more or less libraries than the default distribution, and can be ready to run standalone. Of course there's a bit more to releases than that, but generally, the same discovery process used for individual OTP applications will be applicable here.
 OTPリリースは世間で見かけるたいていのOTPアプリケーションよりもそれほど難しいものではありません。
-OTPリリースは複数のOTPアプリケーションを本番投入可能な状態でパッケージ化したもので、その結果、起動する際に手動でアプリケーションの\function{application:start/2}を呼び出さずに済むようになっています。
+OTPリリースは複数のOTPアプリケーションを本番投入可能な状態でパッケージ化したもので、これによって手動でアプリケーションの\function{application:start/2}を呼び出す必要なく起動と停止を行えるようになっています。
 コンパイルされたリリースが含むライブラリの数は、デフォルトの配布形式と比べて多少違いますが、自分専用のErlang VMのコピーを持っていて、単独で起動できるようになっています。
 もちろん、リリースに関してはまだ話すことはありますが、一般的にOTPアプリケーションのときと同じようなやり方で中身を確認していきます。
 
