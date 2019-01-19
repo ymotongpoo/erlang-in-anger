@@ -86,14 +86,14 @@
 数週間完璧に稼働したあとに、リモートサーバーの一つが落ちたときにHTTPクライアントプールが供給できない状態になりました。
 
 %The reason behind this degradation was that when the remote server would go down, all of a sudden, all connecting operations would take at least 10 milliseconds, the time before which the connection attempt is given up on. With around 9,000 messages per second to the central process, each usually taking under 5 milliseconds, the impact became similar to roughly 18,000 messages a second and things got out of hand.
-このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになったことでした。この10ミリ秒は接続試行が断念されるまでの時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで、このあたりで手に負えなくなりました。
+このデグレの背後にある原因は、リモートサーバーが落ちたときに、突然すべての接続操作が最低10ミリ秒かかるようになったことでした。この10ミリ秒は接続試行が断念されるまでの時間です。中央のプロセスに秒間9,000メッセージが届くようになったあたりでは、各接続試行は通常5ミリ秒以下で、この障害と同様の状況になったのは、およそ秒間18,000メッセージが届くようになったあたりで手に負えなくなりました。
 
 %The solution we came up with was to leave the task of connecting to the caller process, and enforce the limits as if the manager had done it on its own. The blocking operations were now distributed to all users of the library, and even less work was required to be done by the manager, now free to accept more requests.
 私達がいたった解決策は呼び出し元のプロセスに接続のタスクを譲って、プールマネージャー自体で制限したかのように制限を強制することにしました。
 これでブロック操作はライブラリの全ユーザーに分散され、プールマネージャーによって行われるべき仕事はずっと少なくなり、より多くのリクエストを受け付けられるようになりました。
 
 %When there is \emph{any} point of your program that ends up being a central hub for receiving messages, lengthy tasks should be moved out of there if possible. Handling predictable overload\footnote{Something you know for a fact gets overloaded in production} situations by adding more processes — which either handle the blocking operations or instead act as a buffer while the "main" process blocks — is often a good idea.
-プログラム内でメッセージを受信するための中央的なハブになっている場所が\emph{一つでも}あれば、時間がかかるタスクはそこから出来る限り取り除くべきでしょう。
+プログラム内でメッセージを受信するための中央的なハブになっている場所が\emph{一つでも}あれば、できれば時間がかかるタスクはそこから取り除くべきでしょう。
 より多くのプロセスを追加することで予測可能な過負荷\footnote{本番環境で事実に基づいて過負荷になるもの}に対応する---ブロック操作に対処する、またはかわりに''main''プロセスがブロックする間のバッファとして機能する---のは良いアイデアです。
 
 %There will be increased complexity in managing more processes for activities that aren't intrinsically concurrent, so make sure you need them before programming defensively.
