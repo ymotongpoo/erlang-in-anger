@@ -1,4 +1,4 @@
-dist: trusty
+dist: bionic
 language: generic
 sudo: required
 env:
