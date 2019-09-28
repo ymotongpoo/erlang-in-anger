@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-glibc:alpine-3.7
+FROM frolvlad/alpine-glibc:alpine-3.10
 
 MAINTAINER yyu <yyu [at] mental.poker>
 
