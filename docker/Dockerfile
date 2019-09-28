@@ -23,7 +23,7 @@ ENV PERSISTENT_DEPS \
     bash \
     git
 
-ENV PATH $TEXLIVE_PATH/bin/x86_64-linuxmusl:$PATH
+ENV PATH $TEXLIVE_PATH/bin/x86_64-linux:$PATH
 
 RUN apk upgrade --update
 
