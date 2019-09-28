@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-glibc:alpine-3.7
+FROM frolvlad/alpine-glibc:alpine-3.10
 
 MAINTAINER yyu <yyu [at] mental.poker>
 
@@ -23,7 +23,7 @@ ENV PERSISTENT_DEPS \
     bash \
     git
 
-ENV PATH $TEXLIVE_PATH/bin/x86_64-linuxmusl:$PATH
+ENV PATH $TEXLIVE_PATH/bin/x86_64-linux:$PATH
 
 RUN apk upgrade --update
 
