@@ -4,7 +4,7 @@ set -ex
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" && "${TRAVIS_BRANCH}" == "japanese" && "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
   echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
-  openssl aes-256-cbc -k "$SERVER_KEY" -in ./travis/deploy_key.enc -d -a -out deploy.key
+  openssl aes-256-cbc -pass "pass:$SERVER_KEY" -pbkdf2 -in ./travis/deploy_key.enc -d -a -out deploy.key
   cp deploy.key ~/.ssh/
   chmod 600 ~/.ssh/deploy.key
   git config --global user.email "yyu@mental.poker"
@@ -19,7 +19,7 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" && "${TRAVIS_BRANCH}" == "japanese" && "${T
   git push git@github.com:ymotongpoo/erlang-in-anger.git gh-pages:gh-pages
 elif [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
   echo -e "Host github.com\n\tStrictHostKeyChecking no\nIdentityFile ~/.ssh/deploy.key\n" >> ~/.ssh/config
-  openssl aes-256-cbc -k "$SERVER_KEY_PR" -in ./travis/deploy_key_pr.enc -d -a -out deploy.key
+  openssl aes-256-cbc -pass "pass:$SERVER_KEY_PR" -pbkdf2 -in ./travis/deploy_key_pr.enc -d -a -out deploy.key
   cp deploy.key ~/.ssh/
   chmod 600 ~/.ssh/deploy.key
   git config --global user.email "yyu@mental.poker"
