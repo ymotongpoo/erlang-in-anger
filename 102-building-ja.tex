@@ -22,9 +22,9 @@
 \label{sec:project-structure}
 
 %The structures of OTP applications and of OTP releases are different. An OTP application can be expected to have one top-level supervisor (if any) and possibly a bunch of dependencies that sit below it. An OTP release will usually be composed of multiple OTP applications, which may or may not depend on each other. This will lead to two major ways to lay out applications.
-OTPアプリケーションとOTPリリースのプロジェクト構造は異なります。OTPアプリケーションは（あるとすれば）トップレベルスーパーバイザーを1つ持っていると想定できます。そしておそらく依存しているものがその下に固まってぶら下がっていると想定できます。
+OTPアプリケーションとOTPリリースではプロジェクトの構造が異なります。OTPアプリケーションは（あるとすれば）トップレベルスーパーバイザーを1つ持っていると想定できます。そしておそらく依存しているものがその下に固まってぶら下がっていると想定できます。
 OTPリリースは通常複数のOTPアプリケーションから成り、それらがお互いに依存していることもあればそうでないこともあります。
-これらの事実からアプリケーションの構成をする際に主に2つの方法に落ち着きます。
+アプリケーションの主な構成方法はこのように2種類あります。
 
 %\subsection{OTP Applications}
 \subsection{OTPアプリケーション}
@@ -49,8 +49,8 @@ rebar.lock
 これらは\app{rebar3}によって自動的に生成されます。\footnote{人によっては\app{rebar3}をアプリケーション内に直接パッケージします。これはrebar3やその前身を使ったことがない人がライブラリやプロジェクトとブートストラップできるようになされていたものです。自分のシステムのグローバルにrebar3をインストールして問題ありません。自分のシステムをビルドするのに特定のバージョンが必要であればローカルにコピーを持っておいても良いでしょう。}
 
 %This is the directory where \app{rebar3} places all build artifacts for a project, including local copies of libraries and packages required for it to work. No mainstream Erlang tool installs packages globally\footnote{Except as a local cache of unbuilt packages.}, preferring to instead keep everything project-local to avoid inter-project conflicts.
-このディレクトリに\app{rebar3}がプロジェクトのすべてのビルドアーティファクトを置きます。動作させるのに必要なライブラリやパッケージのローカルコピーなどもそこに含まれます。
-主要なErlangツールはパッケージをグローバルにはインストールせず、\footnote{まだビルドされていないパッケージのローカルキャッシュは除きます。}かわりにプロジェクト間での衝突を避けるためにすべてをプロジェクトローカルに保存します。
+このディレクトリに\app{rebar3}がプロジェクトのすべてのビルド成果物を置きます。動作させるのに必要なライブラリやパッケージのローカルコピーなどもそこに含まれます。
+主要なErlangツールはパッケージをグローバルにはインストールせず、\footnote{まだビルドされていないパッケージのローカルキャッシュは除きます。}代わりにプロジェクト間での衝突を避けるためにすべてをプロジェクトの中に保存します。
 
 %Such dependencies can be specified for \app{rebar3} by adding a few config lines to \filename{rebar.config}:
 このような依存関係は\filename{rebar.config}に数行設定を追加するだけで\app{rebar3}に指定できます。
@@ -68,15 +68,15 @@ rebar.lock
 \end{VerbatimText}
 
 %Dependencies are fetched directly from a \app{git} (or \app{hg}) source or as a package from \href{https://hex.pm}{\app{hex.pm}} in a level-order traversal. They can then be compiled, and specific compile options can be added with the \expression{\{erl\_opts, List\}.} option in the config file\footnote{More details on \href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}.
-依存するものは\app{git}（または\app{hg}）のソースあるいは\href{https://hex.pm}{\app{hex.pm}}からレベル順の幅優先探索で直接取得されます。
-その後コンパイルされて、特定のコンパイルオプションが設定ファイルの\expression{\{erl\_opts, List\}.}オプションとともに追加されます。\footnote{より詳しい話はこちらを参照してください。\href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}
+\app{git}（または\app{hg}）を使ってソースコードを、あるいは\href{https://hex.pm}{\app{hex.pm}}からパッケージを、幅優先探索で取得し、依存しているソフトウェアを集めます。
+続いて、ソースコードをコンパイルします。このとき、設定ファイルの\expression{\{erl\_opts, List\}.}項目で追加のコンパイルオプションを指定できます。\footnote{より詳しい話はこちらを参照してください。\href{https://www.rebar3.org/docs/configuration}{https://www.rebar3.org/docs/configuration}}
 
 %You can call \command{rebar3 compile}, which will download all dependencies, and then build them and your app at once.
-\command{rebar3 compile}を呼んで、すべての依存物をダウンロードし、一度にそれらとあなたのアプリをビルドします。
+\command{rebar3 compile}を呼んで、すべての依存しているソフトウェアをダウンロードし、あなたのアプリとダウンロードしたソフトウェアとをまとめてビルドします。
 
 %When making your application's source code public to the world, distribute it \emph{without} the \filename{\_build/} directory. It's quite possible that other developers' applications depend on the same applications yours do, and it's no use shipping them all multiple times. The build system in place (in this case, \app{rebar3}) should be able to figure out duplicated entries and fetch everything necessary only once.
-あなたのアプリケーションのコードを公開するときは、\filename{\_build/}ディレクトリを\emph{含まずに}配布しましょう。
-他の開発社があなたのアプリケーションと同じものに依存している可能性は高く、何度もそれを配布するのは意味がありません。
+あなたのアプリケーションのコードを公開するときは、\filename{\_build/}ディレクトリを\emph{含めずに}配布しましょう。
+他の開発者のアプリケーションとあなたのアプリケーションが共通の依存先を持つことはよくあり、何度もそれを配布するのは意味がありません。
 その場にあるビルドシステム（この場合は\app{rebar3}）が重複した項目を見つけ出して、必要なものは1度だけしか取得しないようにしてくれるでしょう。
 
 %\subsection{OTP Releases}
@@ -109,7 +109,7 @@ rebar.lock
 SystoolやReltoolといった他のツールも以前はカバーされていて\footnote{\href{http://learnyousomeerlang.com/release-is-the-word}{http://learnyousomeerlang.com/release-is-the-word} 訳註: 日本語訳版は \href{https://www.ymotongpoo.com/works/lyse-ja/ja/24\_release\_is\_the\_word.html}{https://www.ymotongpoo.com/works/lyse-ja/ja/24\_release\_is\_the\_word.html}}、ユーザーに多くの力を提供します。
 
 %A \app{relx} configuration tuple (within \filename{rebar.config}) for the directory structure above would look like:
-（\filename{rebar.config}内の）上のようなディレクトリ構造の場合の\app{relx}設定タプルは次のようになります。
+上のようなディレクトリ構造の場合、（\filename{rebar.config}内の）\app{relx}設定タプルは次のようになります。
 
 \begin{VerbatimText}
 {relx, [
@@ -122,7 +122,7 @@ SystoolやReltoolといった他のツールも以前はカバーされていて
 
 %Calling \command{rebar3 release} will build a release, to be found in the \filename{\_build/default/rel/} directory. Calling \command{rebar3 tar} will generate a tarball at\\
 %\filename{\_build/default/rel/demo/demo-1.0.0.tar.gz}, ready to be deployed.
-\command{rebar3 release}を呼ぶとリリースをビルドして、\filename{\_build/default/rel/}ディレクトリに置かれます。
+\command{rebar3 release}を呼ぶとリリースをビルドして、その成果物は\filename{\_build/default/rel/}ディレクトリに置かれます。
 \command{rebar3 tar}を呼ぶとtarballを\filename{\_build/default/rel/demo/demo-1.0.0.tar.gz}に配置し、デプロイ可能となります。
 
 %\section{Supervisors and start\_link Semantics}
@@ -131,7 +131,7 @@ SystoolやReltoolといった他のツールも以前はカバーされていて
 
 %In complex production systems, most faults and errors are transient, and retrying an operation is a good way to do things — Jim Gray's paper\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}} quotes \emph{Mean Times Between Failures} (MTBF) of systems handling transient bugs being better by a factor of 4 when doing this. Still, supervisors aren't just about restarting.
 複雑な本番システムでは、多くの障害やエラーは一時的なもので、処理を再実行するのは良いことです---Jim Grayの
-論文\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}}では、一時的なバグを扱う場合、システムの\emph{Mean Times Between Failures（障害間隔平均時間）} (MTBF)で見た時に4倍良くなると引用していました。
+論文\footnote{\href{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}{http://mononcqc.tumblr.com/post/35165909365/why-do-computers-stop}}では、一時的なバグが発生したとき処理を再実行すれば、システムの\emph{Mean Times Between Failures（障害間隔平均時間）} (MTBF)は4倍良くなると引用していました。
 そして、スーバーバイザーは再起動を行うだけではありません。
 
 %One very important part of Erlang supervisors and their supervision trees is that \emph{their start phases are synchronous}. Each OTP process has the potential to prevent its siblings and cousins from booting. If the process dies, it's retried again, and again, until it works, or fails too often.
@@ -139,12 +139,12 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 各OTPプロセスは兄弟や従兄弟のプロセスの起動を妨げる可能性があります。もしプロセスが死んだら、起動を何度も何度も繰り返され、最終的に起動できるようになる、さもなければ頻繁に失敗することになります。
 
 %That's where people make a very common mistake. There isn't a backoff or cooldown period before a supervisor restarts a crashed child. When a network-based application tries to set up a connection during its initialization phase and the remote service is down, the application fails to boot after too many fruitless restarts. Then the system may shut down.
-この点が人々がよくある間違いをおかしがちなところです。クラッシュした子プロセスを再起動する前にバックオフやクールダウンの期間はありません。
+この点が人々が間違いをおかしがちなところです。クラッシュした子プロセスを再起動する前にバックオフやクールダウンの期間はありません。
 ネットワーク系アプリケーションが初期化フェーズで接続を確立しようとしてリモートサービスが落ちているとき、アプリケーションは無意味な再起動を多数繰り返した後に失敗します。そしてシステムが停止します。
 
 %Many Erlang developers end up arguing in favor of a supervisor that has a cooldown period. I strongly oppose the sentiment for one simple reason: \emph{it's all about the guarantees}.
 多くのErlang開発者がスーパーバイザーにクールダウン期間を持たせるほうがいいという方向の主張をします。
-私は一つの単純な理由からそれにいは反対です。その理由とは\emph{保証がすべて}ということです。
+私は一つの単純な理由からそれには反対です。その理由とは\emph{保証がすべて}ということです。
 
 %\subsection{It's About the Guarantees}
 \subsection{すべては保証のため}
@@ -175,7 +175,7 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 
 %The reconnection to the database can then be done using whatever cooldown or backoff strategy you believe is optimal, without impacting the stability of the system. It can be attempted in the initialization phase as an optimization, but the process should be able to reconnect later on if anything ever disconnects.
 その上でデータベースへの再接続はクールダウンでもバックオフでも何でもいいですが、とりあえずあなたが最適だと思うそういうものを使って、システムの安定性を損なわずに行えるでしょう。
-最適化の一貫として初期化フェーズに行うこともできるでしょうが、何かが切断された場合にプロセスがあとになっても再接続できるようにすべきです。
+最適化の一環として初期化フェーズに行うこともできるでしょうが、何かが切断された場合にプロセスがあとになっても再接続できるようにすべきです。
 
 %If you expect failure to happen on an external service, do not make its presence a guarantee of your system. We're dealing with the real world here, and failure of external dependencies is always an option.
 外部サービスが落ちることが予想されるのであれば、システムでそのサービスの存在を保証すべきではありません。
@@ -193,7 +193,7 @@ Erlangのスーバーバイザーとその監視ツリーの非常に重要な�
 %The difference in both initialization and supervision approaches is that the client's callers make the decision about how much failure they can tolerate, not the client itself. That's a very important distinction when it comes to designing fault-tolerant systems. Yes, supervisors are about restarts, but they should be about restarts to a stable known state.
 初期化と監視での手法の違いは、クライアント自身ではなくクライアントの呼び出し側が障害にどの程度耐えられるか決められるという点です。
 障害耐性のあるシステムを設計する場合にこの点は非常に重要な特徴です。
-そうです、スーバーバイザーとは再起動についてですが、それは既知の安定した状態への再起動であるべきです。
+そうです、スーバーバイザーは再起動を行いますが、それは既知の安定した状態への再起動であるべきです。
 
 %\subsection{Example: Initializing without guaranteeing connections}
 \subsection{例: 接続を保証しない初期化}
@@ -264,7 +264,7 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
 %No matter what, a sequence of failures is not a death sentence for the node. Once a system has been divided into various OTP applications, it becomes possible to choose which applications are vital or not to the node. Each OTP application can be started in 3 ways: temporary, transient, permanent, either by doing it manually in \expression{application:start(Name, Type)}, or in the config file for your release:
 何があろうとも、ノードで障害が連続して起きることはノードへの死刑宣告ではありません。
 システムが様々なOTPアプリケーションに分割されてしまえば、ノードにとってどのアプリケーションが致命的でどれがそうでないかを決められるようになります。
-各OTPアプリケーションは3つの方法で起動できます。temporary (一時的)、transient (暫定的)、permanent (永続的)のどれか一つを選択でき、\expression{application:start(Name, Type)}と手動で起動するか、あるいはリリース内の設定ファイルに書くことで可能です。
+各OTPアプリケーションは3つの方法で起動できます。temporary (一時的)、transient (暫定的)、permanent (永続的)のどれか一つを、\expression{application:start(Name, Type)}と手動で起動するときに引数で指定するか、リリース内の設定ファイルに書くことで選択可能です。
 
 \begin{itemize*}
   %\item \term{permanent}: if the app terminates, the entire system is taken down, excluding manual termination of the app with \function{application:stop/1}.
@@ -272,7 +272,7 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item \term{transient}: if the app terminates for reason \term{normal}, that's ok. Any other reason for termination shuts down the entire system.
   \item \term{transient}: アプリケーションが\term{normal}が原因で終了した場合は問題ありません。他の理由で終了した場合はシステム全体を終了させます。
   %\item \term{temporary}: the application is allowed to stop for any reason. It will be reported, but nothing bad will happen.
-  \item \term{temporary}: アプリケーションはいかなる理由でも停止できます。停止したことは報告されますが、何も悪いことは起きません。  
+  \item \term{temporary}: アプリケーションはいかなる理由でも停止できます。停止したことは報告されますが、何も悪いことは起きません。
 \end{itemize*}
 
 %It is also possible to start an application as an \emph{included application}, which starts it under your own OTP supervisor with its own strategy to restart it.
@@ -288,11 +288,11 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item Are Erlang supervision trees started depth-first? breadth-first? Synchronously or asynchronously?
   \item Erlangの監視ツリーは深さ優先で起動されますか。それとも幅優先ですか。同期的ですか、非同期ですか。
   %\item What are the three application strategies? What do they do?
-  \item 3つのアプリケーション戦略はなんでしょうか。それぞれ何をするものでしょう。  
+  \item 3つのアプリケーション戦略はなんでしょうか。それぞれ何をするものでしょう。
   %\item What are the main differences between the directory structure of an app and a release?
-  \item アプリケーションとリリースのディレクトリ構造の主な違いはなんでしょうか。  
+  \item アプリケーションとリリースのディレクトリ構造の主な違いはなんでしょうか。
   %\item When should you use a release?
-  \item リリースを使うべき場面はいつでしょう。  
+  \item リリースを使うべき場面はいつでしょう。
   %\item Give two examples of the type of state that can go in a process' init function, and two examples of the type of state that shouldn't go in a process' init function
   \item プロセスのinit関数に含まれるべき状態の例を2つ挙げてください。また含まれるべきでない状態の例も2つ挙げてください。
 \end{enumerate}
@@ -309,6 +309,6 @@ handle_info(reconnect, S = #state{sock=undefined, opts=Opts}) ->
   %\item Host the application somewhere (Github, Bitbucket, local server), and build a release with that application as a dependency.
   \item アプリケーションをどこかにホストしてください。(GitHub、Bitbukect、ローカルサーバーなど)そしてそのアプリケーションに依存するリリースをビルドしてください。
   %\item The main application's workers (\module{council\_member}) starts a server and connects to it in its \function{init/1} function. Can you make this connection happen outside of the init function's? Is there a benefit to doing so in this specific case?
-  \item mainアプリケーションのワーカー(\module{council\_member})はサーバーの起動とそこへの接続を自身の\function{init/1}関数で行っています。この接続をinit関数の外で行なえますか。このアプリの用途においてそうすることの利点はあるでしょうか。 
+  \item mainアプリケーションのワーカー(\module{council\_member})はサーバーの起動とそこへの接続を自身の\function{init/1}関数で行っています。この接続をinit関数の外で行なえますか。このアプリの用途においてそうすることの利点はあるでしょうか。
 \end{enumerate}
 
