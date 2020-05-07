@@ -1,6 +1,6 @@
+os: linux
 dist: bionic
 language: generic
-sudo: required
 env:
   global:
     - IMAGE_NAME=yyupw/erlang-in-anger-pdf
