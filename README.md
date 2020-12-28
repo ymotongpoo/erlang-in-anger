@@ -1,5 +1,5 @@
 # README
-[![Build Status](https://travis-ci.org/ymotongpoo/erlang-in-anger.svg?branch=japanese)](https://travis-ci.org/ymotongpoo/erlang-in-anger)
+![CI](https://github.com/ymotongpoo/erlang-in-anger/workflows/CI/badge.svg)
 
 Erlang in Angerの翻訳用レポジトリです。オリジナルのREADMEは[こちら](./README.en.md)を参照してください。
 
