@@ -34,7 +34,11 @@ RUN apk add --no-cache --virtual .persistent-deps $PERSISTENT_DEPS
 RUN mkdir -p $FONT_PATH && \
     apk add --no-cache --virtual .font-deps $FONT_DEPS && \
     wget https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/SourceHanSansJP.zip && \
-      unzip SourceHanSansJP.zip && \
+      # The latest `SourceHanSansJP.zip` doesn't contain the directory
+      # which named `SourceHanSansJP`. `SourceHan*Serif*JP.zip` contains
+      # the same name directory as the unzip destination.
+      # So I think it might be unintended.
+      unzip -d SourceHanSansJP SourceHanSansJP.zip && \
       cp SourceHanSansJP/*.otf $FONT_PATH && \
       rm -rf SourceHanSansJP.zip SourceHanSansJP && \
     wget https://github.com/adobe-fonts/source-han-serif/raw/release/SubsetOTF/SourceHanSerifJP.zip && \
@@ -68,6 +72,7 @@ RUN apk add --no-cache --virtual .texlive-deps $TEXLIVE_DEPS && \
       collectbox fncychap sourcesanspro sourceserifpro cm-unicode \
       letltxmacro zref && \
     luaotfload-tool -u -vvv && \
+    rm -fr /tmp/install-tl-unx && \
     apk del .texlive-deps
 
 VOLUME ["/workdir"]
