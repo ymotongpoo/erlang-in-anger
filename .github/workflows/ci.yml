@@ -35,7 +35,6 @@ jobs:
       with:
         name: erlang in anger
         path: text-ja.pdf
-      if: ${{ github.ref == 'refs/heads/japanese' }}
 
   release:
     name: Publish artifact to gh-pages
