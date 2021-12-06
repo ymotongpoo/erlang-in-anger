@@ -38,7 +38,7 @@ RUN mkdir -p $FONT_PATH && \
       cp SourceHanSansJP/SubsetOTF/JP/*.otf $FONT_PATH && \
       rm -rf SourceHanSansJP.zip SourceHanSansJP && \
     wget https://github.com/adobe-fonts/source-han-serif/releases/latest/download/SourceHanSerifJP.zip && \
-      unzip SourceHanSerifJP.zip && \
+      unzip -d SourceHanSerifJP SourceHanSerifJP.zip && \
       cp SourceHanSerifJP/SubsetOTF/JP/*.otf $FONT_PATH && \
       rm -rf SourceHanSerifJP.zip SourceHanSerifJP && \
     fc-cache -f -v && \
