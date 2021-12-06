@@ -34,16 +34,12 @@ RUN apk add --no-cache --virtual .persistent-deps $PERSISTENT_DEPS
 RUN mkdir -p $FONT_PATH && \
     apk add --no-cache --virtual .font-deps $FONT_DEPS && \
     wget https://github.com/adobe-fonts/source-han-sans/releases/latest/download/SourceHanSansJP.zip && \
-      # The latest `SourceHanSansJP.zip` doesn't contain the directory
-      # which named `SourceHanSansJP`. `SourceHan*Serif*JP.zip` contains
-      # the same name directory as the unzip destination.
-      # So I think it might be unintended.
       unzip -d SourceHanSansJP SourceHanSansJP.zip && \
-      cp SourceHanSansJP/*.otf $FONT_PATH && \
+      cp SourceHanSansJP/SubsetOTF/JP/*.otf $FONT_PATH && \
       rm -rf SourceHanSansJP.zip SourceHanSansJP && \
     wget https://github.com/adobe-fonts/source-han-serif/releases/latest/download/SourceHanSerifJP.zip && \
       unzip SourceHanSerifJP.zip && \
-      cp SourceHanSerifJP/*.otf $FONT_PATH && \
+      cp SourceHanSerifJP/SubsetOTF/JP/*.otf $FONT_PATH && \
       rm -rf SourceHanSerifJP.zip SourceHanSerifJP && \
     fc-cache -f -v && \
     apk del .font-deps
