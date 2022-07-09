@@ -9,12 +9,6 @@ ENV TEXLIVE_DEPS \
     
 ENV TEXLIVE_PATH /usr/local/texlive
 
-ENV FONT_DEPS \
-    unzip \
-    fontconfig-dev
-
-ENV FONT_PATH /usr/share/fonts/
-
 ENV PERSISTENT_DEPS \
     wget \
     make \
@@ -29,20 +23,6 @@ RUN apk upgrade --update
 
 # Install basic dependencies
 RUN apk add --no-cache --virtual .persistent-deps $PERSISTENT_DEPS
-
-# Setup fonts
-RUN mkdir -p $FONT_PATH && \
-    apk add --no-cache --virtual .font-deps $FONT_DEPS && \
-    wget https://github.com/adobe-fonts/source-han-sans/releases/latest/download/SourceHanSansJP.zip && \
-      unzip -d SourceHanSansJP SourceHanSansJP.zip && \
-      cp SourceHanSansJP/SubsetOTF/JP/*.otf $FONT_PATH && \
-      rm -rf SourceHanSansJP.zip SourceHanSansJP && \
-    wget https://github.com/adobe-fonts/source-han-serif/releases/latest/download/SourceHanSerifJP.zip && \
-      unzip -d SourceHanSerifJP SourceHanSerifJP.zip && \
-      cp SourceHanSerifJP/SubsetOTF/JP/*.otf $FONT_PATH && \
-      rm -rf SourceHanSerifJP.zip SourceHanSerifJP && \
-    fc-cache -f -v && \
-    apk del .font-deps
 
 # Set timezone to Tokyo
 RUN apk --no-cache add tzdata && \

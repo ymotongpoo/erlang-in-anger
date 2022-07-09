@@ -26,7 +26,9 @@ jobs:
       run: docker-compose build
 
     - name: PDF build
-      run: docker-compose up --abort-on-container-exit
+      run: |
+        sudo chown -R root:root $GITHUB_WORKSPACE
+        docker-compose up --abort-on-container-exit
 
     - name: Push Docker image
       run: docker-compose push
