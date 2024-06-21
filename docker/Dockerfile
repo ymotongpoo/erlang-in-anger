@@ -1,8 +1,6 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 LABEL maintainer="YOSHIMRUA Hikaru <yyu [at] mental.poker>"
-
-ARG TARGETARCH
 
 RUN apt-get update
 
@@ -28,6 +26,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata && \
 # Install TeXLive
 ARG TEXLIVE_OPTIONS=""
 ENV TEXLIVE_PATH /usr/local/texlive
+ARG TARGETARCH
 RUN mkdir /tmp/install-tl-unx && \
     wget -qO- http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz | \
       tar -xz -C /tmp/install-tl-unx --strip-components=1 && \
