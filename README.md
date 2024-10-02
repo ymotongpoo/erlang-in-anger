@@ -39,7 +39,7 @@ $ make japanese  # -> text-ja.pdf: Japanese translation version
 また、Docker環境がある場合は次のコマンドでコンパイルすることもできます。
 
 ```console
-$ docker-compose up
+$ docker compose up
 ```
 
 ビルドに成功すると、`text-ja.pdf` が作成されているはずです。

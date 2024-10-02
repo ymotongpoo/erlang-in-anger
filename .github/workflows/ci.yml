@@ -36,14 +36,14 @@ jobs:
     - name: PDF build
       run: |
         sudo chown -R root:root $GITHUB_WORKSPACE
-        docker-compose up --abort-on-container-exit
+        docker compose up --abort-on-container-exit
 
     - name: Push Docker image
-      run: docker-compose push
+      run: docker compose push
       if: ${{ github.ref == 'refs/heads/japanese' }}
 
     - name: Push PDF file
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: erlang in anger
         path: text-ja.pdf
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Download PDF
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: erlang in anger
           path: ./build/
